@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wade Strong — Admin CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#B85A30;--rust-dark:#8C4122;--rust-light:#FAECE7;
+  --iron:#1a1a1a;--iron-mid:#2c2c2c;--chalk:#f5f2ee;--white:#fff;--muted:#6b6560;
+  --border:rgba(0,0,0,0.09);--border-med:rgba(0,0,0,0.15);
+  --green:#2c7a4b;--green-bg:#e6f4ed;--amber:#7a5010;--amber-bg:#fef3d8;
+  --font-display:'Bebas Neue',sans-serif;--font-body:'Instrument Sans',sans-serif;
+  --sidebar:220px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);display:flex;flex-direction:column}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:var(--iron);display:flex;align-items:center;justify-content:center;z-index:200;transition:opacity 0.3s}
+#loginScreen.hidden{opacity:0;pointer-events:none}
+.login-box{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:36px;width:360px;text-align:center}
+.login-logo{font-family:var(--font-display);font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:6px}
+.login-logo span{color:var(--rust)}
+.login-sub{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:28px;text-transform:uppercase;letter-spacing:1px}
+.login-input{width:100%;padding:11px 14px;border:1px solid rgba(255,255,255,0.15);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--white);font-family:var(--font-body);font-size:14px;outline:none;margin-bottom:10px}
+.login-input:focus{border-color:var(--rust)}
+.login-input::placeholder{color:rgba(255,255,255,0.25)}
+.login-btn{width:100%;padding:12px;background:var(--rust);color:var(--white);border:none;border-radius:6px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer}
+.login-btn:hover{background:var(--rust-dark)}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--iron);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+.topbar-logo{font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--white)}
+.topbar-logo span{color:var(--rust)}
+.topbar-tag{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-left:12px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-notif{position:relative;cursor:pointer}
+.tb-notif-dot{position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--rust);border-radius:50%;border:1.5px solid var(--iron)}
+.tb-icon-btn{width:32px;height:32px;border-radius:5px;border:1px solid rgba(255,255,255,0.12);background:transparent;color:rgba(255,255,255,0.6);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tb-icon-btn:hover{background:rgba(255,255,255,0.08);color:var(--white)}
+.tb-btn{padding:7px 14px;border-radius:5px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;border:none;background:var(--rust);color:var(--white)}
+.tb-btn:hover{background:var(--rust-dark)}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* LEFT NAV */
+.leftnav{width:var(--sidebar);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.leftnav-section{padding:12px 12px 8px}
+.leftnav-section-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;padding:0 8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);transition:all 0.15s;border:1px solid transparent}
+.nav-item:hover{background:var(--chalk);color:var(--iron)}
+.nav-item.active{background:var(--rust-light);color:var(--rust-dark);border-color:rgba(184,90,48,0.15)}
+.nav-item-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.nav-item-badge{margin-left:auto;font-size:10px;font-weight:700;background:var(--rust);color:var(--white);padding:1px 6px;border-radius:100px}
+
+/* MAIN */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.view{display:none;flex:1;overflow:hidden;flex-direction:column}
+.view.active{display:flex}
+
+/* ── DASHBOARD VIEW ── */
+.dash-scroll{flex:1;overflow-y:auto;padding:20px}
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.stat-val{font-family:var(--font-display);font-size:32px;letter-spacing:1px;margin-bottom:2px}
+.stat-lbl{font-size:12px;color:var(--muted)}
+.stat-change{font-size:11px;font-weight:600;margin-top:4px}
+.sc-up{color:var(--green)}.sc-down{color:#c03020}.sc-neutral{color:var(--muted)}
+
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dash-card{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.dc-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.dc-title{font-size:13px;font-weight:600}
+.dc-action{font-size:12px;color:var(--rust);cursor:pointer}
+.dc-body{padding:14px 16px}
+.activity-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.dot-green{background:var(--green)}.dot-rust{background:var(--rust)}.dot-amber{background:#e0a020}
+.activity-text{font-size:13px;line-height:1.4;flex:1}
+.activity-time{font-size:11px;color:var(--muted);flex-shrink:0}
+.action-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.action-item:last-child{border-bottom:none}
+.action-label{font-size:13px;font-weight:500}
+.action-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.action-btn{padding:5px 12px;border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--iron);white-space:nowrap;transition:all 0.15s}
+.action-btn:hover{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.action-btn.primary{background:var(--rust);color:var(--white);border-color:var(--rust)}
+.action-btn.primary:hover{background:var(--rust-dark)}
+
+/* ── CLIENTS VIEW ── */
+.clients-toolbar{padding:12px 20px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.search-wrap{position:relative;flex:1;max-width:320px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px}
+.search-input{width:100%;padding:7px 10px 7px 30px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:13px;outline:none;background:var(--chalk)}
+.search-input:focus{border-color:var(--rust);background:var(--white)}
+.filter-btn{padding:6px 12px;border:1px solid var(--border);border-radius:5px;background:var(--white);font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.filter-btn:hover,.filter-btn.active{background:var(--iron);color:var(--white);border-color:var(--iron)}
+
+.clients-list{flex:1;overflow-y:auto;padding:0}
+.client-row{display:grid;grid-template-columns:40px 1fr 120px 100px 90px 110px 90px 36px;gap:8px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.12s}
+.client-row:hover{background:var(--chalk)}
+.client-row.header{cursor:default;background:var(--chalk);border-bottom:1px solid var(--border-med)}
+.client-row.header:hover{background:var(--chalk)}
+.cr-hdr{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.cr-avatar{width:32px;height:32px;border-radius:50%;background:var(--iron);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--white);flex-shrink:0}
+.cr-name{font-size:14px;font-weight:600}
+.cr-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.cr-prog{font-size:12px;font-weight:500}
+.cr-prog-sub{font-size:11px;color:var(--muted)}
+.status-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:100px}
+.sp-active{background:var(--green-bg);color:var(--green)}
+.sp-pending{background:var(--amber-bg);color:var(--amber)}
+.sp-new{background:var(--rust-light);color:var(--rust-dark)}
+.sp-complete{background:var(--chalk);color:var(--muted);border:1px solid var(--border)}
+.cr-week{font-size:13px;font-weight:600;text-align:center}
+.cr-week-sub{font-size:11px;color:var(--muted);text-align:center}
+.cr-actions{display:flex;gap:4px}
+.cr-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:4px;background:var(--white);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all 0.15s}
+.cr-btn:hover{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.cr-rpe{font-size:11px;font-weight:600;text-align:center}
+.rpe-good{color:var(--green)}.rpe-warn{color:var(--amber)}.rpe-bad{color:#c03020}
+
+/* ── CLIENT DETAIL VIEW ── */
+.detail-header{padding:16px 20px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.detail-back{font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;transition:all 0.15s}
+.detail-back:hover{color:var(--iron);border-color:var(--iron)}
+.detail-name{font-family:var(--font-display);font-size:22px;letter-spacing:1px;flex:1}
+.detail-status{margin-left:auto}
+.detail-actions{display:flex;gap:8px}
+.detail-btn{padding:7px 14px;border-radius:5px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.detail-btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.detail-btn-ghost:hover{border-color:var(--iron);color:var(--iron)}
+.detail-btn-primary{background:var(--rust);color:var(--white);border:none}
+.detail-btn-primary:hover{background:var(--rust-dark)}
+
+.detail-scroll{flex:1;overflow-y:auto;padding:20px}
+.detail-grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+.detail-main{display:flex;flex-direction:column;gap:14px}
+.detail-side{display:flex;flex-direction:column;gap:14px}
+
+.info-card{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.ic-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ic-title{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.ic-action{font-size:12px;color:var(--rust);cursor:pointer;font-weight:500}
+.ic-body{padding:14px 16px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.info-item{}
+.info-label{font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.info-val{font-size:14px;font-weight:500}
+.divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+.rpe-results{display:flex;flex-direction:column;gap:6px}
+.rpe-result-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.rpe-result-row:last-child{border-bottom:none}
+.rr-name{font-size:13px;font-weight:500}
+.rr-weight{font-size:13px;font-weight:600}
+.rpe-badge-sm{display:inline-flex;align-items:center;justify-content:center;width:24px;height:20px;border-radius:3px;font-size:10px;font-weight:700}
+.rb-6{background:#e8f4e8;color:#2d6a2d}.rb-7{background:#f0f4e0;color:#4a6020}
+.rb-8{background:#f8f0d8;color:#7a5010}.rb-9{background:#fce8d8;color:#8c3020}
+.rb-10{background:var(--iron);color:var(--white)}
+
+/* magic link */
+.magic-link-box{background:var(--chalk);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:10px}
+.ml-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.ml-link{font-size:12px;color:var(--iron);word-break:break-all;background:var(--white);border:1px solid var(--border);border-radius:4px;padding:7px 10px;font-family:monospace;margin-bottom:8px;line-height:1.5}
+.ml-actions{display:flex;gap:6px}
+.ml-btn{padding:6px 12px;border-radius:4px;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.ml-copy{background:var(--iron);color:var(--white);border:none}
+.ml-copy:hover{background:var(--rust)}
+.ml-regen{background:var(--white);color:var(--muted);border:1px solid var(--border)}
+.ml-regen:hover{border-color:var(--iron);color:var(--iron)}
+.ml-expiry{font-size:11px;color:var(--muted);margin-top:6px}
+
+/* msg thread in detail */
+.msg-thread{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto;margin-bottom:10px}
+.msg-bubble{padding:9px 12px;border-radius:6px;font-size:13px;line-height:1.5}
+.msg-wade{background:var(--chalk);color:var(--iron)}
+.msg-client{background:var(--iron);color:var(--white);margin-left:20%}
+.msg-meta{font-size:10px;color:var(--muted);margin-top:3px}
+.msg-input-row{display:flex;gap:6px}
+.msg-input{flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:13px;outline:none;background:var(--chalk)}
+.msg-input:focus{border-color:var(--rust);background:var(--white)}
+.msg-send{padding:8px 14px;background:var(--iron);color:var(--white);border:none;border-radius:5px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer}
+.msg-send:hover{background:var(--rust)}
+
+/* toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--iron);color:var(--white);padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;z-index:300;transition:transform 0.3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">WADE<span>.</span>STRONG</div>
+    <div class="login-sub">Admin Panel</div>
+    <input class="login-input" type="email" placeholder="wade@wadestrong.com" id="adminEmail">
+    <input class="login-input" type="password" placeholder="Password" id="adminPass" style="margin-top:0">
+    <button class="login-btn" onclick="adminLogin()" style="margin-top:4px">Sign in</button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar" id="mainTopbar" style="display:none">
+  <div style="display:flex;align-items:center;gap:0">
+    <div class="topbar-logo">WADE<span>.</span>STRONG</div>
+    <div class="topbar-tag">Admin</div>
+  </div>
+  <div class="topbar-right">
+    <div class="tb-notif">
+      <button class="tb-icon-btn" onclick="showToast('3 new RPE submissions')">🔔</button>
+      <div class="tb-notif-dot"></div>
+    </div>
+    <button class="tb-btn" onclick="openAddClientModal()">+ New client</button>
+  </div>
+</div>
+
+<div class="app-body" id="mainApp" style="display:none">
+
+  <!-- LEFT NAV -->
+  <div class="leftnav">
+    <div class="leftnav-section">
+      <div class="leftnav-section-title">Overview</div>
+      <div class="nav-item active" onclick="switchView('dashboard',this)">
+        <span class="nav-item-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="switchView('clients',this)">
+        <span class="nav-item-icon">👥</span> All clients
+        <span class="nav-item-badge">8</span>
+      </div>
+    </div>
+    <div class="leftnav-section">
+      <div class="leftnav-section-title">Actions</div>
+      <div class="nav-item" onclick="switchView('clients',this);setTimeout(()=>filterClients('new'),100)">
+        <span class="nav-item-icon">🆕</span> New signups
+        <span class="nav-item-badge">2</span>
+      </div>
+      <div class="nav-item" onclick="showToast('Opening RPE submissions')">
+        <span class="nav-item-icon">📋</span> RPE submissions
+        <span class="nav-item-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="showToast('Opening video clips')">
+        <span class="nav-item-icon">🎥</span> Clips to review
+        <span class="nav-item-badge">2</span>
+      </div>
+    </div>
+    <div class="leftnav-section">
+      <div class="leftnav-section-title">Tools</div>
+      <div class="nav-item" onclick="window.open('program-builder.html')">
+        <span class="nav-item-icon">🏋️</span> Program builder
+      </div>
+      <div class="nav-item" onclick="showToast('Exercise library')">
+        <span class="nav-item-icon">📚</span> Exercise library
+      </div>
+    </div>
+    <div style="margin-top:auto;padding:12px">
+      <div class="nav-item" onclick="adminLogout()">
+        <span class="nav-item-icon">🚪</span> Sign out
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DASHBOARD VIEW -->
+    <div class="view active" id="view-dashboard">
+      <div class="dash-scroll">
+
+        <div class="dash-stats">
+          <div class="stat-card">
+            <div class="stat-val">8</div>
+            <div class="stat-lbl">Active clients</div>
+            <div class="stat-change sc-up">↑ +2 this month</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">3</div>
+            <div class="stat-lbl">RPE submissions</div>
+            <div class="stat-change sc-neutral">Awaiting review</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">2</div>
+            <div class="stat-lbl">Video clips</div>
+            <div class="stat-change sc-neutral">To review</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val">$5.4k</div>
+            <div class="stat-lbl">Revenue MTD</div>
+            <div class="stat-change sc-up">↑ +$1.2k vs last month</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="dash-card">
+            <div class="dc-header">
+              <div class="dc-title">Recent activity</div>
+              <div class="dc-action" onclick="switchView('clients',document.querySelector('.nav-item:nth-child(2)'))">View all</div>
+            </div>
+            <div class="dc-body">
+              <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Dave M.</strong> submitted Week 3 session RPE</div><div class="activity-time">2h ago</div></div>
+              <div class="activity-item"><div class="activity-dot dot-rust"></div><div class="activity-text"><strong>Sarah K.</strong> uploaded a deadlift clip</div><div class="activity-time">4h ago</div></div>
+              <div class="activity-item"><div class="activity-dot dot-amber"></div><div class="activity-text"><strong>Tom R.</strong> completed RPE10 testing</div><div class="activity-time">6h ago</div></div>
+              <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Mark T.</strong> paid — Pre-comp Build Up</div><div class="activity-time">1d ago</div></div>
+              <div class="activity-item"><div class="activity-dot dot-rust"></div><div class="activity-text"><strong>Jamie L.</strong> completed questionnaire</div><div class="activity-time">1d ago</div></div>
+              <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Chris W.</strong> finished Week 6 — program complete</div><div class="activity-time">2d ago</div></div>
+            </div>
+          </div>
+          <div class="dash-card">
+            <div class="dc-header"><div class="dc-title">Needs your attention</div></div>
+            <div class="dc-body">
+              <div class="action-item">
+                <div><div class="action-label">Tom R. — RPE10 test submitted</div><div class="action-sub">Ready to build program</div></div>
+                <button class="action-btn primary" onclick="showToast('Opening Tom R. program builder')">Build program</button>
+              </div>
+              <div class="action-item">
+                <div><div class="action-label">Jamie L. — Questionnaire done</div><div class="action-sub">Awaiting RPE10 test</div></div>
+                <button class="action-btn" onclick="showToast('Magic link copied')">Send link</button>
+              </div>
+              <div class="action-item">
+                <div><div class="action-label">Sarah K. — Clip to review</div><div class="action-sub">Deadlift — Week 3 Day 1</div></div>
+                <button class="action-btn" onclick="showToast('Opening clip')">Review</button>
+              </div>
+              <div class="action-item">
+                <div><div class="action-label">Dave M. — Week 4 due Friday</div><div class="action-sub">Program not yet published</div></div>
+                <button class="action-btn primary" onclick="window.open('program-builder.html')">Build now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- CLIENTS VIEW -->
+    <div class="view" id="view-clients">
+      <div class="clients-toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" placeholder="Search clients..." oninput="searchClients(this.value)">
+        </div>
+        <button class="filter-btn active" id="filter-all" onclick="filterClients('all',this)">All (8)</button>
+        <button class="filter-btn" id="filter-active" onclick="filterClients('active',this)">Active</button>
+        <button class="filter-btn" id="filter-new" onclick="filterClients('new',this)">New (2)</button>
+        <button class="filter-btn" id="filter-precomp" onclick="filterClients('precomp',this)">Pre-comp</button>
+      </div>
+      <div class="client-row header">
+        <div></div>
+        <div class="cr-hdr">Client</div>
+        <div class="cr-hdr">Program</div>
+        <div class="cr-hdr">Status</div>
+        <div class="cr-hdr" style="text-align:center">Week</div>
+        <div class="cr-hdr" style="text-align:center">Last RPE</div>
+        <div class="cr-hdr">Joined</div>
+        <div></div>
+      </div>
+      <div class="clients-list" id="clientsList"></div>
+    </div>
+
+    <!-- CLIENT DETAIL VIEW -->
+    <div class="view" id="view-detail">
+      <div class="detail-header">
+        <div class="detail-back" onclick="switchView('clients',null)">← Back</div>
+        <div class="detail-name" id="detailName">Dave Mitchell</div>
+        <div class="detail-status"><span class="status-pill sp-active" id="detailStatus">Active</span></div>
+        <div class="detail-actions">
+          <button class="detail-btn detail-btn-ghost" onclick="showToast('Sending message...')">Message</button>
+          <button class="detail-btn detail-btn-ghost" onclick="showToast('Magic link copied ✓')">Copy login link</button>
+          <button class="detail-btn detail-btn-primary" onclick="window.open('program-builder.html')">Open program builder</button>
+        </div>
+      </div>
+      <div class="detail-scroll">
+        <div class="detail-grid">
+          <div class="detail-main" id="detailMain"></div>
+          <div class="detail-side" id="detailSide"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const clients = [
+  {id:1,name:'Dave Mitchell',initials:'DM',program:'Get Strong',type:'getstrong',status:'active',week:3,totalWeeks:6,joined:'2 Jan 2025',lastRpe:'RPE 7–9',rpeStatus:'good',
+    age:42,location:'Brisbane, QLD',occupation:'Tradie',weight:'108kg',height:'182cm',sleep:'6–7hrs',stress:6,trainingDays:4,gymType:'Commercial',injuries:'None',
+    rpe10:{deadlift:'220kg',squat:'180kg',bench:'130kg',ohp:'90kg'},
+    lastFeedback:'Squat felt heavy — knees tracking weird. OHP was a grind on last set.',
+    magicLink:'https://wadestrong.com/portal?token=abc123xyz789',
+    messages:[
+      {from:'wade',text:'Solid work last week Dave. Pushing DL to 190kg this week.',time:'2h ago'},
+      {from:'client',text:'Cheers, feeling good. Knee thing from last week has settled.',time:'3h ago'},
+    ]
+  },
+  {id:2,name:'Sarah Kim',initials:'SK',program:'Pre-Comp Build Up',type:'precomp',status:'active',week:5,totalWeeks:8,joined:'15 Dec 2024',lastRpe:'RPE 8',rpeStatus:'good',
+    age:28,location:'Melbourne, VIC',occupation:'Physiotherapist',weight:'75kg',height:'165cm',sleep:'7–8hrs',stress:4,trainingDays:5,gymType:'Strongman gym',injuries:'Left shoulder — minor',
+    rpe10:{deadlift:'180kg',log:'75kg',farmers:'95kg/hand',yoke:'220kg'},
+    lastFeedback:'Farmers felt better this week. Log press shoulder still a bit iffy on heavier sets.',
+    magicLink:'https://wadestrong.com/portal?token=sk456def012',
+    messages:[{from:'wade',text:'Comp is 3 weeks out — this week is peak week.',time:'1d ago'}]
+  },
+  {id:3,name:'Tom Richards',initials:'TR',program:'Get Strong',type:'getstrong',status:'pending',week:0,totalWeeks:6,joined:'18 Jan 2025',lastRpe:'RPE10 submitted',rpeStatus:'new',
+    age:35,location:'Sydney, NSW',occupation:'IT Manager',weight:'95kg',height:'178cm',sleep:'6hrs',stress:7,trainingDays:3,gymType:'Budget gym',injuries:'Lower back — minor',
+    rpe10:{deadlift:'160kg',squat:'130kg',bench:'100kg',ohp:'70kg'},
+    lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=tr789ghi345',messages:[]
+  },
+  {id:4,name:'Jamie Lee',initials:'JL',program:'Get Strong',type:'getstrong',status:'new',week:0,totalWeeks:6,joined:'20 Jan 2025',lastRpe:'—',rpeStatus:'new',
+    age:31,location:'Gold Coast, QLD',occupation:'Teacher',weight:'88kg',height:'176cm',sleep:'7hrs',stress:5,trainingDays:4,gymType:'Commercial',injuries:'None',
+    rpe10:{},lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=jl012jkl678',messages:[]
+  },
+  {id:5,name:'Mark Torres',initials:'MT',program:'Pre-Comp Build Up',type:'precomp',status:'new',week:0,totalWeeks:10,joined:'21 Jan 2025',lastRpe:'—',rpeStatus:'new',
+    age:38,location:'Perth, WA',occupation:'Construction',weight:'115kg',height:'188cm',sleep:'6–7hrs',stress:6,trainingDays:5,gymType:'Strongman gym',injuries:'None',
+    rpe10:{},lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=mt345mno901',messages:[]
+  },
+  {id:6,name:'Chris Walsh',initials:'CW',program:'Get Strong',type:'getstrong',status:'complete',week:6,totalWeeks:6,joined:'1 Nov 2024',lastRpe:'RPE 7',rpeStatus:'good',
+    age:45,location:'Auckland, NZ',occupation:'Builder',weight:'100kg',height:'183cm',sleep:'7hrs',stress:5,trainingDays:4,gymType:'Commercial',injuries:'None',
+    rpe10:{deadlift:'200kg',squat:'160kg',bench:'120kg',ohp:'85kg'},
+    lastFeedback:'Great final week. Deadlift PR of 215kg.',magicLink:'https://wadestrong.com/portal?token=cw678pqr234',messages:[]
+  },
+  {id:7,name:'Ben Nguyen',initials:'BN',program:'Get Strong',type:'getstrong',status:'active',week:2,totalWeeks:6,joined:'10 Jan 2025',lastRpe:'RPE 8',rpeStatus:'good',
+    age:26,location:'Brisbane, QLD',occupation:'Nurse',weight:'82kg',height:'172cm',sleep:'5–6hrs',stress:8,trainingDays:3,gymType:'Commercial',injuries:'None',
+    rpe10:{deadlift:'140kg',squat:'110kg',bench:'90kg',ohp:'60kg'},lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=bn901stu567',messages:[]
+  },
+  {id:8,name:'Alex Payne',initials:'AP',program:'Pre-Comp Build Up',type:'precomp',status:'active',week:3,totalWeeks:8,joined:'5 Jan 2025',lastRpe:'RPE 9',rpeStatus:'warn',
+    age:33,location:'Melbourne, VIC',occupation:'Firefighter',weight:'105kg',height:'185cm',sleep:'7hrs',stress:5,trainingDays:5,gymType:'Strongman gym',injuries:'Right knee — recovering',
+    rpe10:{deadlift:'210kg',log:'90kg',farmers:'100kg/hand',yoke:'240kg'},lastFeedback:'Everything is heavy this week — might be accumulated fatigue.',
+    magicLink:'https://wadestrong.com/portal?token=ap234vwx890',messages:[]
+  },
+];
+
+let filteredClients = [...clients];
+let currentFilter = 'all';
+
+// ── LOGIN ──
+function adminLogin() {
+  const email = document.getElementById('adminEmail').value;
+  const pass = document.getElementById('adminPass').value;
+  if(!email || !pass){ showToast('Enter email and password'); return; }
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainTopbar').style.display='flex';
+  document.getElementById('mainApp').style.display='flex';
+}
+function adminLogout(){
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('mainTopbar').style.display='none';
+  document.getElementById('mainApp').style.display='none';
+}
+// auto-login demo
+setTimeout(()=>{
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainTopbar').style.display='flex';
+  document.getElementById('mainApp').style.display='flex';
+  renderClientsList();
+},300);
+
+// ── VIEWS ──
+function switchView(id, navEl) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(navEl) navEl.classList.add('active');
+  if(id==='clients') renderClientsList();
+}
+
+// ── CLIENTS LIST ──
+function renderClientsList() {
+  const list = document.getElementById('clientsList');
+  list.innerHTML = filteredClients.map(c=>{
+    const statusPill = {
+      active:'<span class="status-pill sp-active">Active</span>',
+      pending:'<span class="status-pill sp-pending">Pending</span>',
+      new:'<span class="status-pill sp-new">New</span>',
+      complete:'<span class="status-pill sp-complete">Complete</span>',
+    }[c.status]||'';
+    const rpeColour = {good:'rpe-good',warn:'rpe-warn',new:'rpe-warn'}[c.rpeStatus]||'';
+    const progLabel = c.type==='precomp'?'Pre-Comp':'Get Strong';
+    return `<div class="client-row" onclick="openClient(${c.id})">
+      <div class="cr-avatar" style="background:${c.type==='precomp'?'var(--rust)':'var(--iron)'}">${c.initials}</div>
+      <div><div class="cr-name">${c.name}</div><div class="cr-meta">${c.age}y · ${c.location}</div></div>
+      <div><div class="cr-prog">${progLabel}</div><div class="cr-prog-sub">${c.totalWeeks} weeks</div></div>
+      <div>${statusPill}</div>
+      <div><div class="cr-week">${c.week>0?'W'+c.week:'—'}</div><div class="cr-week-sub">${c.week>0?'of '+c.totalWeeks:'awaiting'}</div></div>
+      <div class="cr-rpe ${rpeColour}">${c.lastRpe}</div>
+      <div style="font-size:12px;color:var(--muted)">${c.joined}</div>
+      <div class="cr-actions" onclick="event.stopPropagation()">
+        <button class="cr-btn" title="Message" onclick="showToast('Message sent')">💬</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterClients(type, el) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(type==='all') filteredClients=[...clients];
+  else if(type==='active') filteredClients=clients.filter(c=>c.status==='active');
+  else if(type==='new') filteredClients=clients.filter(c=>c.status==='new'||c.status==='pending');
+  else if(type==='precomp') filteredClients=clients.filter(c=>c.type==='precomp');
+  renderClientsList();
+}
+
+function searchClients(q) {
+  const s = q.toLowerCase();
+  filteredClients = clients.filter(c=>c.name.toLowerCase().includes(s)||c.location.toLowerCase().includes(s)||c.program.toLowerCase().includes(s));
+  renderClientsList();
+}
+
+// ── CLIENT DETAIL ──
+function openClient(id) {
+  const c = clients.find(x=>x.id===id);
+  if(!c) return;
+  switchView('detail',null);
+  document.getElementById('detailName').textContent = c.name;
+  document.getElementById('detailStatus').textContent = c.status.charAt(0).toUpperCase()+c.status.slice(1);
+  document.getElementById('detailStatus').className = 'status-pill sp-'+c.status;
+
+  // Build main col
+  const rpe10Rows = Object.entries(c.rpe10).map(([k,v])=>`
+    <div class="rpe-result-row"><div class="rr-name">${k.charAt(0).toUpperCase()+k.slice(1)}</div><div class="rr-weight">${v}</div></div>`).join('') || '<div style="font-size:13px;color:var(--muted)">RPE10 testing not yet completed</div>';
+
+  document.getElementById('detailMain').innerHTML = `
+    <div class="info-card">
+      <div class="ic-header"><div class="ic-title">Profile</div></div>
+      <div class="ic-body">
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Age</div><div class="info-val">${c.age}</div></div>
+          <div class="info-item"><div class="info-label">Location</div><div class="info-val">${c.location}</div></div>
+          <div class="info-item"><div class="info-label">Weight</div><div class="info-val">${c.weight}</div></div>
+          <div class="info-item"><div class="info-label">Height</div><div class="info-val">${c.height}</div></div>
+          <div class="info-item"><div class="info-label">Occupation</div><div class="info-val">${c.occupation}</div></div>
+          <div class="info-item"><div class="info-label">Training days/wk</div><div class="info-val">${c.trainingDays}</div></div>
+          <div class="info-item"><div class="info-label">Gym type</div><div class="info-val">${c.gymType}</div></div>
+          <div class="info-item"><div class="info-label">Sleep</div><div class="info-val">${c.sleep}</div></div>
+          <div class="info-item"><div class="info-label">Stress level</div><div class="info-val">${c.stress}/10</div></div>
+          <div class="info-item"><div class="info-label">Injuries</div><div class="info-val">${c.injuries}</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="ic-header"><div class="ic-title">RPE 10 Maxes</div><div class="ic-action" onclick="showToast('Viewing full RPE data')">View full</div></div>
+      <div class="ic-body"><div class="rpe-results">${rpe10Rows}</div></div>
+    </div>
+    ${c.lastFeedback?`<div class="info-card">
+      <div class="ic-header"><div class="ic-title">Last session feedback</div></div>
+      <div class="ic-body"><div style="font-size:13px;color:var(--muted);line-height:1.6;font-style:italic">"${c.lastFeedback}"</div></div>
+    </div>`:''}
+    <div class="info-card">
+      <div class="ic-header"><div class="ic-title">Program</div><div class="ic-action" onclick="window.open('program-builder.html')">Open builder →</div></div>
+      <div class="ic-body">
+        <div class="info-grid">
+          <div class="info-item"><div class="info-label">Program</div><div class="info-val">${c.program}</div></div>
+          <div class="info-item"><div class="info-label">Progress</div><div class="info-val">${c.week>0?`Week ${c.week} of ${c.totalWeeks}`:'Not started'}</div></div>
+        </div>
+        <div style="margin-top:12px">
+          <button style="width:100%;padding:10px;background:var(--rust);color:var(--white);border:none;border-radius:6px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer" onclick="window.open('program-builder.html')">
+            ${c.week>0?'Continue building program':'Build program'}
+          </button>
+        </div>
+      </div>
+    </div>`;
+
+  // Build side col
+  const msgThread = c.messages.map(m=>`
+    <div>
+      <div class="msg-bubble ${m.from==='wade'?'msg-wade':'msg-client'}">${m.text}</div>
+      <div class="msg-meta">${m.from==='wade'?'You · ':'Client · '}${m.time}</div>
+    </div>`).join('') || '<div style="font-size:13px;color:var(--muted)">No messages yet</div>';
+
+  document.getElementById('detailSide').innerHTML = `
+    <div class="info-card">
+      <div class="ic-header"><div class="ic-title">Client portal access</div></div>
+      <div class="ic-body">
+        <div class="magic-link-box">
+          <div class="ml-label">Magic login link</div>
+          <div class="ml-link">${c.magicLink}</div>
+          <div class="ml-actions">
+            <button class="ml-btn ml-copy" onclick="showToast('Link copied to clipboard ✓')">Copy link</button>
+            <button class="ml-btn ml-regen" onclick="showToast('New link generated')">Regenerate</button>
+          </div>
+          <div class="ml-expiry">Expires in 7 days · Send via WhatsApp or email</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">Paste this link into a WhatsApp message or email. The client clicks it to access their portal — no password needed.</div>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="ic-header"><div class="ic-title">Messages</div></div>
+      <div class="ic-body">
+        <div class="msg-thread">${msgThread}</div>
+        <div class="msg-input-row">
+          <input class="msg-input" id="detailMsgInput_${c.id}" placeholder="Message ${c.name.split(' ')[0]}...">
+          <button class="msg-send" onclick="sendDetailMsg(${c.id})">Send</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function sendDetailMsg(clientId) {
+  const input = document.getElementById('detailMsgInput_'+clientId);
+  if(!input.value.trim()) return;
+  const c = clients.find(x=>x.id===clientId);
+  c.messages.push({from:'wade',text:input.value.trim(),time:'Just now'});
+  input.value='';
+  openClient(clientId);
+  showToast('Message sent to client portal ✓');
+}
+
+function openAddClientModal() { showToast('Add client — coming in full build'); }
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>

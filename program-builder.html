@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wade Strong — Program Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#B85A30;--rust-dark:#8C4122;--rust-light:#FAECE7;--rust-mid:#D85A30;
+  --iron:#1a1a1a;--iron-mid:#2c2c2c;--chalk:#f5f2ee;--white:#fff;--muted:#6b6560;
+  --border:rgba(0,0,0,0.09);--border-med:rgba(0,0,0,0.15);
+  --green:#2c7a4b;--green-bg:#e6f4ed;--amber:#7a5010;--amber-bg:#fef3d8;
+  --font-display:'Bebas Neue',sans-serif;--font-body:'Instrument Sans',sans-serif;
+  --sidebar:280px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);display:flex;flex-direction:column}
+
+/* ── TOP BAR ── */
+.topbar{height:56px;background:var(--iron);display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;gap:16px}
+.topbar-logo{font-family:var(--font-display);font-size:20px;letter-spacing:2px;color:var(--white);white-space:nowrap}
+.topbar-logo span{color:var(--rust)}
+.topbar-center{display:flex;align-items:center;gap:12px;flex:1;justify-content:center}
+.client-pill{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:6px 14px;cursor:pointer;transition:background 0.2s}
+.client-pill:hover{background:rgba(255,255,255,0.13)}
+.client-avatar{width:26px;height:26px;border-radius:50%;background:var(--rust);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--white)}
+.client-name{font-size:13px;color:var(--white);font-weight:500}
+.client-prog{font-size:11px;color:rgba(255,255,255,0.45)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.tb-btn{padding:7px 14px;border-radius:5px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;white-space:nowrap}
+.tb-btn-ghost{background:transparent;color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.15)}
+.tb-btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.35)}
+.tb-btn-rust{background:var(--rust);color:var(--white);border:none}
+.tb-btn-rust:hover{background:var(--rust-dark)}
+
+/* ── MAIN LAYOUT ── */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* ── LEFT SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.sidebar-section-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+
+/* client info */
+.client-card{background:var(--chalk);border-radius:6px;padding:12px}
+.client-card-name{font-size:15px;font-weight:600;margin-bottom:2px}
+.client-card-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.client-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.cs{background:var(--white);border-radius:4px;padding:6px 8px}
+.cs-val{font-size:15px;font-weight:600;color:var(--iron)}
+.cs-lbl{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* RPE reference */
+.rpe-ref{display:flex;flex-direction:column;gap:3px}
+.rpe-row{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:4px}
+.rpe-badge{width:28px;height:22px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.rpe-text{font-size:12px;color:var(--muted)}
+.rpe-row.r6 .rpe-badge{background:#e8f4e8;color:#2d6a2d}
+.rpe-row.r7 .rpe-badge{background:#f0f4e0;color:#4a6020}
+.rpe-row.r8 .rpe-badge{background:#f8f0d8;color:#7a5010}
+.rpe-row.r9 .rpe-badge{background:#fce8d8;color:#8c3020}
+.rpe-row.r10 .rpe-badge{background:var(--iron);color:var(--white)}
+
+/* week nav */
+.week-nav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.week-nav-btn{width:28px;height:28px;border:1px solid var(--border);border-radius:4px;background:transparent;cursor:pointer;font-size:14px;color:var(--muted);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.week-nav-btn:hover{border-color:var(--iron);color:var(--iron)}
+.week-label{font-size:14px;font-weight:600;flex:1;text-align:center}
+.week-list{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+.week-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:5px;cursor:pointer;transition:background 0.15s;border:1px solid transparent}
+.week-item:hover{background:var(--chalk)}
+.week-item.active{background:var(--rust-light);border-color:rgba(184,90,48,0.2)}
+.week-item-label{font-size:13px;font-weight:500}
+.week-item-badge{font-size:10px;font-weight:600;letter-spacing:0.5px;padding:2px 7px;border-radius:100px}
+.badge-deload{background:var(--amber-bg);color:var(--amber)}
+.badge-peak{background:var(--rust-light);color:var(--rust-dark)}
+.badge-build{background:#e6f4ed;color:var(--green)}
+.week-add-btn{width:100%;margin-top:6px;padding:7px;border:1px dashed var(--border-med);border-radius:5px;background:transparent;font-family:var(--font-body);font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.2s}
+.week-add-btn:hover{border-color:var(--rust);color:var(--rust)}
+
+/* ── CANVAS ── */
+.canvas{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.canvas-header{padding:14px 20px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.canvas-title{font-family:var(--font-display);font-size:22px;letter-spacing:1px}
+.canvas-header-right{display:flex;align-items:center;gap:8px}
+.week-type-select{padding:5px 10px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:13px;color:var(--iron);background:var(--white);cursor:pointer;outline:none}
+.day-tabs{display:flex;gap:4px;padding:10px 20px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
+.day-tab{padding:6px 14px;border-radius:5px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);white-space:nowrap;transition:all 0.15s}
+.day-tab:hover{border-color:var(--iron);color:var(--iron)}
+.day-tab.active{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.day-tab.rest-day{border-style:dashed;color:rgba(107,101,96,0.5)}
+.day-tab-add{padding:6px 10px;border-radius:5px;font-size:13px;cursor:pointer;border:1px dashed var(--border-med);background:transparent;color:var(--muted)}
+.day-tab-add:hover{border-color:var(--rust);color:var(--rust)}
+
+.session-canvas{flex:1;overflow-y:auto;padding:20px}
+.session-meta{display:flex;gap:10px;margin-bottom:16px;align-items:center}
+.session-name-input{font-family:var(--font-display);font-size:20px;letter-spacing:1px;border:none;background:transparent;color:var(--iron);outline:none;flex:1;min-width:0}
+.session-name-input:focus{border-bottom:2px solid var(--rust)}
+.session-notes-input{flex:1;padding:7px 12px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:13px;color:var(--iron);background:var(--white);outline:none;min-width:0}
+.session-notes-input:focus{border-color:var(--rust)}
+.rest-day-toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.rest-day-toggle input{accent-color:var(--rust);cursor:pointer}
+
+/* blocks */
+.blocks-area{display:flex;flex-direction:column;gap:10px;min-height:200px}
+.block{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:box-shadow 0.15s}
+.block.dragging{box-shadow:0 8px 24px rgba(0,0,0,0.12);opacity:0.95}
+.block.drag-over{border-color:var(--rust);border-style:dashed}
+.block-header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--chalk);border-bottom:1px solid var(--border);cursor:grab;user-select:none}
+.block-header:active{cursor:grabbing}
+.drag-handle{color:var(--muted);font-size:14px;cursor:grab;flex-shrink:0}
+.block-type-badge{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:100px}
+.bt-main{background:var(--iron);color:var(--white)}
+.bt-accessory{background:var(--chalk);color:var(--muted);border:1px solid var(--border)}
+.bt-superset{background:#e8f0fe;color:#1a56c4}
+.bt-conditioning{background:var(--rust-light);color:var(--rust-dark)}
+.bt-warmup{background:var(--green-bg);color:var(--green)}
+.block-title-input{font-size:14px;font-weight:600;border:none;background:transparent;outline:none;flex:1;min-width:0;color:var(--iron)}
+.block-header-right{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0}
+.block-rest{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.block-rest input{width:40px;padding:2px 5px;border:1px solid var(--border);border-radius:3px;font-family:var(--font-body);font-size:12px;text-align:center;outline:none;background:var(--white)}
+.block-rest input:focus{border-color:var(--rust)}
+.block-delete{width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:3px;transition:all 0.15s}
+.block-delete:hover{background:#fce8e8;color:#8c2020}
+.block-body{padding:0}
+
+/* exercise rows */
+.ex-row{display:grid;grid-template-columns:22px 1fr 52px 52px 64px 72px 64px 28px;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border)}
+.ex-row:last-child{border-bottom:none}
+.ex-row:hover{background:rgba(245,242,238,0.5)}
+.ex-drag{color:rgba(107,101,96,0.3);font-size:12px;cursor:grab;text-align:center}
+.ex-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;color:var(--iron)}
+.ex-name:hover{color:var(--rust)}
+.ex-input{width:100%;padding:4px 6px;border:1px solid var(--border);border-radius:4px;font-family:var(--font-body);font-size:13px;text-align:center;background:var(--white);outline:none;color:var(--iron)}
+.ex-input:focus{border-color:var(--rust);background:var(--white)}
+.ex-input.highlight{background:var(--amber-bg);border-color:#f0d080;font-weight:600}
+.ex-rpe{padding:3px 6px;border:1px solid var(--border);border-radius:4px;font-size:12px;font-weight:700;text-align:center;cursor:default}
+.ex-rpe.r6{background:#e8f4e8;color:#2d6a2d;border-color:#a8d5b0}
+.ex-rpe.r7{background:#f0f4e0;color:#4a6020;border-color:#c8d898}
+.ex-rpe.r8{background:#f8f0d8;color:#7a5010;border-color:#e0c888}
+.ex-rpe.r9{background:#fce8d8;color:#8c3020;border-color:#f0b888}
+.ex-rpe.r10{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.ex-note-btn{width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:var(--muted);font-size:13px;border-radius:3px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.ex-note-btn:hover{background:var(--chalk);color:var(--rust)}
+.ex-note-btn.has-note{color:var(--rust)}
+.ex-delete-btn{width:22px;height:22px;border:none;background:transparent;cursor:pointer;color:rgba(107,101,96,0.4);font-size:14px;border-radius:3px;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.ex-delete-btn:hover{background:#fce8e8;color:#8c2020}
+
+/* col headers */
+.ex-headers{display:grid;grid-template-columns:22px 1fr 52px 52px 64px 72px 64px 28px;gap:6px;padding:5px 12px 4px;background:var(--chalk);border-bottom:1px solid var(--border)}
+.ex-hdr{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center}
+.ex-hdr:nth-child(2){text-align:left}
+
+.block-add-ex{width:100%;padding:8px;border:none;background:transparent;font-family:var(--font-body);font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;border-top:1px dashed var(--border);transition:all 0.15s}
+.block-add-ex:hover{background:var(--chalk);color:var(--rust)}
+
+/* add block toolbar */
+.add-block-bar{display:flex;gap:8px;padding:12px 0 4px;flex-wrap:wrap}
+.add-block-btn{padding:7px 14px;border:1px dashed var(--border-med);border-radius:5px;background:transparent;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 0.2s;display:flex;align-items:center;gap:5px}
+.add-block-btn:hover{border-color:var(--rust);color:var(--rust);border-style:solid}
+
+/* progression panel */
+.prog-panel{background:var(--white);border-top:1px solid var(--border);padding:14px 20px;flex-shrink:0}
+.prog-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;cursor:pointer}
+.prog-panel-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.prog-panel-toggle{font-size:12px;color:var(--muted)}
+.prog-suggestions{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px}
+.prog-card{background:var(--chalk);border:1px solid var(--border);border-radius:6px;padding:12px 14px;min-width:200px;flex-shrink:0}
+.prog-card-ex{font-size:12px;font-weight:600;color:var(--iron);margin-bottom:2px}
+.prog-card-detail{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.4}
+.prog-card-actions{display:flex;gap:6px}
+.prog-accept{padding:4px 10px;background:var(--green-bg);color:var(--green);border:none;border-radius:4px;font-family:var(--font-body);font-size:11px;font-weight:600;cursor:pointer}
+.prog-accept:hover{background:#c8e8d8}
+.prog-tweak{padding:4px 10px;background:var(--chalk);color:var(--muted);border:1px solid var(--border);border-radius:4px;font-family:var(--font-body);font-size:11px;cursor:pointer}
+.prog-tweak:hover{border-color:var(--rust);color:var(--rust)}
+
+/* ── RIGHT PANEL ── */
+.right-panel{width:300px;background:var(--white);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.rp-tabs{display:flex;border-bottom:1px solid var(--border)}
+.rp-tab{flex:1;padding:10px 6px;font-size:12px;font-weight:600;text-align:center;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.15s}
+.rp-tab.active{color:var(--rust);border-bottom-color:var(--rust)}
+.rp-content{flex:1;overflow-y:auto;padding:14px}
+.rp-panel{display:none}
+.rp-panel.active{display:block}
+
+/* exercise search */
+.ex-search-wrap{position:relative;margin-bottom:12px}
+.ex-search{width:100%;padding:8px 12px 8px 32px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:13px;outline:none;background:var(--chalk)}
+.ex-search:focus{border-color:var(--rust);background:var(--white)}
+.ex-search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;pointer-events:none}
+.ex-category{margin-bottom:14px}
+.ex-category-title{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;padding:0 2px}
+.ex-item{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:5px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;margin-bottom:2px}
+.ex-item:hover{background:var(--chalk);border-color:var(--border)}
+.ex-item-name{font-size:13px;font-weight:500}
+.ex-item-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.ex-item-add{width:22px;height:22px;border-radius:4px;background:var(--chalk);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);flex-shrink:0;transition:all 0.15s}
+.ex-item:hover .ex-item-add{background:var(--rust);color:var(--white);border-color:var(--rust)}
+.ex-add-custom{width:100%;padding:8px;border:1px dashed var(--border-med);border-radius:5px;background:transparent;font-family:var(--font-body);font-size:12px;color:var(--muted);cursor:pointer;margin-top:8px;transition:all 0.2s}
+.ex-add-custom:hover{border-color:var(--rust);color:var(--rust)}
+
+/* client data panel */
+.data-section{margin-bottom:20px}
+.data-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.data-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.data-row:last-child{border-bottom:none}
+.data-label{font-size:12px;color:var(--muted)}
+.data-val{font-size:13px;font-weight:600;color:var(--iron)}
+.rpe-indicator{display:inline-flex;align-items:center;gap:4px}
+.rpe-dot{width:8px;height:8px;border-radius:50%}
+.rpe-dot.green{background:#2d6a2d}
+.rpe-dot.amber{background:#f0a020}
+.rpe-dot.red{background:#c03020}
+
+/* notes panel */
+.notes-textarea{width:100%;min-height:120px;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:13px;color:var(--iron);resize:vertical;outline:none;background:var(--chalk);line-height:1.6}
+.notes-textarea:focus{border-color:var(--rust);background:var(--white)}
+.note-save-btn{width:100%;margin-top:8px;padding:8px;background:var(--iron);color:var(--white);border:none;border-radius:5px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.note-save-btn:hover{background:var(--rust)}
+
+/* modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center;display:none}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:10px;padding:24px;width:100%;max-width:440px;box-shadow:0 16px 48px rgba(0,0,0,0.15)}
+.modal h3{font-family:var(--font-display);font-size:24px;letter-spacing:1px;margin-bottom:16px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+.modal-field input,.modal-field select,.modal-field textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:14px;color:var(--iron);background:var(--chalk);outline:none}
+.modal-field input:focus,.modal-field select:focus,.modal-field textarea:focus{border-color:var(--rust);background:var(--white)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.modal-cancel{padding:8px 18px;border:1px solid var(--border);border-radius:5px;background:transparent;font-family:var(--font-body);font-size:14px;cursor:pointer;color:var(--muted)}
+.modal-confirm{padding:8px 18px;background:var(--iron);color:var(--white);border:none;border-radius:5px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer}
+.modal-confirm:hover{background:var(--rust)}
+
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--iron);color:var(--white);padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;z-index:300;transition:transform 0.3s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* scrollbars */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">WADE<span>.</span>STRONG</div>
+  <div class="topbar-center">
+    <div class="client-pill" onclick="openClientModal()">
+      <div class="client-avatar" id="clientAvatar">DM</div>
+      <div>
+        <div class="client-name" id="clientNameDisplay">Dave Mitchell</div>
+        <div class="client-prog" id="clientProgDisplay">Get Strong — Week 3 of 6</div>
+      </div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="tb-btn tb-btn-ghost" onclick="showToast('Program saved as draft')">Save draft</button>
+    <button class="tb-btn tb-btn-ghost" onclick="showToast('Preview opened in new tab')">Preview</button>
+    <button class="tb-btn tb-btn-rust" onclick="showToast('Program published to client portal ✓')">Publish to client</button>
+  </div>
+</div>
+
+<div class="app-body">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- Client snapshot -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Client snapshot</div>
+      <div class="client-card">
+        <div class="client-card-name" id="sidebarClientName">Dave Mitchell</div>
+        <div class="client-card-meta">42 · Brisbane · Tradie</div>
+        <div class="client-stats">
+          <div class="cs"><div class="cs-val">108kg</div><div class="cs-lbl">Bodyweight</div></div>
+          <div class="cs"><div class="cs-val">4 days</div><div class="cs-lbl">Per week</div></div>
+          <div class="cs"><div class="cs-val">None</div><div class="cs-lbl">Injuries</div></div>
+          <div class="cs"><div class="cs-val">Barbell+</div><div class="cs-lbl">Equipment</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RPE reference -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">RPE reference</div>
+      <div class="rpe-ref">
+        <div class="rpe-row r6"><div class="rpe-badge">6</div><div class="rpe-text">4+ reps left</div></div>
+        <div class="rpe-row r7"><div class="rpe-badge">7</div><div class="rpe-text">3 reps left</div></div>
+        <div class="rpe-row r8"><div class="rpe-badge">8</div><div class="rpe-text">2 reps left</div></div>
+        <div class="rpe-row r9"><div class="rpe-badge">9</div><div class="rpe-text">1 rep left</div></div>
+        <div class="rpe-row r10"><div class="rpe-badge">10</div><div class="rpe-text">Absolute max</div></div>
+      </div>
+    </div>
+
+    <!-- Week navigator -->
+    <div class="sidebar-section" style="flex:1;overflow-y:auto">
+      <div class="sidebar-section-title">Program weeks</div>
+      <div class="week-list" id="weekList"></div>
+      <button class="week-add-btn" onclick="addWeek()">+ Add week</button>
+    </div>
+
+  </div>
+
+  <!-- MAIN CANVAS -->
+  <div class="canvas">
+    <div class="canvas-header">
+      <div class="canvas-title" id="canvasTitle">WEEK 3 — BUILD</div>
+      <div class="canvas-header-right">
+        <select class="week-type-select" onchange="updateWeekType(this.value)">
+          <option value="build">Build</option>
+          <option value="peak">Peak</option>
+          <option value="deload">Deload</option>
+          <option value="test">Test week</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Day tabs -->
+    <div class="day-tabs" id="dayTabs"></div>
+
+    <!-- Session canvas -->
+    <div class="session-canvas" id="sessionCanvas">
+      <div class="session-meta">
+        <input class="session-name-input" id="sessionNameInput" value="LOWER BODY — PULL FOCUS" placeholder="Session name...">
+        <input class="session-notes-input" id="sessionNotesInput" placeholder="Session notes for client...">
+        <label class="rest-day-toggle">
+          <input type="checkbox" id="restDayToggle" onchange="toggleRestDay(this.checked)">
+          Rest day
+        </label>
+      </div>
+
+      <div class="blocks-area" id="blocksArea"></div>
+
+      <div class="add-block-bar">
+        <button class="add-block-btn" onclick="addBlock('warmup')">+ Warm-up</button>
+        <button class="add-block-btn" onclick="addBlock('main')">+ Main lift</button>
+        <button class="add-block-btn" onclick="addBlock('accessory')">+ Accessory</button>
+        <button class="add-block-btn" onclick="addBlock('superset')">+ Superset</button>
+        <button class="add-block-btn" onclick="addBlock('conditioning')">+ Conditioning</button>
+      </div>
+    </div>
+
+    <!-- Progression panel -->
+    <div class="prog-panel" id="progPanel">
+      <div class="prog-panel-header" onclick="toggleProgPanel()">
+        <div class="prog-panel-title">
+          <span style="color:var(--amber)">&#9650;</span>
+          Progression suggestions — Week 3
+          <span style="font-size:11px;font-weight:400;color:var(--muted)">Based on last week's RPE feedback</span>
+        </div>
+        <div class="prog-panel-toggle" id="progToggle">&#x25BC; Hide</div>
+      </div>
+      <div class="prog-suggestions" id="progSuggestions"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="rp-tabs">
+      <div class="rp-tab active" onclick="switchRpTab('exercises',this)">Exercises</div>
+      <div class="rp-tab" onclick="switchRpTab('client',this)">Client data</div>
+      <div class="rp-tab" onclick="switchRpTab('notes',this)">Notes</div>
+    </div>
+    <div class="rp-content">
+
+      <!-- Exercises panel -->
+      <div class="rp-panel active" id="rp-exercises">
+        <div class="ex-search-wrap">
+          <span class="ex-search-icon">&#128269;</span>
+          <input class="ex-search" id="exSearch" placeholder="Search exercises..." oninput="filterExercises(this.value)">
+        </div>
+        <div id="exerciseList"></div>
+        <button class="ex-add-custom" onclick="openAddExerciseModal()">+ Add custom exercise</button>
+      </div>
+
+      <!-- Client data panel -->
+      <div class="rp-panel" id="rp-client">
+        <div class="data-section">
+          <div class="data-title">RPE 10 maxes</div>
+          <div class="data-row"><div class="data-label">Deadlift</div><div class="data-val">220kg</div></div>
+          <div class="data-row"><div class="data-label">Squat</div><div class="data-val">180kg</div></div>
+          <div class="data-row"><div class="data-label">Bench press</div><div class="data-val">130kg</div></div>
+          <div class="data-row"><div class="data-label">Overhead press</div><div class="data-val">90kg</div></div>
+        </div>
+        <div class="data-section">
+          <div class="data-title">Last week's RPE feedback</div>
+          <div class="data-row">
+            <div class="data-label">Deadlift 4×4 @180kg</div>
+            <div class="data-val"><span class="rpe-indicator"><span class="rpe-dot green"></span>RPE 7</span></div>
+          </div>
+          <div class="data-row">
+            <div class="data-label">Squat 4×5 @140kg</div>
+            <div class="data-val"><span class="rpe-indicator"><span class="rpe-dot amber"></span>RPE 9</span></div>
+          </div>
+          <div class="data-row">
+            <div class="data-label">Bench 4×6 @100kg</div>
+            <div class="data-val"><span class="rpe-indicator"><span class="rpe-dot green"></span>RPE 7</span></div>
+          </div>
+          <div class="data-row">
+            <div class="data-label">OHP 3×8 @65kg</div>
+            <div class="data-val"><span class="rpe-indicator"><span class="rpe-dot red"></span>RPE 10</span></div>
+          </div>
+        </div>
+        <div class="data-section">
+          <div class="data-title">Client notes</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6">"Squat felt heavy this week — knees tracking weird. OHP was a grind on last set, dropped the bar on rep 7."</div>
+        </div>
+        <div class="data-section">
+          <div class="data-title">Profile</div>
+          <div class="data-row"><div class="data-label">Training age</div><div class="data-val">3–5 years</div></div>
+          <div class="data-row"><div class="data-label">Gym type</div><div class="data-val">Commercial</div></div>
+          <div class="data-row"><div class="data-label">Session length</div><div class="data-val">90 min</div></div>
+          <div class="data-row"><div class="data-label">Sleep</div><div class="data-val">6–7hrs</div></div>
+          <div class="data-row"><div class="data-label">Stress level</div><div class="data-val">6/10</div></div>
+        </div>
+      </div>
+
+      <!-- Notes panel -->
+      <div class="rp-panel" id="rp-notes">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Program notes (Wade only)</div>
+        <textarea class="notes-textarea" placeholder="Internal notes about this client's program — not visible to client...">Week 3 plan: Push DL intensity, back off squat slightly after RPE 9 last week. OHP — drop weight 5kg, keep same rep scheme. Consider adding tempo squats as accessory to address knee tracking issue.</textarea>
+        <button class="note-save-btn" onclick="showToast('Notes saved')">Save notes</button>
+
+        <div style="margin-top:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Message client</div>
+        <textarea class="notes-textarea" style="min-height:80px" placeholder="Send a message to the client portal..."></textarea>
+        <button class="note-save-btn" onclick="showToast('Message sent to client portal')">Send message</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add exercise modal -->
+<div class="modal-overlay" id="addExModal">
+  <div class="modal">
+    <h3>ADD EXERCISE</h3>
+    <div class="modal-field">
+      <label>Exercise name</label>
+      <input type="text" id="newExName" placeholder="e.g. Paused deadlift, Suitcase carry...">
+    </div>
+    <div class="modal-field">
+      <label>Category</label>
+      <select id="newExCategory">
+        <option value="Strongman">Strongman</option>
+        <option value="Lower body">Lower body</option>
+        <option value="Upper body">Upper body</option>
+        <option value="Accessories">Accessories</option>
+        <option value="Conditioning">Conditioning</option>
+        <option value="Warm-up / mobility">Warm-up / mobility</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Notes (optional)</label>
+      <input type="text" placeholder="e.g. Use straps, touch and go only...">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('addExModal')">Cancel</button>
+      <button class="modal-confirm" onclick="addCustomExercise()">Add exercise</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let currentWeek = 3;
+let currentDay = 1;
+let dragSrcBlock = null;
+let progPanelOpen = true;
+
+const weeks = [
+  {num:1,type:'build',label:'Week 1'},{num:2,type:'build',label:'Week 2'},
+  {num:3,type:'build',label:'Week 3'},{num:4,type:'peak',label:'Week 4'},
+  {num:5,type:'peak',label:'Week 5'},{num:6,type:'deload',label:'Week 6'},
+];
+
+const days = [
+  {id:1,name:'Monday',session:'LOWER — PULL',rest:false},
+  {id:2,name:'Tuesday',session:'UPPER — PUSH',rest:false},
+  {id:3,name:'Wednesday',session:'',rest:true},
+  {id:4,name:'Thursday',session:'LOWER — SQUAT',rest:false},
+  {id:5,name:'Friday',session:'UPPER — PULL',rest:false},
+  {id:6,name:'Saturday',session:'',rest:true},
+  {id:7,name:'Sunday',session:'',rest:true},
+];
+
+const exerciseLibrary = {
+  'Strongman': [
+    {name:'Log press',meta:'Clean & press'},
+    {name:'Axle deadlift',meta:'Double overhand'},
+    {name:'Farmers carry',meta:'Per hand'},
+    {name:'Yoke walk',meta:'20m default'},
+    {name:'Atlas stone load',meta:'Over bar'},
+    {name:'Sandbag carry',meta:'Over shoulder'},
+    {name:'Keg toss',meta:'Height target'},
+    {name:'Tyre flip',meta:'Continuous'},
+  ],
+  'Lower body': [
+    {name:'Deadlift',meta:'Conventional'},
+    {name:'Squat',meta:'Back squat'},
+    {name:'Romanian deadlift',meta:'Hinge pattern'},
+    {name:'Trap bar deadlift',meta:'High handles'},
+    {name:'Bulgarian split squat',meta:'Unilateral'},
+    {name:'Leg press',meta:'Machine'},
+    {name:'Good mornings',meta:'Barbell'},
+    {name:'Paused deadlift',meta:'Below knee'},
+    {name:'Tempo squat',meta:'3-1-1 default'},
+  ],
+  'Upper body': [
+    {name:'Bench press',meta:'Flat barbell'},
+    {name:'Overhead press',meta:'Standing strict'},
+    {name:'Incline press',meta:'Dumbbell'},
+    {name:'Barbell row',meta:'Overhand'},
+    {name:'Pull-ups',meta:'Bodyweight'},
+    {name:'Dumbbell row',meta:'Single arm'},
+    {name:'Face pulls',meta:'Cable'},
+    {name:'Dips',meta:'Weighted'},
+    {name:'Lat pulldown',meta:'Cable'},
+  ],
+  'Accessories': [
+    {name:'Bicep curl',meta:'Dumbbell'},
+    {name:'Tricep pushdown',meta:'Cable'},
+    {name:'Lateral raise',meta:'Dumbbell'},
+    {name:'Glute bridge',meta:'Barbell'},
+    {name:'Cable crunch',meta:'Kneeling'},
+    {name:'Pallof press',meta:'Anti-rotation'},
+    {name:'Leg curl',meta:'Machine'},
+    {name:'Leg extension',meta:'Machine'},
+  ],
+  'Conditioning': [
+    {name:'Sled push',meta:'Distance or time'},
+    {name:'Assault bike',meta:'Calories or time'},
+    {name:'Prowler sprint',meta:'20m sets'},
+    {name:'Rowing',meta:'Erg'},
+    {name:'Battle ropes',meta:'Time sets'},
+  ],
+  'Warm-up / mobility': [
+    {name:'Hip flexor stretch',meta:'2 min each'},
+    {name:'Thoracic rotation',meta:'10 each side'},
+    {name:'Banded pull-aparts',meta:'3×20'},
+    {name:'Goblet squat',meta:'Light, deep'},
+    {name:'Cat-cow',meta:'Spine mob'},
+  ],
+};
+
+// Session data per day (demo)
+const sessionData = {
+  1: {
+    blocks: [
+      {
+        id:'b1', type:'main', title:'Main pull', rest:240,
+        exercises:[
+          {id:'e1',name:'Deadlift',sets:'4',reps:'4',weight:'190',rpe:'8',note:''},
+          {id:'e2',name:'Romanian deadlift',sets:'3',reps:'8',weight:'140',rpe:'7',note:''},
+        ]
+      },
+      {
+        id:'b2', type:'accessory', title:'Lower accessories', rest:90,
+        exercises:[
+          {id:'e3',name:'Bulgarian split squat',sets:'3',reps:'10',weight:'30',rpe:'8',note:'Per leg, DB'},
+          {id:'e4',name:'Leg curl',sets:'3',reps:'12',weight:'45',rpe:'7',note:''},
+          {id:'e5',name:'Cable crunch',sets:'3',reps:'15',weight:'35',rpe:'7',note:''},
+        ]
+      }
+    ]
+  }
+};
+
+const progSuggestions = [
+  {ex:'Deadlift',detail:'Last week: 4×4 @180kg (RPE 7) → suggest 4×4 @190kg',action:'accept'},
+  {ex:'Squat',detail:'Last week: 4×5 @140kg (RPE 9) → suggest 4×5 @140kg (hold weight)',action:'hold'},
+  {ex:'Bench press',detail:'Last week: 4×6 @100kg (RPE 7) → suggest 4×6 @105kg',action:'accept'},
+  {ex:'OHP',detail:'Last week: 3×8 @65kg (RPE 10) → suggest 3×8 @60kg (drop 5kg)',action:'drop'},
+];
+
+// ── RENDER WEEKS ──
+function renderWeeks() {
+  const wl = document.getElementById('weekList');
+  wl.innerHTML = weeks.map(w=>{
+    const badge = w.type==='deload'?'<span class="week-item-badge badge-deload">Deload</span>':
+      w.type==='peak'?'<span class="week-item-badge badge-peak">Peak</span>':
+      '<span class="week-item-badge badge-build">Build</span>';
+    return `<div class="week-item${w.num===currentWeek?' active':''}" onclick="switchWeek(${w.num})">
+      <div class="week-item-label">${w.label}</div>${badge}</div>`;
+  }).join('');
+}
+
+function switchWeek(n) {
+  currentWeek = n;
+  const w = weeks.find(x=>x.num===n);
+  document.getElementById('canvasTitle').textContent = `WEEK ${n} — ${w.type.toUpperCase()}`;
+  document.querySelector('.week-type-select').value = w.type;
+  renderWeeks();
+  showToast(`Switched to Week ${n}`);
+}
+
+function addWeek() {
+  const n = weeks.length+1;
+  weeks.push({num:n,type:'build',label:`Week ${n}`});
+  renderWeeks();
+  switchWeek(n);
+}
+
+function updateWeekType(type) {
+  const w = weeks.find(x=>x.num===currentWeek);
+  if(w) { w.type=type; renderWeeks(); }
+  document.getElementById('canvasTitle').textContent = `WEEK ${currentWeek} — ${type.toUpperCase()}`;
+}
+
+// ── RENDER DAYS ──
+function renderDays() {
+  const dt = document.getElementById('dayTabs');
+  dt.innerHTML = days.map(d=>`
+    <button class="day-tab${d.id===currentDay?' active':''}${d.rest?' rest-day':''}" onclick="switchDay(${d.id})">
+      ${d.name}${d.rest?' (Rest)':''}
+    </button>`).join('') +
+    `<button class="day-tab-add" onclick="addDay()">+ Day</button>`;
+}
+
+function switchDay(id) {
+  currentDay = id;
+  const d = days.find(x=>x.id===id);
+  document.getElementById('sessionNameInput').value = d.session || '';
+  document.getElementById('restDayToggle').checked = d.rest;
+  document.getElementById('sessionCanvas').style.opacity = d.rest ? '0.4' : '1';
+  renderDays();
+  renderBlocks();
+}
+
+function addDay() {
+  const n = days.length+1;
+  days.push({id:n,name:`Day ${n}`,session:'',rest:false});
+  renderDays();
+  switchDay(n);
+}
+
+function toggleRestDay(on) {
+  const d = days.find(x=>x.id===currentDay);
+  if(d) d.rest = on;
+  document.getElementById('sessionCanvas').style.opacity = on ? '0.4' : '1';
+  renderDays();
+}
+
+// ── RENDER BLOCKS ──
+function renderBlocks() {
+  const area = document.getElementById('blocksArea');
+  const data = sessionData[currentDay];
+  if(!data || !data.blocks.length) { area.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted);font-size:14px">No blocks yet — add one below</div>'; return; }
+  area.innerHTML = data.blocks.map(b=>renderBlock(b)).join('');
+  setupBlockDrag();
+}
+
+function renderBlock(b) {
+  const typeLabel = {main:'Main lift',accessory:'Accessory',superset:'Superset',conditioning:'Conditioning',warmup:'Warm-up'}[b.type]||b.type;
+  const rows = b.exercises.map(e=>renderExRow(e,b.id)).join('');
+  return `<div class="block" id="block_${b.id}" draggable="true">
+    <div class="block-header">
+      <span class="drag-handle">&#8942;&#8942;</span>
+      <span class="block-type-badge bt-${b.type}">${typeLabel}</span>
+      <input class="block-title-input" value="${b.title}" placeholder="Block name..." oninput="updateBlockTitle('${b.id}',this.value)">
+      <div class="block-header-right">
+        <div class="block-rest">Rest <input type="number" value="${b.rest}" min="0" max="600" oninput="updateBlockRest('${b.id}',this.value)"> sec</div>
+        <button class="block-delete" onclick="deleteBlock('${b.id}')" title="Delete block">&#215;</button>
+      </div>
+    </div>
+    <div class="block-body">
+      <div class="ex-headers">
+        <div class="ex-hdr"></div>
+        <div class="ex-hdr" style="text-align:left">Exercise</div>
+        <div class="ex-hdr">Sets</div>
+        <div class="ex-hdr">Reps</div>
+        <div class="ex-hdr">Weight</div>
+        <div class="ex-hdr">RPE</div>
+        <div class="ex-hdr">kg / %1RM</div>
+        <div class="ex-hdr"></div>
+      </div>
+      ${rows}
+      <button class="block-add-ex" onclick="openExPicker('${b.id}')">+ Add exercise</button>
+    </div>
+  </div>`;
+}
+
+function renderExRow(e, blockId) {
+  const rpeClass = e.rpe ? `r${e.rpe}` : '';
+  const pct = e.weight && e.rpe ? calcPct(parseFloat(e.weight), e.name, parseInt(e.rpe)) : '';
+  const highlight = pct && parseFloat(pct) > 95 ? ' highlight' : '';
+  return `<div class="ex-row" id="exrow_${e.id}">
+    <div class="ex-drag">&#8942;</div>
+    <div class="ex-name" onclick="openExPicker('${blockId}','${e.id}')" title="Click to change">${e.name}</div>
+    <input class="ex-input" type="number" min="0" value="${e.sets}" placeholder="4" oninput="updateEx('${blockId}','${e.id}','sets',this.value)">
+    <input class="ex-input" type="text" value="${e.reps}" placeholder="5" oninput="updateEx('${blockId}','${e.id}','reps',this.value)">
+    <input class="ex-input" type="number" min="0" value="${e.weight}" placeholder="kg" oninput="updateEx('${blockId}','${e.id}','weight',this.value)">
+    <select class="ex-input ex-rpe ${rpeClass}" onchange="updateEx('${blockId}','${e.id}','rpe',this.value);this.className='ex-input ex-rpe r'+this.value">
+      <option value="">—</option>
+      ${[6,7,8,9,10].map(n=>`<option value="${n}"${e.rpe==n?' selected':''}>${n}</option>`).join('')}
+    </select>
+    <input class="ex-input${highlight}" type="text" value="${pct}" placeholder="%" oninput="updateEx('${blockId}','${e.id}','pct',this.value)" title="${parseFloat(pct)>95?'High % — check fatigue':''}">
+    <button class="ex-delete-btn" onclick="deleteExercise('${blockId}','${e.id}')">&#215;</button>
+  </div>`;
+}
+
+function calcPct(weight, exName, rpe) {
+  const maxes = {deadlift:220,squat:180,'bench press':130,'overhead press':90,'romanian deadlift':154,'trap bar deadlift':198};
+  const key = exName.toLowerCase();
+  const max = Object.entries(maxes).find(([k])=>key.includes(k));
+  if(!max || !weight) return '';
+  return ((weight/max[1])*100).toFixed(1);
+}
+
+// ── BLOCK OPERATIONS ──
+function addBlock(type) {
+  if(!sessionData[currentDay]) sessionData[currentDay]={blocks:[]};
+  const id = 'b'+(Date.now());
+  const titles = {main:'Main lift',accessory:'Accessories',superset:'Superset',conditioning:'Conditioning',warmup:'Warm-up'};
+  const rests = {main:240,accessory:90,superset:60,conditioning:45,warmup:60};
+  sessionData[currentDay].blocks.push({id,type,title:titles[type],rest:rests[type],exercises:[]});
+  renderBlocks();
+}
+
+function deleteBlock(id) {
+  const d = sessionData[currentDay];
+  d.blocks = d.blocks.filter(b=>b.id!==id);
+  renderBlocks();
+  showToast('Block removed');
+}
+
+function updateBlockTitle(id,val) {
+  const b = getBlock(id);
+  if(b) b.title=val;
+}
+
+function updateBlockRest(id,val) {
+  const b = getBlock(id);
+  if(b) b.rest=parseInt(val)||0;
+}
+
+function getBlock(id) {
+  const d = sessionData[currentDay];
+  return d && d.blocks.find(b=>b.id===id);
+}
+
+// ── EXERCISE OPERATIONS ──
+let pendingBlockId = null;
+let pendingExId = null;
+
+function openExPicker(blockId, exId=null) {
+  pendingBlockId = blockId;
+  pendingExId = exId;
+  switchRpTab('exercises', document.querySelector('.rp-tab'));
+  document.querySelectorAll('.rp-tab').forEach(t=>{ t.classList.toggle('active', t.textContent==='Exercises'); });
+  document.querySelectorAll('.rp-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('rp-exercises').classList.add('active');
+  document.getElementById('exSearch').focus();
+  showToast('Select an exercise from the panel →');
+}
+
+function selectExercise(name) {
+  if(!pendingBlockId) return;
+  const b = getBlock(pendingBlockId);
+  if(!b) return;
+  if(pendingExId) {
+    const ex = b.exercises.find(e=>e.id===pendingExId);
+    if(ex) { ex.name=name; }
+  } else {
+    b.exercises.push({id:'e'+Date.now(),name,sets:'4',reps:'6',weight:'',rpe:'8',note:''});
+  }
+  pendingBlockId=null; pendingExId=null;
+  renderBlocks();
+}
+
+function updateEx(blockId, exId, field, val) {
+  const b = getBlock(blockId);
+  if(!b) return;
+  const ex = b.exercises.find(e=>e.id===exId);
+  if(ex) ex[field]=val;
+  if(field==='weight'||field==='rpe') {
+    const row = document.getElementById('exrow_'+exId);
+    if(row) {
+      const pctInput = row.querySelectorAll('.ex-input')[4];
+      if(pctInput) {
+        const pct = calcPct(parseFloat(ex.weight),ex.name,parseInt(ex.rpe));
+        pctInput.value = pct;
+        pctInput.classList.toggle('highlight', parseFloat(pct)>95);
+      }
+    }
+  }
+}
+
+function deleteExercise(blockId, exId) {
+  const b = getBlock(blockId);
+  if(b) b.exercises=b.exercises.filter(e=>e.id!==exId);
+  renderBlocks();
+}
+
+// ── DRAG & DROP ──
+function setupBlockDrag() {
+  document.querySelectorAll('.block').forEach(el=>{
+    el.addEventListener('dragstart',e=>{dragSrcBlock=el.id;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';});
+    el.addEventListener('dragend',()=>{el.classList.remove('dragging');document.querySelectorAll('.block').forEach(b=>b.classList.remove('drag-over'));});
+    el.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='move';el.classList.add('drag-over');});
+    el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+    el.addEventListener('drop',e=>{
+      e.preventDefault();
+      el.classList.remove('drag-over');
+      if(dragSrcBlock===el.id) return;
+      const src=document.getElementById(dragSrcBlock);
+      const area=document.getElementById('blocksArea');
+      const children=[...area.children];
+      const si=children.indexOf(src), ti=children.indexOf(el);
+      if(si<ti) area.insertBefore(src,el.nextSibling); else area.insertBefore(src,el);
+      // reorder data
+      const d=sessionData[currentDay];
+      const srcIdx=d.blocks.findIndex(b=>'block_'+b.id===dragSrcBlock);
+      const tgtIdx=d.blocks.findIndex(b=>'block_'+b.id===el.id);
+      const [moved]=d.blocks.splice(srcIdx,1);
+      d.blocks.splice(tgtIdx,0,moved);
+    });
+  });
+}
+
+// ── EXERCISE LIBRARY ──
+function renderExercises(filter='') {
+  const list = document.getElementById('exerciseList');
+  const q = filter.toLowerCase();
+  let html = '';
+  Object.entries(exerciseLibrary).forEach(([cat,exs])=>{
+    const filtered = exs.filter(e=>e.name.toLowerCase().includes(q)||cat.toLowerCase().includes(q));
+    if(!filtered.length) return;
+    html+=`<div class="ex-category"><div class="ex-category-title">${cat}</div>`;
+    filtered.forEach(e=>{
+      html+=`<div class="ex-item" onclick="selectExercise('${e.name}')">
+        <div><div class="ex-item-name">${e.name}</div><div class="ex-item-meta">${e.meta}</div></div>
+        <div class="ex-item-add">+</div></div>`;
+    });
+    html+='</div>';
+  });
+  list.innerHTML = html || '<div style="padding:20px;text-align:center;font-size:13px;color:var(--muted)">No exercises found</div>';
+}
+
+function filterExercises(q) { renderExercises(q); }
+
+function openAddExerciseModal() { openModal('addExModal'); }
+
+function addCustomExercise() {
+  const name = document.getElementById('newExName').value.trim();
+  const cat = document.getElementById('newExCategory').value;
+  if(!name) return;
+  if(!exerciseLibrary[cat]) exerciseLibrary[cat]=[];
+  exerciseLibrary[cat].unshift({name,meta:'Custom'});
+  renderExercises();
+  closeModal('addExModal');
+  showToast(`"${name}" added to library`);
+  document.getElementById('newExName').value='';
+}
+
+// ── PROGRESSION SUGGESTIONS ──
+function renderProgSuggestions() {
+  const colours = {accept:'var(--green)',hold:'var(--amber)',drop:'#c03020'};
+  const labels = {accept:'↑ Increase',hold:'= Hold',drop:'↓ Drop'};
+  document.getElementById('progSuggestions').innerHTML = progSuggestions.map(s=>`
+    <div class="prog-card">
+      <div class="prog-card-ex" style="color:${colours[s.action]}">${labels[s.action]} — ${s.ex}</div>
+      <div class="prog-card-detail">${s.detail}</div>
+      <div class="prog-card-actions">
+        <button class="prog-accept" onclick="acceptSuggestion('${s.ex}')">Accept</button>
+        <button class="prog-tweak" onclick="showToast('Tweak mode — edit weights above')">Tweak</button>
+      </div>
+    </div>`).join('');
+}
+
+function acceptSuggestion(ex) { showToast(`${ex} progression accepted ✓`); }
+
+function toggleProgPanel() {
+  progPanelOpen = !progPanelOpen;
+  document.getElementById('progSuggestions').style.display = progPanelOpen ? 'flex' : 'none';
+  document.getElementById('progToggle').textContent = progPanelOpen ? '▼ Hide' : '▲ Show';
+}
+
+// ── RIGHT PANEL TABS ──
+function switchRpTab(id, el) {
+  document.querySelectorAll('.rp-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.rp-panel').forEach(p=>p.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('rp-'+id).classList.add('active');
+}
+
+// ── MODALS ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openClientModal() { showToast('Client switcher — coming in admin panel'); }
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──
+renderWeeks();
+renderDays();
+renderBlocks();
+renderExercises();
+renderProgSuggestions();
+</script>
+</body>
+</html>

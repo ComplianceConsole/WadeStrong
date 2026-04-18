@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wade Strong — Log Your RPE 10 Numbers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#B85A30;--rust-dark:#8C4122;--rust-light:#FAECE7;
+  --iron:#1a1a1a;--chalk:#f5f2ee;--white:#ffffff;--muted:#6b6560;
+  --border:rgba(0,0,0,0.1);
+  --font-display:'Bebas Neue',sans-serif;--font-body:'Instrument Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--chalk);color:var(--iron)}
+
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:var(--white);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:24px;letter-spacing:2px}
+.nav-logo span{color:var(--rust)}
+.nav-back{font-size:14px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.2s}
+.nav-back:hover{color:var(--iron)}
+
+.hero{background:var(--iron);padding:48px 40px;text-align:center}
+.hero-tag{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--rust);margin-bottom:10px}
+.hero h1{font-family:var(--font-display);font-size:52px;color:var(--white);letter-spacing:1px;margin-bottom:12px;line-height:1}
+.hero p{font-size:15px;color:rgba(255,255,255,0.5);max-width:480px;margin:0 auto;line-height:1.7}
+
+.form-wrap{max-width:680px;margin:0 auto;padding:48px 40px}
+
+.section-header{margin-bottom:28px}
+.section-tag{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--rust);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.section-tag::before{content:'';display:block;width:20px;height:1px;background:var(--rust)}
+.section-title{font-family:var(--font-display);font-size:36px;letter-spacing:1px}
+
+/* LIFT ENTRY CARDS */
+.lift-entry{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin-bottom:20px;transition:border-color 0.2s}
+.lift-entry:focus-within{border-color:var(--rust)}
+.lift-entry.skipped{opacity:0.45;pointer-events:none}
+.lift-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
+.lift-name{font-family:var(--font-display);font-size:28px;letter-spacing:1px;line-height:1}
+.lift-sub{font-size:13px;color:var(--muted);margin-top:3px;line-height:1.4}
+.lift-tag{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:4px 12px;border-radius:100px;white-space:nowrap;flex-shrink:0;margin-top:4px}
+.tag-req{background:var(--iron);color:var(--white)}
+.tag-opt{background:var(--chalk);color:var(--muted);border:1px solid var(--border)}
+.tag-skip{background:#fce8e8;color:#8c2020}
+
+.lift-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.input-group label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.input-row{display:flex;align-items:center;gap:8px}
+.input-row input{flex:1;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:16px;font-weight:600;color:var(--iron);background:var(--chalk);outline:none;transition:border-color 0.2s,background 0.2s}
+.input-row input:focus{border-color:var(--rust);background:var(--white)}
+.input-row .unit{font-size:13px;color:var(--muted);font-weight:500;white-space:nowrap}
+
+/* RPE selector */
+.rpe-selector label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+.rpe-pills{display:flex;gap:5px;flex-wrap:wrap}
+.rpe-pill{cursor:pointer}
+.rpe-pill input{display:none}
+.rpe-pill span{display:flex;align-items:center;justify-content:center;width:42px;height:38px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-weight:600;color:var(--muted);background:var(--white);transition:all 0.15s}
+.rpe-pill input:checked+span{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.rpe-pill span:hover{border-color:var(--iron);color:var(--iron)}
+/* highlight RPE 10 specially */
+.rpe-pill.is-10 input:checked+span{background:var(--rust);border-color:var(--rust);color:var(--white)}
+
+.lift-notes-row{margin-top:12px}
+.lift-notes-row label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin-bottom:6px}
+.lift-notes-row input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;transition:border-color 0.2s}
+.lift-notes-row input:focus{border-color:var(--rust);background:var(--white)}
+
+/* skip toggle */
+.skip-row{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.skip-row label{font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none}
+.skip-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--rust);cursor:pointer}
+
+/* divider */
+.section-divider{border:none;border-top:1px solid var(--border);margin:36px 0}
+
+/* session notes */
+.session-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin-bottom:28px}
+.session-card h3{font-size:15px;font-weight:600;margin-bottom:16px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px}
+.field select,.field textarea,.field input[type=text]{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-body);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;transition:border-color 0.2s}
+.field select:focus,.field textarea:focus,.field input:focus{border-color:var(--rust);background:var(--white)}
+.field textarea{resize:vertical;min-height:80px}
+.field select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6560' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.choices{display:flex;flex-wrap:wrap;gap:8px}
+.choice{cursor:pointer}
+.choice input{display:none}
+.choice span{display:block;padding:8px 16px;border:1px solid var(--border);border-radius:100px;font-size:13px;color:var(--muted);background:var(--white);transition:all 0.15s}
+.choice input:checked+span{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.choice span:hover{border-color:var(--iron);color:var(--iron)}
+
+/* submit */
+.submit-area{text-align:center;padding:8px 0 16px}
+.btn-submit{background:var(--rust);color:var(--white);border:none;padding:16px 48px;border-radius:6px;font-family:var(--font-body);font-size:16px;font-weight:600;cursor:pointer;transition:background 0.2s;width:100%}
+.btn-submit:hover{background:var(--rust-dark)}
+.submit-note{font-size:13px;color:var(--muted);margin-top:12px}
+
+/* success */
+.success-screen{display:none;text-align:center;padding:80px 40px;max-width:520px;margin:0 auto}
+.success-icon{width:64px;height:64px;background:#e6f4ed;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;color:#2c7a4b}
+.success-screen h2{font-family:var(--font-display);font-size:44px;letter-spacing:1px;margin-bottom:12px}
+.success-screen p{font-size:16px;color:var(--muted);line-height:1.7}
+
+@media(max-width:600px){
+  nav{padding:16px 20px}
+  .hero{padding:40px 20px}
+  .form-wrap{padding:32px 20px}
+  .lift-inputs{grid-template-columns:1fr}
+  .rpe-pills{gap:4px}
+  .rpe-pill span{width:36px;height:34px;font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">WADE<span>.</span>STRONG</div>
+  <a href="rpe10-nextsteps.html" class="nav-back">&#8592; Back to overview</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">RPE 10 Testing</div>
+  <h1>LOG YOUR NUMBERS.</h1>
+  <p>Fill in what you hit today. If you skipped a lift, tick the skip box and let Wade know why. Every field helps.</p>
+</div>
+
+<div class="form-wrap">
+
+  <div id="liftForm">
+    <div class="section-tag">Your lifts</div>
+    <div class="section-title" style="margin-bottom:28px">WHAT DID YOU HIT?</div>
+
+    <!-- Lift cards injected by JS based on profile -->
+    <div id="liftCards"></div>
+
+    <div class="section-divider"></div>
+
+    <!-- SESSION NOTES -->
+    <div class="section-tag">Session notes</div>
+    <div class="section-title" style="margin-bottom:20px">HOW DID IT GO?</div>
+
+    <div class="session-card">
+      <h3>Tell Wade about the session</h3>
+
+      <div class="field">
+        <label>Overall session feel</label>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="sessionFeel" value="great"><span>Great — felt strong</span></label>
+          <label class="choice"><input type="radio" name="sessionFeel" value="good"><span>Good</span></label>
+          <label class="choice"><input type="radio" name="sessionFeel" value="average"><span>Average day</span></label>
+          <label class="choice"><input type="radio" name="sessionFeel" value="off"><span>Off day — not my best</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>How fresh were you going in?</label>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="freshness" value="fully"><span>Fully rested</span></label>
+          <label class="choice"><input type="radio" name="freshness" value="mostly"><span>Mostly rested</span></label>
+          <label class="choice"><input type="radio" name="freshness" value="tired"><span>A bit tired</span></label>
+          <label class="choice"><input type="radio" name="freshness" value="fatigued"><span>Pretty fatigued</span></label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Did anything feel off or cause pain?</label>
+        <textarea placeholder="e.g. Left knee was uncomfortable on squat, stopped early. Right shoulder clicked on press but no pain."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Any other notes for Wade?</label>
+        <textarea placeholder="e.g. Grip gave out on farmers before my legs did, I think my deadlift was more than this on a good day, hadn't slept well..."></textarea>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button class="btn-submit" onclick="submitRPE()">Send to Wade &rarr;</button>
+      <div class="submit-note">Wade will receive this immediately and start building your program.</div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">&#10003;</div>
+    <h2>NUMBERS SENT.</h2>
+    <p>Wade has everything he needs now. He'll build your program and send you your portal link — usually within 24 hours.</p>
+    <p style="margin-top:16px;font-size:14px;color:var(--muted)">Good effort in the gym today. Now rest up — your program will be ready soon.</p>
+  </div>
+
+</div>
+
+<script>
+const profile = getProfile();
+
+function getProfile() {
+  const p = new URLSearchParams(window.location.search);
+  return {
+    name: p.get('name') || '',
+    programType: p.get('type') || 'getstrong',
+    injuries: p.get('injuries') || 'none',
+    equipment: (p.get('eq') || 'barbell,rack,dumbbells,cables').split(','),
+    injuryDetail: p.get('injuryDetail') || ''
+  };
+}
+
+const allLifts = [
+  { id:'deadlift', name:'Deadlift', sub:'Conventional — heaviest single with solid form', unit:'kg', requires:['barbell'], injurySensitive:['back','spine','lumbar','disc','hip'], type:'required', programs:['getstrong','precomp'], hasTime:false },
+  { id:'squat', name:'Back squat', sub:'High or low bar, to depth', unit:'kg', requires:['rack','barbell'], injurySensitive:['knee','hip','back','squat'], type:'required', programs:['getstrong','precomp'], hasTime:false },
+  { id:'bench', name:'Bench press', sub:'Flat barbell bench, full range', unit:'kg', requires:['barbell','rack'], injurySensitive:['shoulder','pec','chest','rotator'], type:'required', programs:['getstrong','precomp'], hasTime:false },
+  { id:'ohp', name:'Overhead press', sub:'Standing strict barbell press', unit:'kg', requires:['barbell'], injurySensitive:['shoulder','rotator','neck','overhead'], type:'required', programs:['getstrong','precomp'], hasTime:false },
+  { id:'log', name:'Log press', sub:'Clean and press — max single', unit:'kg', requires:['log'], injurySensitive:['shoulder','elbow','wrist','overhead'], type:'required', programs:['precomp'], hasTime:false },
+  { id:'axle', name:'Axle deadlift', sub:'Double overhand or mixed grip', unit:'kg', requires:['axle'], injurySensitive:['back','grip','wrist'], type:'required', programs:['precomp'], hasTime:false },
+  { id:'farmers', name:'Farmers carry', sub:'Max pick per hand — walk 20m if possible', unit:'kg/hand', requires:['farmers'], injurySensitive:['grip','wrist','forearm','shoulder'], type:'required', programs:['precomp'], hasTime:true },
+  { id:'yoke', name:'Yoke walk', sub:'Heaviest load you can move 20m', unit:'kg', requires:['yoke'], injurySensitive:['back','knee','hip','neck'], type:'required', programs:['precomp'], hasTime:true },
+  { id:'trapbar', name:'Trap bar deadlift', sub:'High handles, max single', unit:'kg', requires:['trap'], injurySensitive:[], type:'optional', programs:['getstrong','precomp'], hasTime:false },
+  { id:'dumbbell_press', name:'Dumbbell press', sub:'Seated or standing, max set of 5', unit:'kg/hand', requires:['dumbbells'], injurySensitive:['shoulder','rotator'], type:'optional', programs:['getstrong'], hasTime:false },
+];
+
+function hasInjuryConflict(lift) {
+  if (profile.injuries === 'none') return false;
+  const detail = (profile.injuryDetail || '').toLowerCase();
+  if (!detail) return false;
+  return lift.injurySensitive.some(kw => detail.includes(kw));
+}
+
+function hasEquipment(lift) {
+  return lift.requires.every(r => profile.equipment.includes(r));
+}
+
+function buildForm() {
+  const container = document.getElementById('liftCards');
+  const lifts = allLifts.filter(l => l.programs.includes(profile.programType) && hasEquipment(l));
+  let html = '';
+
+  lifts.forEach(lift => {
+    const injSkip = hasInjuryConflict(lift);
+    const tagClass = injSkip ? 'tag-skip' : (lift.type === 'required' ? 'tag-req' : 'tag-opt');
+    const tagText = injSkip ? '&#9888; Flagged — injury risk' : (lift.type === 'required' ? 'Required' : 'Optional');
+    const skipClass = injSkip ? ' skipped' : '';
+
+    const timeField = lift.hasTime ? `
+      <div class="input-group">
+        <label>Time (seconds)</label>
+        <div class="input-row">
+          <input type="number" min="0" placeholder="0" id="${lift.id}_time">
+          <span class="unit">sec</span>
+        </div>
+      </div>` : '';
+
+    html += `
+    <div class="lift-entry${skipClass}" id="entry_${lift.id}">
+      <div class="lift-header">
+        <div>
+          <div class="lift-name">${lift.name.toUpperCase()}</div>
+          <div class="lift-sub">${lift.sub}</div>
+        </div>
+        <div class="lift-tag ${tagClass}">${tagText}</div>
+      </div>
+      <div class="lift-inputs">
+        <div class="input-group">
+          <label>Weight (${lift.unit})</label>
+          <div class="input-row">
+            <input type="number" min="0" placeholder="0" id="${lift.id}_weight">
+            <span class="unit">${lift.unit}</span>
+          </div>
+        </div>
+        ${timeField}
+      </div>
+      <div class="rpe-selector">
+        <label>RPE — how hard was it?</label>
+        <div class="rpe-pills">
+          ${[6,7,8,9,10].map(n=>`<label class="rpe-pill${n===10?' is-10':''}"><input type="radio" name="rpe_${lift.id}" value="${n}"><span>${n}</span></label>`).join('')}
+        </div>
+      </div>
+      <div class="lift-notes-row">
+        <label>Notes (optional)</label>
+        <input type="text" placeholder="e.g. felt solid, grip gave out, form broke on last attempt..." id="${lift.id}_notes">
+      </div>
+      <div class="skip-row">
+        <label>
+          <input type="checkbox" id="skip_${lift.id}" onchange="toggleSkip('${lift.id}', this.checked)">
+          I skipped this lift
+        </label>
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html || '<p style="color:var(--muted)">Loading your lift list...</p>';
+}
+
+function toggleSkip(liftId, skipped) {
+  const card = document.getElementById('entry_' + liftId);
+  const inputs = card.querySelectorAll('input:not([type=checkbox]), select, textarea');
+  card.style.opacity = skipped ? '0.45' : '1';
+  inputs.forEach(i => i.disabled = skipped);
+}
+
+function submitRPE() {
+  document.getElementById('liftForm').style.display = 'none';
+  document.getElementById('successScreen').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+buildForm();
+</script>
+</body>
+</html>
