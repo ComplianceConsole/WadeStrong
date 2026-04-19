@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wade Strong — Strongman Coaching</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#B85A30;--rust-dark:#8C4122;--rust-light:#FAECE7;--rust-mid:#D85A30;
+  --iron:#1a1a1a;--chalk:#f5f2ee;--white:#ffffff;--muted:#6b6560;
+  --border:rgba(0,0,0,0.1);
+  --font-display:'Bebas Neue',sans-serif;--font-body:'Instrument Sans',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;background:rgba(245,242,238,0.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:var(--font-display);font-size:26px;letter-spacing:2px;color:var(--iron)}
+.nav-logo span{color:var(--rust)}
+.nav-links{display:flex;gap:32px}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none;letter-spacing:0.5px;transition:color 0.2s}
+.nav-links a:hover{color:var(--iron)}
+.nav-cta{background:var(--iron);color:var(--white);border:none;padding:11px 24px;border-radius:4px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.nav-cta:hover{background:var(--rust)}
+
+/* HERO */
+.hero{min-height:100vh;display:grid;grid-template-columns:55% 45%;padding-top:72px}
+.hero-left{padding:80px 64px;display:flex;flex-direction:column;justify-content:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:10px;margin-bottom:28px;font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--rust)}
+.eyebrow-line{width:32px;height:1px;background:var(--rust)}
+.hero-left h1{font-family:var(--font-display);font-size:112px;line-height:0.92;letter-spacing:2px;margin-bottom:32px}
+.hero-left h1 .accent{color:var(--rust)}
+.hero-sub{font-size:17px;color:var(--muted);line-height:1.75;max-width:420px;margin-bottom:44px}
+.hero-actions{display:flex;gap:14px}
+.btn-primary{background:var(--rust);color:var(--white);border:none;padding:16px 36px;border-radius:4px;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.15s}
+.btn-primary:hover{background:var(--rust-dark);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);padding:16px 36px;border-radius:4px;font-family:var(--font-body);font-size:15px;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--iron);color:var(--iron)}
+.hero-right{background:var(--iron);display:flex;flex-direction:column;justify-content:flex-end;padding:48px;position:relative;overflow:hidden}
+.hero-bg-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-display);font-size:280px;line-height:1;color:rgba(255,255,255,0.03);white-space:nowrap;pointer-events:none;letter-spacing:4px}
+.hero-photo-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.photo-note{border:1px dashed rgba(255,255,255,0.15);padding:16px 28px;border-radius:4px;font-size:13px;color:rgba(255,255,255,0.3);letter-spacing:0.5px}
+.hero-stats-bar{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(255,255,255,0.1);border-radius:6px;overflow:hidden;position:relative;z-index:2}
+.stat{padding:20px 24px;border-right:1px solid rgba(255,255,255,0.1)}
+.stat:last-child{border-right:none}
+.stat-val{font-family:var(--font-display);font-size:28px;color:#fff;letter-spacing:1px}
+.stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;letter-spacing:0.5px}
+
+/* SHARED */
+.section{padding:96px 64px}
+.section-tag{font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--rust);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.section-tag::before{content:'';display:block;width:24px;height:1px;background:var(--rust)}
+.section-title{font-family:var(--font-display);font-size:64px;letter-spacing:1px;line-height:0.95;margin-bottom:48px;color:var(--iron)}
+
+/* ABOUT */
+.about{background:var(--white)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.about-text p{font-size:16px;color:var(--muted);line-height:1.8;margin-bottom:18px}
+.flag-row{display:flex;gap:8px;margin-top:28px;flex-wrap:wrap}
+.flag-pill{font-size:12px;padding:6px 16px;border-radius:100px;border:1px solid var(--border);color:var(--muted);background:var(--chalk);font-weight:500}
+.about-pull{padding:40px;background:var(--iron);border-radius:8px;position:relative;overflow:hidden}
+.about-pull-bg{position:absolute;bottom:-20px;right:-10px;font-family:var(--font-display);font-size:160px;color:rgba(255,255,255,0.04);line-height:1;pointer-events:none}
+.about-pull blockquote{font-family:var(--font-display);font-size:38px;line-height:1.1;color:var(--white);letter-spacing:1px;position:relative;z-index:1}
+.about-pull blockquote span{color:var(--rust-mid)}
+.pull-note{margin-top:20px;font-size:13px;color:rgba(255,255,255,0.4);position:relative;z-index:1}
+
+/* PROGRAMS */
+.programs{background:var(--chalk)}
+.programs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.program-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:36px;display:flex;flex-direction:column;transition:transform 0.2s,box-shadow 0.2s}
+.program-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,0.08)}
+.program-card.featured{background:var(--iron);border-color:var(--iron)}
+.prog-tag{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:5px 12px;border-radius:100px;display:inline-block;width:fit-content;margin-bottom:24px}
+.tag-start{background:var(--chalk);color:var(--muted);border:1px solid var(--border)}
+.tag-comp{background:var(--rust-light);color:var(--rust-dark)}
+.prog-name{font-family:var(--font-display);font-size:36px;letter-spacing:1px;margin-bottom:8px;color:var(--iron)}
+.program-card.featured .prog-name{color:var(--white)}
+.prog-desc{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:28px}
+.program-card.featured .prog-desc{color:rgba(255,255,255,0.5)}
+.prog-price{font-family:var(--font-display);font-size:52px;letter-spacing:1px;color:var(--iron);line-height:1}
+.program-card.featured .prog-price{color:var(--white)}
+.prog-price sup{font-family:var(--font-body);font-size:22px;vertical-align:top;margin-top:8px;display:inline-block;font-weight:400}
+.prog-price-note{font-size:13px;color:var(--muted);margin-top:4px;margin-bottom:28px}
+.program-card.featured .prog-price-note{color:rgba(255,255,255,0.4)}
+.prog-divider{border:none;border-top:1px solid var(--border);margin-bottom:24px}
+.program-card.featured .prog-divider{border-color:rgba(255,255,255,0.1)}
+.prog-features{list-style:none;flex:1}
+.prog-features li{font-size:14px;color:var(--muted);padding:9px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;line-height:1.45}
+.program-card.featured .prog-features li{color:rgba(255,255,255,0.55);border-color:rgba(255,255,255,0.08)}
+.prog-features li:last-child{border-bottom:none}
+.feat-check{color:var(--rust);font-weight:700;font-size:13px;flex-shrink:0;padding-top:1px}
+.program-card.featured .feat-check{color:var(--rust-mid)}
+.prog-btn{margin-top:32px;width:100%;padding:14px;border-radius:4px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn-outline{background:transparent;color:var(--iron);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--iron)}
+.btn-rust{background:var(--rust);color:var(--white);border:none}
+.btn-rust:hover{background:var(--rust-dark)}
+
+/* PAYMENT */
+.payment{background:var(--white)}
+.payment-intro{font-size:16px;color:var(--muted);line-height:1.75;max-width:600px;margin-bottom:56px}
+.payment-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+.pay-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s}
+.pay-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.07)}
+.pay-card-header{padding:28px 32px 24px;border-bottom:1px solid var(--border);background:var(--chalk)}
+.pay-card-header.dark{background:var(--iron)}
+.pay-card-name{font-family:var(--font-display);font-size:30px;letter-spacing:1px;color:var(--iron);margin-bottom:4px}
+.pay-card-header.dark .pay-card-name{color:var(--white)}
+.pay-card-sub{font-size:13px;color:var(--muted);line-height:1.5}
+.pay-card-header.dark .pay-card-sub{color:rgba(255,255,255,0.4)}
+.pay-card-body{padding:28px 32px}
+.pay-amount{font-family:var(--font-display);font-size:56px;letter-spacing:1px;color:var(--iron);line-height:1;margin-bottom:6px}
+.pay-amount sup{font-family:var(--font-body);font-size:22px;vertical-align:top;margin-top:8px;display:inline-block;font-weight:400}
+.pay-options{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.pay-btn{width:100%;padding:14px;border-radius:4px;font-family:var(--font-body);font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;border:none}
+.pay-btn-stripe{background:var(--iron);color:var(--white)}
+.pay-btn-stripe:hover{background:var(--rust)}
+.pay-btn-afterpay{background:#B2FCE4;color:#000;font-weight:700}
+.pay-btn-afterpay:hover{background:#8ff0d0}
+.afterpay-split{font-size:12px;color:var(--muted);margin-top:4px;text-align:center}
+.stripe-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--muted);margin-top:20px}
+.afterpay-strip{background:#B2FCE4;border-radius:8px;padding:22px 32px;display:flex;align-items:center;gap:24px}
+.afterpay-logo{font-family:var(--font-display);font-size:24px;letter-spacing:1px;color:#000;flex-shrink:0}
+.afterpay-text{font-size:14px;color:#000;line-height:1.6}
+.afterpay-text strong{font-weight:600}
+
+/* PHILOSOPHY */
+.philosophy{background:var(--iron)}
+.philosophy .section-tag{color:rgba(255,255,255,0.4)}
+.philosophy .section-tag::before{background:rgba(255,255,255,0.3)}
+.philosophy .section-title{color:var(--white)}
+.phil-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.08);border-radius:8px;overflow:hidden}
+.phil-card{background:var(--iron);padding:32px 28px;transition:background 0.2s}
+.phil-card:hover{background:#222}
+.phil-num{font-family:var(--font-display);font-size:48px;color:rgba(255,255,255,0.06);margin-bottom:16px;line-height:1}
+.phil-card h4{font-size:15px;font-weight:600;color:var(--white);margin-bottom:10px}
+.phil-card p{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7}
+
+/* TESTIMONIALS */
+.testimonials{background:var(--chalk)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.testi-card{border:1px solid var(--border);border-radius:8px;padding:28px;background:var(--white)}
+.testi-stars{color:var(--rust);font-size:13px;margin-bottom:14px;letter-spacing:2px}
+.testi-text{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:20px;font-style:italic}
+.testi-author{font-size:14px;font-weight:600;color:var(--iron)}
+.testi-role{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* CONTACT */
+.contact{background:var(--chalk)}
+.quote-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.quote-left{padding:48px;background:var(--iron)}
+.quote-left h3{font-family:var(--font-display);font-size:36px;color:var(--white);letter-spacing:1px;margin-bottom:14px}
+.quote-left p{font-size:14px;color:rgba(255,255,255,0.45);line-height:1.7;margin-bottom:28px}
+.quote-includes{list-style:none}
+.quote-includes li{font-size:14px;color:rgba(255,255,255,0.55);padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;gap:10px;line-height:1.4}
+.quote-includes li:last-child{border-bottom:none}
+.q-check{color:var(--rust-mid);font-weight:700;flex-shrink:0}
+.quote-right{padding:48px;background:var(--white)}
+.quote-right h4{font-size:16px;font-weight:600;color:var(--iron);margin-bottom:28px}
+.form-row{margin-bottom:16px}
+.form-row label{display:block;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--muted);margin-bottom:6px;text-transform:uppercase}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:12px 14px;border-radius:4px;border:1px solid var(--border);background:var(--chalk);font-family:var(--font-body);font-size:14px;color:var(--iron);transition:border-color 0.2s;outline:none}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:var(--rust);background:var(--white)}
+.form-row textarea{resize:vertical;min-height:90px}
+.form-row-split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-submit{width:100%;margin-top:8px;padding:15px;background:var(--rust);color:var(--white);border:none;border-radius:4px;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:background 0.2s;letter-spacing:0.3px}
+.form-submit:hover{background:var(--rust-dark)}
+
+/* CTA */
+.cta{background:var(--rust);padding:96px 64px;text-align:center;position:relative;overflow:hidden}
+.cta-bg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--font-display);font-size:300px;line-height:1;color:rgba(0,0,0,0.08);white-space:nowrap;pointer-events:none;letter-spacing:4px}
+.cta h2{font-family:var(--font-display);font-size:80px;color:var(--white);letter-spacing:2px;line-height:0.95;margin-bottom:20px;position:relative;z-index:1}
+.cta p{font-size:16px;color:rgba(255,255,255,0.7);margin-bottom:40px;position:relative;z-index:1}
+.cta-btn{background:var(--white);color:var(--rust);border:none;padding:18px 48px;border-radius:4px;font-family:var(--font-body);font-size:16px;font-weight:700;cursor:pointer;position:relative;z-index:1;transition:all 0.2s;letter-spacing:0.3px}
+.cta-btn:hover{background:var(--iron);color:var(--white)}
+
+/* FOOTER */
+footer{background:var(--iron);padding:40px 64px}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.footer-logo{font-family:var(--font-display);font-size:22px;letter-spacing:2px;color:var(--white)}
+.footer-logo span{color:var(--rust)}
+.footer-links{display:flex;gap:28px}
+.footer-links a{font-size:13px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.2s}
+.footer-links a:hover{color:rgba(255,255,255,0.7)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.06);padding-top:24px;display:flex;justify-content:space-between}
+.footer-note{font-size:12px;color:rgba(255,255,255,0.25)}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.hero-left>*{animation:fadeUp 0.6s ease both}
+.hero-left>*:nth-child(1){animation-delay:0.1s}
+.hero-left>*:nth-child(2){animation-delay:0.2s}
+.hero-left>*:nth-child(3){animation-delay:0.3s}
+.hero-left>*:nth-child(4){animation-delay:0.4s}
+
+/* RESPONSIVE */
+@media(max-width:1024px){
+  .payment-grid{grid-template-columns:1fr}
+  .quote-card{grid-template-columns:1fr}
+  .phil-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .hero-left h1{font-size:72px}
+  .about-grid,.programs-grid,.testi-grid{grid-template-columns:1fr}
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  .section{padding:64px 24px}
+  .hero-left{padding:60px 24px}
+  .section-title{font-size:44px}
+  footer{padding:40px 24px}
+  .footer-inner{flex-direction:column;gap:20px;text-align:center}
+  .footer-bottom{flex-direction:column;gap:8px;text-align:center}
+  .cta h2{font-size:52px}
+  .form-row-split{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+  .phil-grid{grid-template-columns:1fr}
+}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">WADE<span>.</span>STRONG</div>
+  <div class="nav-links">
+    <a href="#about">about</a>
+    <a href="#programs">programs</a>
+    <a href="#payment">pricing</a>
+    <a href="#contact">contact</a>
+    <a href="#book">book a call</a>
+  </div>
+  <button class="nav-cta" onclick="document.getElementById('programs').scrollIntoView({behavior:'smooth'})">start training</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-eyebrow"><span class="eyebrow-line"></span>Professional strongman &nbsp;·&nbsp; NZ &nbsp;·&nbsp; AUS &nbsp;·&nbsp; USA</div>
+    <h1>BUILT<br>FOR THE<br><span class="accent">STRONG.</span></h1>
+    <p class="hero-sub">Custom training from a pro strongman who has competed at the highest level across three countries. Built for everyday blokes who want to get seriously strong.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('programs').scrollIntoView({behavior:'smooth'})">get my program</button>
+      <button class="btn-ghost" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">how it works</button>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-bg-text">WADE</div>
+    <div class="hero-photo-placeholder"><div class="photo-note">Photo of Wade goes here</div></div>
+    <div class="hero-stats-bar">
+      <div class="stat"><div class="stat-val">7TH</div><div class="stat-label">Arnold Classic, Ohio</div></div>
+      <div class="stat"><div class="stat-val">PRO</div><div class="stat-label">level athlete</div></div>
+      <div class="stat"><div class="stat-val">3</div><div class="stat-label">countries competed</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="about section" id="about">
+  <div class="section-tag">about wade</div>
+  <div class="about-grid">
+    <div class="about-text">
+      <div class="section-title">A KIWI WHO LIFTS THE WORLD.</div>
+      <p>Wade is a professional strongman who has competed across New Zealand, Australia, and the United States — most recently placing 7th at the Arnold Classic in Ohio, one of the most prestigious events on the planet.</p>
+      <p>He's accumulated more medals than he knows what to do with. But what drives him now is helping everyday people — blokes with jobs, families, and busy lives — discover exactly what their bodies are capable of.</p>
+      <p>If you've ever wanted to get genuinely strong, Wade will show you how.</p>
+      <div class="flag-row">
+        <span class="flag-pill">New Zealand</span>
+        <span class="flag-pill">Australia</span>
+        <span class="flag-pill">USA</span>
+      </div>
+    </div>
+    <div>
+      <div class="about-pull">
+        <div class="about-pull-bg">STRONG</div>
+        <blockquote>"The everyday man is <span>stronger</span> than he thinks. My job is to prove it."</blockquote>
+        <p class="pull-note">— Wade</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="programs section" id="programs">
+  <div class="section-tag">training programs</div>
+  <div class="section-title">THREE WAYS TO WORK WITH WADE.</div>
+  <div class="programs-grid">
+    <div class="program-card">
+      <span class="prog-tag tag-start">Start here</span>
+      <div class="prog-name">GET STRONG</div>
+      <p class="prog-desc">A 6-week custom program to build real, functional strength from the ground up.</p>
+      <div class="prog-price"><sup>$</sup>600</div>
+      <div class="prog-price-note">one-time &nbsp;·&nbsp; 6 weeks</div>
+      <hr class="prog-divider">
+      <ul class="prog-features">
+        <li><span class="feat-check">+</span> Fully custom 6-week program</li>
+        <li><span class="feat-check">+</span> Weekly 1-on-1 video call with Wade</li>
+        <li><span class="feat-check">+</span> Ongoing progress feedback throughout</li>
+        <li><span class="feat-check">+</span> Program adjusted week to week</li>
+        <li><span class="feat-check">+</span> Works with any gym setup</li>
+      </ul>
+      <button class="prog-btn btn-outline" onclick="document.getElementById('payment').scrollIntoView({behavior:'smooth'})">get started</button>
+    </div>
+    <div class="program-card featured">
+      <span class="prog-tag tag-comp">Strongman specific</span>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;margin-top:-10px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#c03020;animation:pulse 1.5s infinite"></div>
+        <span style="font-size:12px;font-weight:600;color:#c03020" id="spacesLeft">Only 3 spots left this block</span>
+      </div>
+      <div class="prog-name">PRE-COMP BUILD UP</div>
+      <p class="prog-desc">Targeted strongman programming to peak you exactly for competition day.</p>
+      <div class="prog-price"><sup>$</sup>1,200</div>
+      <div class="prog-price-note">one-time &nbsp;·&nbsp; pre-competition block</div>
+      <hr class="prog-divider">
+      <ul class="prog-features">
+        <li><span class="feat-check">+</span> Competition-specific event training</li>
+        <li><span class="feat-check">+</span> Peaking strategy built to your comp date</li>
+        <li><span class="feat-check">+</span> Weekly 1-on-1 video call with Wade</li>
+        <li><span class="feat-check">+</span> Form video review for all key events</li>
+        <li><span class="feat-check">+</span> Recovery &amp; taper protocol included</li>
+        <li><span class="feat-check">+</span> Feedback right up to comp day</li>
+      </ul>
+      <button class="prog-btn btn-rust" onclick="document.getElementById('payment').scrollIntoView({behavior:'smooth'})">apply now</button>
+    </div>
+    <div class="program-card" style="border-style:dashed;opacity:0.7">
+      <span class="prog-tag tag-start">Coming soon</span>
+      <div class="prog-name">NUTRITION PLANS</div>
+      <p class="prog-desc">Custom meal and macro plans built around your training. Designed for strength athletes — not generic diet advice.</p>
+      <div class="prog-price" style="font-size:28px;padding-top:6px">Available soon</div>
+      <div class="prog-price-note">add-on to any program</div>
+      <hr class="prog-divider">
+      <ul class="prog-features">
+        <li><span class="feat-check">+</span> Tailored to your training load</li>
+        <li><span class="feat-check">+</span> Comp prep &amp; off-season plans</li>
+        <li><span class="feat-check">+</span> Macro targets &amp; meal timing</li>
+        <li><span class="feat-check">+</span> Adjusted week to week</li>
+      </ul>
+      <button class="prog-btn btn-outline" style="opacity:0.5;cursor:default">Notify me</button>
+    </div>
+
+    <div class="program-card">
+      <span class="prog-tag tag-start">Fully custom</span>
+      <div class="prog-name">I'LL COME TO YOU</div>
+      <p class="prog-desc">Wherever you are in the world — Wade will travel to coach you in person.</p>
+      <div class="prog-price" style="font-size:36px;padding-top:6px">Custom quote</div>
+      <div class="prog-price-note">in-person &nbsp;·&nbsp; worldwide</div>
+      <hr class="prog-divider">
+      <ul class="prog-features">
+        <li><span class="feat-check">+</span> Wade travels to your location, anywhere</li>
+        <li><span class="feat-check">+</span> Hands-on coaching &amp; technique work</li>
+        <li><span class="feat-check">+</span> Tailored entirely to your goals</li>
+        <li><span class="feat-check">+</span> Training camp or one-off session options</li>
+        <li><span class="feat-check">+</span> Fill in a quick form — we'll be in touch fast</li>
+      </ul>
+      <button class="prog-btn btn-outline" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">get a quote</button>
+    </div>
+  </div>
+</section>
+
+<section class="payment section" id="payment">
+  <div class="section-tag">secure checkout</div>
+  <div class="section-title">READY TO GET STARTED?</div>
+  <p class="payment-intro">Pay securely online and Wade will be in touch within 24 hours to kick things off. Both programs are available via card or Afterpay — split into four fortnightly payments, completely interest free.</p>
+  <div class="payment-grid">
+    <div class="pay-card">
+      <div class="pay-card-header">
+        <div class="pay-card-name">GET STRONG</div>
+        <div class="pay-card-sub">6-week custom program &nbsp;·&nbsp; weekly video calls &nbsp;·&nbsp; ongoing feedback</div>
+      </div>
+      <div class="pay-card-body">
+        <div class="pay-amount"><sup>$</sup>600</div>
+        <div class="pay-options">
+          <button class="pay-btn pay-btn-stripe">&#x1F4B3; Pay with card — $600</button>
+          <button class="pay-btn pay-btn-afterpay">Afterpay &nbsp;·&nbsp; 4 &times; $150</button>
+          <div class="afterpay-split">4 fortnightly payments of $150 &nbsp;·&nbsp; interest free</div>
+        </div>
+        <div class="stripe-badge">&#x1F512; Secured by Stripe</div>
+      </div>
+    </div>
+    <div class="pay-card">
+      <div class="pay-card-header dark">
+        <div class="pay-card-name">PRE-COMP BUILD UP</div>
+        <div class="pay-card-sub">Strongman-specific &nbsp;·&nbsp; competition peaking &nbsp;·&nbsp; full support to comp day</div>
+      </div>
+      <div class="pay-card-body">
+        <div class="pay-amount"><sup>$</sup>1,200</div>
+        <div class="pay-options">
+          <button class="pay-btn pay-btn-stripe">&#x1F4B3; Pay with card — $1,200</button>
+          <button class="pay-btn pay-btn-afterpay">Afterpay &nbsp;·&nbsp; 4 &times; $300</button>
+          <div class="afterpay-split">4 fortnightly payments of $300 &nbsp;·&nbsp; interest free</div>
+        </div>
+        <div class="stripe-badge">&#x1F512; Secured by Stripe</div>
+      </div>
+    </div>
+  </div>
+  <div class="afterpay-strip">
+    <div class="afterpay-logo">Afterpay</div>
+    <div class="afterpay-text"><strong>Buy now, pay later — interest free.</strong> Split your coaching into 4 equal fortnightly instalments with no interest and no fees if you pay on time. Available to Australian and New Zealand customers.</div>
+  </div>
+</section>
+
+<section class="philosophy section">
+  <div class="section-tag">the method</div>
+  <div class="section-title">WHY STRONGMAN WORKS FOR EVERYONE.</div>
+  <div class="phil-grid">
+    <div class="phil-card"><div class="phil-num">01</div><h4>Functional strength</h4><p>Strongman movements build the kind of strength you actually use — carrying, pressing, pulling, lifting from the ground.</p></div>
+    <div class="phil-card"><div class="phil-num">02</div><h4>Any gym, any setup</h4><p>Wade has trained in basic gyms across three countries. He knows how to make whatever you have access to actually work.</p></div>
+    <div class="phil-card"><div class="phil-num">03</div><h4>Built around your life</h4><p>Got kids, shift work, a bad back? The program fits around you — not the other way around.</p></div>
+    <div class="phil-card"><div class="phil-num">04</div><h4>Proven on the world stage</h4><p>Every method Wade coaches is something he's tested himself at an elite international level.</p></div>
+  </div>
+</section>
+
+<section class="testimonials section">
+  <div class="section-tag">client results</div>
+  <div class="section-title">EVERYDAY PEOPLE. UNCOMMON STRENGTH.</div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-text">"I'm a 42-year-old tradie who thought his best lifting days were behind him. Wade had me deadlifting 200kg within 6 months. Genuinely changed how I approach training."</p>
+      <div class="testi-author">Dave M.</div><div class="testi-role">Brisbane, QLD</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-text">"No BS, no fancy equipment — just a smart program that works for a regular bloke. Wade is the real deal and genuinely cares about your progress."</p>
+      <div class="testi-author">Sam K.</div><div class="testi-role">Auckland, NZ</div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-text">"Competed in my first strongman event at 38. Wade guided me through every step. Placed 3rd in my class and I'm already signed up for the next one."</p>
+      <div class="testi-author">Chris T.</div><div class="testi-role">Melbourne, VIC</div>
+    </div>
+  </div>
+</section>
+
+<section class="contact section" id="contact">
+  <div class="section-tag">get in touch</div>
+  <div class="section-title">I'LL COME TO YOU — ANYWHERE.</div>
+  <div class="quote-card">
+    <div class="quote-left">
+      <h3>IN-PERSON COACHING</h3>
+      <p>Tell Wade where you are and what you're after. He'll get back to you personally with a custom quote — usually within 24 hours.</p>
+      <ul class="quote-includes">
+        <li><span class="q-check">+</span> Wade travels to your location, worldwide</li>
+        <li><span class="q-check">+</span> Hands-on technique &amp; coaching sessions</li>
+        <li><span class="q-check">+</span> Training camps or one-off intensives</li>
+        <li><span class="q-check">+</span> Fully tailored to your setup &amp; goals</li>
+        <li><span class="q-check">+</span> Custom quote — no cookie-cutter pricing</li>
+      </ul>
+    </div>
+    <div class="quote-right">
+      <h4>Send Wade a quick message</h4>
+      <form id="quoteForm" onsubmit="handleSubmit(event)">
+        <div class="form-row-split">
+          <div class="form-row"><label>First name</label><input type="text" placeholder="John" required></div>
+          <div class="form-row"><label>Last name</label><input type="text" placeholder="Smith" required></div>
+        </div>
+        <div class="form-row"><label>Email</label><input type="email" placeholder="john@email.com" required></div>
+        <div class="form-row"><label>Your location</label><input type="text" placeholder="e.g. Sydney, Australia or Dallas, USA" required></div>
+        <div class="form-row">
+          <label>What are you after?</label>
+          <select>
+            <option value="">Select an option</option>
+            <option>One-off coaching session</option>
+            <option>Training camp (multi-day)</option>
+            <option>Competition prep in-person</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Tell Wade a bit more</label><textarea placeholder="Your goals, current training, any relevant details..."></textarea></div>
+        <button type="submit" class="form-submit">Send my enquiry &rarr;</button>
+        <div id="formSuccess" style="display:none;margin-top:14px;padding:14px;background:#e6f4ed;border:1px solid #a8d5bc;border-radius:4px;font-size:14px;color:#2c7a4b;font-weight:500;text-align:center">
+          Enquiry sent! Wade will be in touch within 24 hours.
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+<!-- BOOK A CALL -->
+<section style="background:var(--white);padding:96px 64px;border-top:1px solid var(--border)" id="book">
+  <div style="max-width:760px;margin:0 auto;text-align:center">
+    <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;color:var(--rust);margin-bottom:12px;display:flex;align-items:center;gap:10px;justify-content:center">
+      <span style="display:block;width:24px;height:1px;background:var(--rust)"></span>
+      Quick call
+      <span style="display:block;width:24px;height:1px;background:var(--rust)"></span>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:1px;margin-bottom:16px;line-height:1">NOT SURE WHERE TO START?</div>
+    <p style="font-size:16px;color:var(--muted);line-height:1.75;margin-bottom:12px;max-width:520px;margin-left:auto;margin-right:auto">Book a 15 minute call with Wade directly. Ask anything — which program is right for you, what to expect, or just whether this is a good fit. No pressure, no sales pitch.</p>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:var(--rust-light);border:1px solid rgba(184,90,48,0.2);border-radius:100px;padding:8px 20px;font-size:13px;color:var(--rust-dark);font-weight:600;margin-bottom:36px">
+      <span>$50 AUD</span>
+      <span style="opacity:0.4">·</span>
+      <span>15 minutes</span>
+      <span style="opacity:0.4">·</span>
+      <span>Video call</span>
+    </div>
+    <!-- Calendly inline widget -->
+    <div id="calendly-placeholder" style="background:var(--chalk);border:1px solid var(--border);border-radius:8px;padding:48px;text-align:center">
+      <div style="font-size:15px;color:var(--muted);margin-bottom:20px;line-height:1.6">Calendly booking widget will appear here once Wade sets up his account at <strong style="color:var(--iron)">calendly.com</strong></div>
+      <div style="font-size:13px;color:var(--muted);background:var(--white);border:1px solid var(--border);border-radius:6px;padding:12px 16px;display:inline-block">
+        To activate: replace this block with the Calendly embed code<br>from <strong>calendly.com → Share → Embed</strong>
+      </div>
+    </div>
+    <!-- PASTE CALENDLY EMBED HERE — replace the div above with:
+    <div class="calendly-inline-widget" data-url="https://calendly.com/YOUR-WADE-USERNAME/15min" style="min-width:320px;height:630px"></div>
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    -->
+  </div>
+</section>
+
+<section class="cta">
+  <div class="cta-bg">STRONG</div>
+  <h2>READY TO FIND OUT WHAT YOU'RE MADE OF?</h2>
+  <p>Spots are limited. Wade personally reviews every application.</p>
+  <button class="cta-btn" onclick="document.getElementById('payment').scrollIntoView({behavior:'smooth'})">apply for coaching</button>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">WADE<span>.</span>STRONG</div>
+    <div class="footer-links">
+      <a href="#about">About</a>
+      <a href="#programs">Programs</a>
+      <a href="#payment">Pricing</a>
+      <a href="#contact">Contact</a>
+    </div>
+    <div class="footer-note" style="color:rgba(255,255,255,0.3)">Based in Australia. Training the world.</div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-note">&copy; 2025 Wade Strong Coaching. All rights reserved.</div>
+    <div class="footer-note">Payments secured by Stripe &nbsp;·&nbsp; Afterpay available at checkout</div>
+  </div>
+</footer>
+
+<script>
+function handleSubmit(e){
+  e.preventDefault();
+  document.getElementById('formSuccess').style.display='block';
+  e.target.querySelector('.form-submit').style.display='none';
+}
+</script>
+</body>
+</html>
