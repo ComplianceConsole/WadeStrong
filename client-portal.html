@@ -373,7 +373,16 @@ nav{background:var(--iron);padding:0 24px;display:flex;align-items:center;justif
     <div id="messageThread" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px"></div>
     <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px">
       <textarea id="msgInput" style="width:100%;padding:8px 0;border:none;font-family:var(--font-body);font-size:14px;color:var(--iron);outline:none;resize:none;min-height:60px;background:transparent" placeholder="Message Wade..."></textarea>
-      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;justify-content:flex-end">
+      <div id="voicePreview" style="display:none;background:var(--chalk);border-radius:5px;padding:8px 12px;margin-bottom:10px;display:none;align-items:center;gap:10px;font-size:13px">
+        <span>🎤</span>
+        <span id="voiceLabel" style="flex:1;color:var(--muted)">Voice note ready</span>
+        <span id="voiceTimer" style="font-weight:600;color:var(--rust)">0:00</span>
+        <span style="cursor:pointer;color:var(--muted)" onclick="cancelVoice()">×</span>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div style="display:flex;gap:6px">
+          <button id="voiceBtn" title="Record voice note" onclick="toggleVoice()" style="width:34px;height:34px;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all 0.2s">🎤</button>
+        </div>
         <button style="padding:8px 20px;background:var(--iron);color:var(--white);border:none;border-radius:5px;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer" onclick="sendMessage()">Send</button>
       </div>
     </div>
@@ -552,13 +561,7 @@ function renderSessionCard(s,weekNum,idx) {
     ${s.note?`<div class="sc-note">${s.note}</div>`:''}
     ${s.blocks.map(b=>renderBlockTable(b)).join('')}
     ${!isDone?renderRpeLogger(s,key):'<div class="session-complete-badge">✓ Session logged — Wade has your feedback</div>'}
-    <div class="upload-section">
-      <div class="upload-title">Send Wade a clip from this session</div>
-      <div class="upload-zone" onclick="switchPanel('uploads',null)">
-        <div class="upload-zone-icon">🎥</div>
-        <div class="upload-zone-text"><strong>Tap to upload</strong>Under 2 min · MP4, MOV, photos</div>
-      </div>
-    </div>
+
   </div>` : '';
 
   return `<div class="session-card" id="sc_${key}">
@@ -577,15 +580,25 @@ function renderSessionCard(s,weekNum,idx) {
 }
 
 function renderBlockTable(b) {
-  const rows = b.exercises.map(e=>`
+  const rows = b.exercises.map((e,i)=>{
+    const uid = `${b.title}_${i}_${Date.now()}`.replace(/\s/g,'_');
+    return `
     <tr>
       <td class="ex-name-cell">${e.name}${e.notes?`<div class="ex-detail">${e.notes}</div>`:''}</td>
       <td class="ex-metric">${e.sets}</td>
       <td class="ex-metric">${e.reps}</td>
       <td class="ex-metric">${e.weight>0?e.weight+'kg':'BW'}</td>
       <td class="ex-metric"><span class="rpe-chip r${e.rpe}">${e.rpe}</span></td>
+      <td style="text-align:center">
+        <label style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:5px;border:1px solid var(--border);background:var(--white);transition:all 0.15s" title="Upload clip for ${e.name}" onmouseover="this.style.borderColor='var(--rust)'" onmouseout="this.style.borderColor='var(--border)'">
+          <input type="file" accept="video/*,image/*" style="display:none" onchange="handleExerciseUpload(this,'${e.name}','${uid}')">
+          <span style="font-size:14px">🎥</span>
+        </label>
+        <div id="upload_${uid}" style="font-size:10px;color:var(--green);margin-top:2px;display:none">✓ Sent</div>
+      </td>
       <td><input type="checkbox" class="ex-check"></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 
   return `<div style="margin-bottom:14px">
     <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px">
@@ -595,11 +608,28 @@ function renderBlockTable(b) {
       <thead><tr>
         <th>Exercise</th><th style="text-align:center">Sets</th>
         <th style="text-align:center">Reps</th><th style="text-align:center">Weight</th>
-        <th style="text-align:center">Target RPE</th><th style="text-align:center">Done</th>
+        <th style="text-align:center">Target RPE</th><th style="text-align:center">Clip</th>
+        <th style="text-align:center">Done</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
   </div>`;
+}
+
+function handleExerciseUpload(input, exerciseName, uid) {
+  const file = input.files[0];
+  if (!file) return;
+  const maxMB = 200;
+  if (file.size > maxMB * 1024 * 1024) {
+    showToast('File too large — keep clips under 2 minutes');
+    return;
+  }
+  // Show sent confirmation
+  const indicator = document.getElementById('upload_' + uid);
+  if (indicator) indicator.style.display = 'block';
+  showToast(`Clip for "${exerciseName}" sent to Wade ✓`);
+  // In production: upload to Cloudflare R2 via Supabase storage
+  // logUpload(clientId, sessionId, { file_name: file.name, file_type: file.type.startsWith('video') ? 'video' : 'image', file_size_bytes: file.size, storage_path: '', client_note: exerciseName });
 }
 
 function renderRpeLogger(s,key) {
@@ -635,14 +665,27 @@ function submitSession(key) {
 // ── MESSAGES ──
 function renderMessages() {
   const thread = document.getElementById('messageThread');
-  thread.innerHTML = messages.map(m=>`
-    <div style="display:flex;flex-direction:column;align-items:${m.from==='wade'?'flex-start':'flex-end'}">
-      <div style="max-width:82%;background:${m.from==='wade'?'var(--white)':'var(--iron)'};color:${m.from==='wade'?'var(--iron)':'var(--white)'};border:1px solid ${m.from==='wade'?'var(--border)':'var(--iron)'};border-radius:${m.from==='wade'?'4px 12px 12px 12px':'12px 4px 12px 12px'};padding:12px 14px;font-size:14px;line-height:1.6">
-        ${m.from==='wade'?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);margin-bottom:4px">Wade</div>':''}
-        ${m.text}
+  thread.innerHTML = messages.map((m,idx)=>{
+    const isWade = m.from==='wade';
+    const bubbleBg = isWade ? 'var(--white)' : 'var(--iron)';
+    const bubbleColor = isWade ? 'var(--iron)' : 'var(--white)';
+    const bubbleBorder = isWade ? 'var(--border)' : 'var(--iron)';
+    const bubbleRadius = isWade ? '4px 12px 12px 12px' : '12px 4px 12px 12px';
+    let bubbleContent = '';
+    if (m.isVoice && m.blob) {
+      const url = URL.createObjectURL(m.blob);
+      bubbleContent = `<audio controls src="${url}" style="width:180px;height:32px;outline:none"></audio>`;
+    } else {
+      bubbleContent = m.text;
+    }
+    return `<div style="display:flex;flex-direction:column;align-items:${isWade?'flex-start':'flex-end'}">
+      <div style="max-width:82%;background:${bubbleBg};color:${bubbleColor};border:1px solid ${bubbleBorder};border-radius:${bubbleRadius};padding:12px 14px;font-size:14px;line-height:1.6">
+        ${isWade?'<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);margin-bottom:4px">Wade</div>':''}
+        ${bubbleContent}
       </div>
       <div style="font-size:11px;color:var(--muted);margin-top:4px;padding:0 4px">${m.time}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function sendMessage() {
@@ -680,6 +723,130 @@ function switchPanel(id, el) {
 }
 
 // ── TOAST ──
+// ── VOICE NOTES ──────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks = [];
+let voiceBlob = null;
+let recordingInterval = null;
+let recordingSeconds = 0;
+let isRecording = false;
+
+async function toggleVoice() {
+  if (isRecording) {
+    stopVoice();
+  } else {
+    startVoice();
+  }
+}
+
+async function startVoice() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    recordingSeconds = 0;
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      voiceBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      stream.getTracks().forEach(t => t.stop());
+      showVoicePreview();
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+
+    // Update button to recording state
+    const btn = document.getElementById('voiceBtn');
+    btn.style.background = '#fce8e8';
+    btn.style.borderColor = '#c03020';
+    btn.innerHTML = '⏹';
+    btn.title = 'Stop recording';
+
+    // Start timer
+    recordingInterval = setInterval(() => {
+      recordingSeconds++;
+      document.getElementById('voiceTimer').textContent = formatTime(recordingSeconds);
+      // Auto stop at 2 minutes
+      if (recordingSeconds >= 120) stopVoice();
+    }, 1000);
+
+    document.getElementById('voiceTimer').textContent = '0:00';
+    const preview = document.getElementById('voicePreview');
+    preview.style.display = 'flex';
+    document.getElementById('voiceLabel').textContent = 'Recording...';
+
+  } catch(err) {
+    showToast('Microphone access denied — check your browser settings');
+  }
+}
+
+function stopVoice() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  clearInterval(recordingInterval);
+
+  const btn = document.getElementById('voiceBtn');
+  btn.style.background = 'var(--white)';
+  btn.style.borderColor = 'var(--border)';
+  btn.innerHTML = '🎤';
+  btn.title = 'Record voice note';
+}
+
+function showVoicePreview() {
+  const duration = formatTime(recordingSeconds);
+  document.getElementById('voiceLabel').textContent = `Voice note · ${duration}`;
+  document.getElementById('voiceTimer').textContent = '';
+}
+
+function cancelVoice() {
+  voiceBlob = null;
+  audioChunks = [];
+  recordingSeconds = 0;
+  const preview = document.getElementById('voicePreview');
+  preview.style.display = 'none';
+  if (isRecording) stopVoice();
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+// Override sendMessage to handle voice notes
+const _origSendMessage = sendMessage;
+function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+
+  if (voiceBlob) {
+    // Send voice note
+    const duration = formatTime(recordingSeconds);
+    messages.push({
+      from: 'client',
+      text: `🎤 Voice note (${duration})`,
+      time: 'Just now',
+      isVoice: true,
+      blob: voiceBlob
+    });
+    input.value = '';
+    voiceBlob = null;
+    cancelVoice();
+    renderMessages();
+    showToast('Voice note sent to Wade ✓');
+    return;
+  }
+
+  if (!text) return;
+  messages.push({ from: 'client', text, time: 'Just now' });
+  input.value = '';
+  renderMessages();
+  showToast('Message sent to Wade');
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
