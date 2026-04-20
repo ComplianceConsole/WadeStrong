@@ -691,6 +691,12 @@ function showAthletePanel(client) {
   }
 }
 
+function openProgramBuilder() {
+  const client = getSelectedClient();
+  if (!client) { showToast('No client selected'); return; }
+  window.location.href = `program-builder.html?client=${encodeURIComponent(client.email)}`;
+}
+
 async function sendProgramReadyEmail() {
   const client = getSelectedClient();
   if (!client) { showToast('No client selected'); return; }
