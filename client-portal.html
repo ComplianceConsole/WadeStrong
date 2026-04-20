@@ -233,10 +233,16 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 .ah-sub{font-size:12px;color:var(--muted);line-height:1.4}
 
 @media(min-width:600px){
-  .nav,.scroll-area,.bnav,.msg-input-area{max-width:480px;margin-left:auto;margin-right:auto;left:50%;transform:translateX(-50%)}
-  .bnav,.msg-input-area{width:480px}
+  body{display:grid;grid-template-rows:var(--nav-h) 1fr var(--bnav-h)}
+  .scroll-area{padding-bottom:16px}
+  .panel{max-width:800px;margin:0 auto;padding:24px 24px 0}
+  .bnav{max-width:100%;position:fixed;bottom:0;left:0;right:0}
+  .bnav-item{font-size:12px;gap:5px}
+  .bnav-icon{font-size:22px}
+  .msg-input-area{max-width:800px;left:50%;transform:translateX(-50%);border-radius:0}
 }
 </style>
+<script src="supabase-config.js"></script>
 </head>
 <body>
 
@@ -336,13 +342,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
           <div style="font-size:12px;font-weight:600;color:var(--muted)">Physical injuries</div>
           <button class="btn-sm btn-sm-iron" onclick="showForm('injuryForm')">+ Add</button>
         </div>
-        <div id="injuryList">
-          <div class="log-item" style="border-left:3px solid #e08020">
-            <div class="log-item-head"><div class="log-item-title">Left shoulder</div><span class="tag-pill tag-monitoring">Monitoring</span></div>
-            <div class="log-item-body">Old AC joint issue. Flares on overhead work. Fine below 90 degrees.</div>
-            <div class="log-item-date" style="margin-top:4px">Added 1 Mar 2025</div>
-          </div>
-        </div>
+        <div id="injuryList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No injuries logged yet.</div></div>
         <div id="injuryForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
           <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="injArea" placeholder="e.g. Lower back, Left knee"></div>
           <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="injDesc" placeholder="What happened, severity..."></textarea></div>
@@ -354,12 +354,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
           <div style="font-size:12px;font-weight:600;color:var(--muted)">Mental health & stress</div>
           <button class="btn-sm btn-sm-iron" onclick="showForm('mentalForm')">+ Add</button>
         </div>
-        <div id="mentalList">
-          <div class="log-item" style="border-left:3px solid #4488cc">
-            <div class="log-item-head"><div class="log-item-title">🙂 Mood: OK · Stress: Moderate</div><span style="font-size:11px;color:var(--muted)">18 Apr</span></div>
-            <div class="log-item-body">"Work has been full on but training is going well. Feeling good about comp."</div>
-          </div>
-        </div>
+        <div id="mentalList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No entries yet.</div></div>
         <div id="mentalForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
           <div class="form-group"><label class="form-label">Mood</label>
             <div class="mood-row">
@@ -407,11 +402,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
           <div style="font-size:12px;font-weight:600;color:var(--muted)">Current supplements</div>
           <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add</button>
         </div>
-        <div id="suppList">
-          <div class="log-item"><div class="log-item-head"><div class="log-item-title">Creatine</div><span class="tag-pill">Post-workout · 5g</span></div></div>
-          <div class="log-item"><div class="log-item-head"><div class="log-item-title">Protein Powder</div><span class="tag-pill">Post-workout · 40g</span></div></div>
-          <div class="log-item"><div class="log-item-head"><div class="log-item-title">Magnesium</div><span class="tag-pill">Before bed · 400mg</span></div></div>
-        </div>
+        <div id="suppList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No supplements added yet — tap + Add to get started.</div></div>
         <div id="suppForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
           <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Pre-workout"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -437,12 +428,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
           <div style="font-size:12px;font-weight:600;color:var(--muted)">Shared with Wade</div>
           <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add</button>
         </div>
-        <div id="practList">
-          <div class="log-item" style="border-left:3px solid #4488cc">
-            <div class="log-item-head"><div class="log-item-title">Sarah Jones — Physiotherapist</div><span style="font-size:11px;color:var(--muted)">10 Mar</span></div>
-            <div class="log-item-body">Avoid full overhead pressing until reviewed. Lat raises and front raises fine. Recheck in 3 weeks.</div>
-          </div>
-        </div>
+        <div id="practList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No notes added yet.</div></div>
         <div id="practForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
           <div class="form-group"><label class="form-label">Practitioner name & type</label><input class="form-input" id="practName" placeholder="e.g. Sarah Jones — Physiotherapist"></div>
           <div class="form-group"><label class="form-label">Note / instructions</label><textarea class="form-textarea" id="practNote" placeholder="What they said, restrictions, clearances..."></textarea></div>
@@ -527,18 +513,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
         <div><div class="card-title" style="margin-bottom:2px">Recovery Log</div><div style="font-size:12px;color:var(--muted)">Optional — body work, therapy, recovery sessions</div></div>
         <button class="btn-sm btn-sm-iron" onclick="showForm('recoveryForm')">+ Add</button>
       </div>
-      <div id="recoveryList">
-        <div class="log-item" style="border-left:3px solid var(--rust)">
-          <div class="log-item-head"><div class="log-item-title">Ice Bath</div><span class="tag-pill">🔥 Great</span></div>
-          <div class="log-item-body">Legs · 12 mins after heavy deadlift session</div>
-          <div class="log-item-date" style="margin-top:4px">14 Apr 2025</div>
-        </div>
-        <div class="log-item" style="border-left:3px solid var(--rust)">
-          <div class="log-item-head"><div class="log-item-title">Dry Needling</div><span class="tag-pill">👍 Good</span></div>
-          <div class="log-item-body">Left shoulder — with physio Sarah</div>
-          <div class="log-item-date" style="margin-top:4px">10 Apr 2025</div>
-        </div>
-      </div>
+      <div id="recoveryList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No recovery sessions logged yet.</div></div>
       <div id="recoveryForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
         <div class="form-group"><label class="form-label">Treatment type</label>
           <select class="form-select" id="recType"><option>Massage</option><option>Cupping</option><option>Dry Needling</option><option>Ice Bath</option><option>Hot/Cold Contrast</option><option>Sauna</option><option>Foam Rolling</option><option>Stretching / Mobility</option><option>Physio</option><option>Chiro</option><option>Compression Therapy</option><option>Other</option></select>
@@ -559,11 +534,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
     <!-- Check-in history -->
     <div class="card">
       <div class="card-title">Check-in History</div>
-      <div id="checkInHistory">
-        <div class="log-item"><div class="log-item-tags"><span class="log-tag" style="color:#c03020">😣 Soreness: 5/10</span><span class="log-tag">😴 7.5h · Good</span><span class="log-tag" style="color:#4488cc">❤️ HRV: 68ms</span></div><div class="log-item-date" style="margin-top:4px">20 Apr 2025</div></div>
-        <div class="log-item"><div class="log-item-tags"><span class="log-tag" style="color:#c03020">😣 Soreness: 7/10</span><span class="log-tag">😴 6.5h · OK</span><span class="log-tag" style="color:#4488cc">❤️ HRV: 54ms</span></div><div class="log-item-date" style="margin-top:4px">19 Apr 2025</div></div>
-        <div class="log-item"><div class="log-item-tags"><span class="log-tag" style="color:#2c7a4b">😊 Soreness: 3/10</span><span class="log-tag">😴 8h · Great</span><span class="log-tag" style="color:#4488cc">❤️ HRV: 72ms</span></div><div class="log-item-date" style="margin-top:4px">18 Apr 2025</div></div>
-      </div>
+      <div id="checkInHistory"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No check-ins yet — log your first one above!</div></div>
     </div>
   </div>
 
@@ -668,7 +639,82 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 
 <script>
 // ── DATA ──────────────────────────────────────────────────────
-const CLIENT = { name:'Chris Thompson', initials:'CT', short:'Chris T.', program:'Pre-Comp Build Up', week:5, totalWeeks:8 };
+let CLIENT = { name:'Loading...', initials:'..', short:'...', program:'', week:1, totalWeeks:6 };
+let clientId = null;
+
+// Get email from URL param or session
+function getClientEmail() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('email') || sessionStorage.getItem('ws_email') || null;
+}
+
+async function loadClientFromSupabase(email) {
+  if (!email) return false;
+  try {
+    const clients = await db.select('clients', { email });
+    if (!clients || !clients.length) return false;
+    const c = clients[0];
+    clientId = c.id;
+    const firstName = c.first_name || '';
+    const lastName = c.last_name || '';
+    const fullName = [firstName, lastName].filter(Boolean).join(' ') || email;
+    const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?';
+    CLIENT = {
+      name: fullName,
+      initials: initials,
+      short: firstName || fullName,
+      program: c.program_type === 'pre_comp' ? 'Pre-Comp Build Up' : 'Get Strong',
+      week: c.current_week || 1,
+      totalWeeks: c.total_weeks || 6,
+      type: c.program_type,
+      email: c.email,
+      age: c.age,
+      height: c.height,
+      weight: c.weight,
+      location: c.location,
+    };
+
+    // Load RPE results
+    const rpe = await db.select('rpe_results', { email }, { order: 'created_at.desc', limit: 1 });
+    if (rpe && rpe.length) CLIENT.rpe = rpe[0];
+
+    // Show comp tab for pre_comp clients
+    if (c.program_type === 'pre_comp') {
+      document.querySelector('[onclick="switchTab('comp',this)"]').style.display = 'flex';
+    }
+
+    // Load program for current week
+    if (clientId) {
+      const programs = await db.select('programs', { client_id: clientId }, { order: 'week_number.asc' });
+      if (programs && programs.length) {
+        window.LOADED_PROGRAMS = programs;
+        // Override SESSIONS with Supabase data
+        programs.forEach(p => {
+          if (p.sessions) SESSIONS[p.week_number] = p.sessions;
+        });
+      }
+
+      // Load messages
+      const msgs = await db.select('messages', { client_id: clientId }, { order: 'created_at.asc' });
+      if (msgs && msgs.length) {
+        msgs.forEach(m => MESSAGES.push({ from: m.from_role, text: m.content, time: new Date(m.created_at).toLocaleString('en-AU',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}) }));
+      }
+
+      // Load comp plan
+      const compPlans = await db.select('comp_plans', { client_id: clientId }, { order: 'created_at.desc', limit: 1 });
+      if (compPlans && compPlans.length) {
+        const cp = compPlans[0];
+        window.LOADED_COMP_PLAN = cp;
+        if (cp.events && cp.events.length) window.EVENTS = cp.events;
+      }
+    }
+
+    return true;
+  } catch(err) {
+    console.error('Load client error:', err);
+    return false;
+  }
+}
 
 const WEEKS = [
   {n:1,label:'Week 1',complete:true},{n:2,label:'Week 2',complete:true},
@@ -722,11 +768,7 @@ const PROGRESS_DATA = [
   {name:'Farmers Carry',data:[{week:'Wk1',w:100},{week:'Wk2',w:105},{week:'Wk3',w:107.5},{week:'Wk4',w:110},{week:'Wk5',w:112.5}]},
 ];
 
-const MESSAGES = [
-  {from:'wade',text:"Great session on the log press yesterday Chris — 82.5kg for 5x3 looking strong. Your technique is locking in nicely. This week I want you to push to 92.5kg for the heavy singles. You've got it.",time:'Yesterday 4:32pm'},
-  {from:'client',text:"Cheers Wade! The cue about keeping the elbows up made a big difference. How conservative should I be with the atlas stones on Saturday?",time:'Yesterday 5:15pm'},
-  {from:'wade',text:"Start at 100kg and build up. Don't miss any — clean laps on every stone, no heroics. Save the heavy attempts for comp.",time:'Yesterday 5:28pm'},
-];
+const MESSAGES = [];
 
 let curWeek = 5;
 let openSessions = new Set();
@@ -742,11 +784,26 @@ let compNotes = [];
 let nutritionHistory = [];
 
 // ── INIT ──────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const email = getClientEmail();
+  if (email) {
+    document.getElementById('navName').textContent = 'Loading...';
+    await loadClientFromSupabase(email);
+  }
+
+  // Update UI with loaded/default data
   document.getElementById('navName').textContent = CLIENT.short;
   document.getElementById('navAvatar').textContent = CLIENT.initials;
-  document.getElementById('navWeek').textContent = `PRE-COMP · WEEK ${CLIENT.week}/${CLIENT.totalWeeks}`;
+  const weekLabel = CLIENT.type === 'pre_comp' ? 'PRE-COMP' : 'GET STRONG';
+  document.getElementById('navWeek').textContent = `${weekLabel} · WEEK ${CLIENT.week}/${CLIENT.totalWeeks}`;
   document.getElementById('profName').textContent = CLIENT.name;
+  curWeek = CLIENT.week;
+
+  // Update profile fields from Supabase data
+  if (CLIENT.age) document.querySelector('[data-field="age"]') && (document.querySelector('[data-field="age"]').textContent = CLIENT.age);
+  if (CLIENT.weight) document.querySelector('[data-field="weight"]') && (document.querySelector('[data-field="weight"]').textContent = CLIENT.weight);
+  if (CLIENT.location) document.querySelector('[data-field="location"]') && (document.querySelector('[data-field="location"]').textContent = CLIENT.location);
+
   renderWeekTabs();
   renderSessions(curWeek);
   renderProgress();
@@ -882,10 +939,24 @@ function selectRPE(sid, exName, rpe, el) {
   });
 }
 
-function logSession(sid) {
+async function logSession(sid) {
   doneSessions.add(sid);
   renderSessions(curWeek);
   showToast('Session logged — Wade has been notified ✓');
+
+  // Save to Supabase
+  if (clientId) {
+    try {
+      await db.insert('session_logs', {
+        client_id: clientId,
+        week_number: curWeek,
+        session_id: sid,
+        session_name: SESSIONS[curWeek]?.find(s=>s.id===sid)?.name || sid,
+        completed_at: new Date().toISOString(),
+        rpe_selections: rpeSelections,
+      });
+    } catch(err) { console.error('Session log save error:', err); }
+  }
 }
 
 // ── PROGRESS ──────────────────────────────────────────────────
@@ -968,7 +1039,7 @@ function renderMessages() {
   }, 100);
 }
 
-function sendMessage() {
+async function sendMessage() {
   const input = document.getElementById('msgInput');
   const text = input.value.trim();
   if (!text) return;
@@ -977,6 +1048,18 @@ function sendMessage() {
   input.style.height = 'auto';
   renderMessages();
   showToast('Message sent to Wade ✓');
+
+  if (clientId) {
+    try {
+      await db.insert('messages', {
+        client_id: clientId,
+        from_role: 'client',
+        message_type: 'text',
+        content: text,
+        read: false,
+      });
+    } catch(err) { console.error('Message save error:', err); }
+  }
 }
 
 function autoResize(el) {
