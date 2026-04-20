@@ -264,9 +264,9 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
     </div>
   </div>
   <div class="topbar-right">
-    <button class="tb-btn tb-btn-ghost" onclick="showToast('Program saved as draft')">Save draft</button>
+    <button class="tb-btn tb-btn-ghost" onclick="saveDraft()">Save draft</button>
     <button class="tb-btn tb-btn-ghost" onclick="showToast('Preview opened in new tab')">Preview</button>
-    <button class="tb-btn tb-btn-rust" onclick="showToast('Program published to client portal ✓')">Publish to client</button>
+    <button class="tb-btn tb-btn-rust" onclick="publishProgram()">Publish to client</button>
   </div>
 </div>
 
@@ -429,11 +429,11 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
       <div class="rp-panel" id="rp-notes">
         <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Program notes (Wade only)</div>
         <textarea class="notes-textarea" placeholder="Internal notes about this client's program — not visible to client...">Week 3 plan: Push DL intensity, back off squat slightly after RPE 9 last week. OHP — drop weight 5kg, keep same rep scheme. Consider adding tempo squats as accessory to address knee tracking issue.</textarea>
-        <button class="note-save-btn" onclick="showToast('Notes saved')">Save notes</button>
+        <button class="note-save-btn" onclick="saveDraft(); showToast('Notes saved ✓')">Save notes</button>
 
         <div style="margin-top:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px">Message client</div>
         <textarea class="notes-textarea" style="min-height:80px" placeholder="Send a message to the client portal..."></textarea>
-        <button class="note-save-btn" onclick="showToast('Message sent to client portal')">Send message</button>
+        <button class="note-save-btn" onclick="sendMessageToClient(document.getElementById('progMessage')?.value)">Send message</button>
       </div>
 
     </div>
@@ -475,10 +475,122 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
 
 <script>
 // ── STATE ──
-let currentWeek = 3;
+let currentWeek = 1;
 let currentDay = 1;
 let dragSrcBlock = null;
 let progPanelOpen = true;
+let currentClientId = null;
+let currentClientEmail = null;
+
+// Load client from URL param
+async function loadClientForBuilder() {
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get('client') || params.get('email');
+  if (!email) return;
+  currentClientEmail = email;
+
+  try {
+    const clients = await db.select('clients', { email });
+    if (!clients || !clients.length) { showToast('Client not found'); return; }
+    const c = clients[0];
+    currentClientId = c.id;
+
+    // Update UI
+    const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || email;
+    const initials = [(c.first_name||'')[0], (c.last_name||'')[0]].filter(Boolean).join('').toUpperCase() || '?';
+    const prog = c.program_type === 'pre_comp' ? 'Pre-Comp Build Up' : 'Get Strong';
+
+    const avatar = document.querySelector('.client-avatar');
+    const cname = document.querySelector('.client-name');
+    const cprog = document.querySelector('.client-prog');
+    if (avatar) avatar.textContent = initials;
+    if (cname) cname.textContent = name;
+    if (cprog) cprog.textContent = prog;
+
+    // Load RPE maxes from Supabase to power % calculations
+    const rpe = await db.select('rpe_results', { email }, { order: 'created_at.desc', limit: 1 });
+    if (rpe && rpe.length) {
+      const r = rpe[0];
+      window.CLIENT_MAXES = {
+        deadlift: r.deadlift_1rm || 0,
+        squat: r.squat_raw_1rm || 0,
+        'bench press': r.bench_1rm || 0,
+        'overhead press': r.press_1rm || 0,
+        'push press': r.press_1rm || 0,
+      };
+    }
+
+    // Load existing programs
+    const programs = await db.select('programs', { client_id: currentClientId }, { order: 'week_number.asc' });
+    if (programs && programs.length) {
+      programs.forEach(p => {
+        if (p.sessions) {
+          // Map loaded sessions into sessionData
+          Object.assign(sessionData, p.sessions);
+        }
+      });
+      showToast(`Loaded ${programs.length} week(s) for ${name}`);
+    }
+  } catch(err) {
+    console.error('Load client error:', err);
+    showToast('Error loading client');
+  }
+}
+
+async function saveDraft() {
+  if (!currentClientId) { showToast('No client selected — open from admin CRM'); return; }
+  try {
+    // Save current week's session data
+    await db.insert('programs', {
+      client_id: currentClientId,
+      week_number: currentWeek,
+      status: 'draft',
+      sessions: sessionData,
+      notes: document.getElementById('progNotes')?.value || ''
+    });
+    showToast('Draft saved ✓');
+  } catch(err) {
+    console.error('Save draft error:', err);
+    showToast('Save failed — check connection');
+  }
+}
+
+async function publishProgram() {
+  if (!currentClientId) { showToast('No client selected — open from admin CRM'); return; }
+  try {
+    // Upsert all weeks
+    for (const weekNum of Object.keys(sessionData)) {
+      await db.upsert('programs', {
+        client_id: currentClientId,
+        week_number: parseInt(weekNum),
+        status: 'published',
+        sessions: sessionData,
+      }, 'client_id,week_number');
+    }
+    showToast('Program published to client portal ✓');
+  } catch(err) {
+    console.error('Publish error:', err);
+    showToast('Publish failed — check connection');
+  }
+}
+
+async function sendMessageToClient(msg) {
+  if (!currentClientId || !msg) return;
+  try {
+    await db.insert('messages', {
+      client_id: currentClientId,
+      from_role: 'wade',
+      message_type: 'text',
+      content: msg,
+      read: false
+    });
+    showToast('Message sent to client portal ✓');
+  } catch(err) {
+    console.error('Message send error:', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadClientForBuilder(); });
 
 const weeks = [
   {num:1,type:'build',label:'Week 1'},{num:2,type:'build',label:'Week 2'},
