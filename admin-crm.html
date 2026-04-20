@@ -357,9 +357,7 @@ if (sessionStorage.getItem('admin_access') === 'true') {
               <div class="dc-action" onclick="switchView('clients',document.querySelector('.nav-item:nth-child(2)'))">View all</div>
             </div>
             <div class="dc-body">
-              <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Dave M.</strong> submitted Week 3 session RPE</div><div class="activity-time">2h ago</div></div>
-              <div class="activity-item"><div class="activity-dot dot-rust"></div><div class="activity-text"><strong>Sarah K.</strong> uploaded a deadlift clip</div><div class="activity-time">4h ago</div></div>
-              <div class="activity-item"><div class="activity-dot dot-amber"></div><div class="activity-text"><strong>Tom R.</strong> completed RPE10 testing</div><div class="activity-time">6h ago</div></div>
+              <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">No recent activity yet.</div>
               <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Mark T.</strong> paid — Pre-comp Build Up</div><div class="activity-time">1d ago</div></div>
               <div class="activity-item"><div class="activity-dot dot-rust"></div><div class="activity-text"><strong>Jamie L.</strong> completed questionnaire</div><div class="activity-time">1d ago</div></div>
               <div class="activity-item"><div class="activity-dot dot-green"></div><div class="activity-text"><strong>Chris W.</strong> finished Week 6 — program complete</div><div class="activity-time">2d ago</div></div>
@@ -420,7 +418,7 @@ if (sessionStorage.getItem('admin_access') === 'true') {
     <div class="view" id="view-detail">
       <div class="detail-header">
         <div class="detail-back" onclick="switchView('clients',null)">← Back</div>
-        <div class="detail-name" id="detailName">Dave Mitchell</div>
+        <div class="detail-name" id="detailName">Select a client</div>
         <div class="detail-status"><span class="status-pill sp-active" id="detailStatus">Active</span></div>
         <div class="detail-actions">
           <button class="detail-btn detail-btn-ghost" onclick="showToast('Sending message...')">Message</button>
@@ -443,52 +441,7 @@ if (sessionStorage.getItem('admin_access') === 'true') {
 <div class="toast" id="toast"></div>
 
 <script>
-const clients = [
-  {id:1,name:'Dave Mitchell',initials:'DM',program:'Get Strong',type:'getstrong',status:'active',week:3,totalWeeks:6,joined:'2 Jan 2025',lastRpe:'RPE 7–9',rpeStatus:'good',
-    age:42,location:'Brisbane, QLD',occupation:'Tradie',weight:'108kg',height:'182cm',sleep:'6–7hrs',stress:6,trainingDays:4,gymType:'Commercial',injuries:'None',
-    rpe10:{deadlift:'220kg',squat:'180kg',bench:'130kg',ohp:'90kg'},
-    lastFeedback:'Squat felt heavy — knees tracking weird. OHP was a grind on last set.',
-    magicLink:'https://wadestrong.com/portal?token=abc123xyz789',
-    messages:[
-      {from:'wade',text:'Solid work last week Dave. Pushing DL to 190kg this week.',time:'2h ago'},
-      {from:'client',text:'Cheers, feeling good. Knee thing from last week has settled.',time:'3h ago'},
-    ]
-  },
-  {id:2,name:'Sarah Kim',initials:'SK',program:'Pre-Comp Build Up',type:'precomp',status:'active',week:5,totalWeeks:8,joined:'15 Dec 2024',lastRpe:'RPE 8',rpeStatus:'good',
-    age:28,location:'Melbourne, VIC',occupation:'Physiotherapist',weight:'75kg',height:'165cm',sleep:'7–8hrs',stress:4,trainingDays:5,gymType:'Strongman gym',injuries:'Left shoulder — minor',
-    rpe10:{deadlift:'180kg',log:'75kg',farmers:'95kg/hand',yoke:'220kg'},
-    lastFeedback:'Farmers felt better this week. Log press shoulder still a bit iffy on heavier sets.',
-    magicLink:'https://wadestrong.com/portal?token=sk456def012',
-    messages:[{from:'wade',text:'Comp is 3 weeks out — this week is peak week.',time:'1d ago'}]
-  },
-  {id:3,name:'Tom Richards',initials:'TR',program:'Get Strong',type:'getstrong',status:'pending',week:0,totalWeeks:6,joined:'18 Jan 2025',lastRpe:'RPE10 submitted',rpeStatus:'new',
-    age:35,location:'Sydney, NSW',occupation:'IT Manager',weight:'95kg',height:'178cm',sleep:'6hrs',stress:7,trainingDays:3,gymType:'Budget gym',injuries:'Lower back — minor',
-    rpe10:{deadlift:'160kg',squat:'130kg',bench:'100kg',ohp:'70kg'},
-    lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=tr789ghi345',messages:[]
-  },
-  {id:4,name:'Jamie Lee',initials:'JL',program:'Get Strong',type:'getstrong',status:'new',week:0,totalWeeks:6,joined:'20 Jan 2025',lastRpe:'—',rpeStatus:'new',
-    age:31,location:'Gold Coast, QLD',occupation:'Teacher',weight:'88kg',height:'176cm',sleep:'7hrs',stress:5,trainingDays:4,gymType:'Commercial',injuries:'None',
-    rpe10:{},lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=jl012jkl678',messages:[]
-  },
-  {id:5,name:'Mark Torres',initials:'MT',program:'Pre-Comp Build Up',type:'precomp',status:'new',week:0,totalWeeks:10,joined:'21 Jan 2025',lastRpe:'—',rpeStatus:'new',
-    age:38,location:'Perth, WA',occupation:'Construction',weight:'115kg',height:'188cm',sleep:'6–7hrs',stress:6,trainingDays:5,gymType:'Strongman gym',injuries:'None',
-    rpe10:{},lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=mt345mno901',messages:[]
-  },
-  {id:6,name:'Chris Walsh',initials:'CW',program:'Get Strong',type:'getstrong',status:'complete',week:6,totalWeeks:6,joined:'1 Nov 2024',lastRpe:'RPE 7',rpeStatus:'good',
-    age:45,location:'Auckland, NZ',occupation:'Builder',weight:'100kg',height:'183cm',sleep:'7hrs',stress:5,trainingDays:4,gymType:'Commercial',injuries:'None',
-    rpe10:{deadlift:'200kg',squat:'160kg',bench:'120kg',ohp:'85kg'},
-    lastFeedback:'Great final week. Deadlift PR of 215kg.',magicLink:'https://wadestrong.com/portal?token=cw678pqr234',messages:[]
-  },
-  {id:7,name:'Ben Nguyen',initials:'BN',program:'Get Strong',type:'getstrong',status:'active',week:2,totalWeeks:6,joined:'10 Jan 2025',lastRpe:'RPE 8',rpeStatus:'good',
-    age:26,location:'Brisbane, QLD',occupation:'Nurse',weight:'82kg',height:'172cm',sleep:'5–6hrs',stress:8,trainingDays:3,gymType:'Commercial',injuries:'None',
-    rpe10:{deadlift:'140kg',squat:'110kg',bench:'90kg',ohp:'60kg'},lastFeedback:'',magicLink:'https://wadestrong.com/portal?token=bn901stu567',messages:[]
-  },
-  {id:8,name:'Alex Payne',initials:'AP',program:'Pre-Comp Build Up',type:'precomp',status:'active',week:3,totalWeeks:8,joined:'5 Jan 2025',lastRpe:'RPE 9',rpeStatus:'warn',
-    age:33,location:'Melbourne, VIC',occupation:'Firefighter',weight:'105kg',height:'185cm',sleep:'7hrs',stress:5,trainingDays:5,gymType:'Strongman gym',injuries:'Right knee — recovering',
-    rpe10:{deadlift:'210kg',log:'90kg',farmers:'100kg/hand',yoke:'240kg'},lastFeedback:'Everything is heavy this week — might be accumulated fatigue.',
-    magicLink:'https://wadestrong.com/portal?token=ap234vwx890',messages:[]
-  },
-];
+const clients = [];
 
 let filteredClients = [...clients];
 let currentFilter = 'all';
