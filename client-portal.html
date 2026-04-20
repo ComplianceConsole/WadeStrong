@@ -1007,6 +1007,54 @@ nav{background:var(--iron);padding:0 24px;display:flex;align-items:center;justif
 <div class="toast" id="toast"></div>
 
 <script>
+// Demo account - defined early so button works
+function loadDemoAccount() {
+  sessionStorage.setItem('ws_injuries', JSON.stringify([
+    { area: 'Left knee', desc: 'Old meniscus issue from football. Flares up on heavy squats occasionally.', status: 'monitoring', date: '10 Apr 2025' },
+    { area: 'Lower back', desc: 'Mild tightness after deadlift sessions. Not painful, just stiff.', status: 'monitoring', date: '5 Apr 2025' },
+  ]));
+  sessionStorage.setItem('ws_supplements', JSON.stringify([
+    { name: 'Creatine', dose: '5g', timing: 'Post-workout', notes: 'Optimum Nutrition' },
+    { name: 'Protein Powder', dose: '40g', timing: 'Post-workout', notes: 'Vanilla whey — hitting 180g protein daily' },
+    { name: 'Magnesium', dose: '400mg', timing: 'Before bed', notes: 'Helps with sleep and cramps' },
+    { name: 'Fish Oil', dose: '2 caps', timing: 'With meals', notes: 'Joint support' },
+  ]));
+  sessionStorage.setItem('ws_recovery', JSON.stringify([
+    { type: 'Massage', area: 'Full body', feel: '🔥 Great', notes: 'Sports massage — felt much looser after', date: '14 Apr 2025' },
+    { type: 'Ice Bath', area: 'Legs', feel: '👍 Good', notes: '10 mins after heavy leg day', date: '12 Apr 2025' },
+    { type: 'Dry Needling', area: 'Left knee / quads', feel: '👍 Good', notes: 'With physio Sarah — targeting VMO', date: '8 Apr 2025' },
+  ]));
+  sessionStorage.setItem('ws_checkins', JSON.stringify([
+    { date: '20 Apr 2025', soreness: 4, sleep: '7.5', sleepQuality: 'good', hrv: '68' },
+    { date: '19 Apr 2025', soreness: 6, sleep: '6.5', sleepQuality: 'ok', hrv: '54' },
+    { date: '18 Apr 2025', soreness: 3, sleep: '8', sleepQuality: 'great', hrv: '72' },
+  ]));
+  sessionStorage.setItem('ws_nutrition', JSON.stringify([
+    { date: '20 Apr 2025', calories: '3200', water: '3.5', protein: '185', carbs: '380', fats: '95' },
+    { date: '19 Apr 2025', calories: '2900', water: '3.0', protein: '170', carbs: '320', fats: '88' },
+  ]));
+  sessionStorage.setItem('ws_mental', JSON.stringify([
+    { date: '18 Apr 2025', mood: { emoji: '🙂', key: 'ok' }, stress: 'Moderate', motivation: 'Good', note: 'Work has been hectic but training is going well. Looking forward to the weekend session.' },
+  ]));
+  sessionStorage.setItem('ws_pract_notes', JSON.stringify([
+    { practitioner: 'Sarah Jones — Physiotherapist', note: 'Continue strengthening VMO. Avoid full depth squats under heavy load for 2 weeks.', fileName: null, date: '8 Apr 2025' },
+  ]));
+  sessionStorage.setItem('demo_mode', 'true');
+  sessionStorage.setItem('client_name', 'Dave Mitchell');
+  document.getElementById('demoGate').style.display = 'none';
+}
+
+function sendMagicLink() {
+  const email = document.getElementById('loginEmail').value;
+  if (!email || !email.includes('@')) return;
+  document.getElementById('demoGate').innerHTML = '<div style="text-align:center;color:#f5f0e0"><div style="font-size:40px;margin-bottom:16px">📧</div><div style="font-size:28px;margin-bottom:8px">CHECK YOUR EMAIL</div><div style="font-size:14px;color:rgba(255,255,255,0.5)">Magic link sent to ' + email + '</div></div>';
+}
+
+if (sessionStorage.getItem('demo_mode') === 'true') {
+  document.getElementById('demoGate').style.display = 'none';
+}
+</script>
+<script>
 // ── DEMO DATA ──
 const clientData = {
   name:'Dave Mitchell', initials:'DM', shortName:'Dave M.',
