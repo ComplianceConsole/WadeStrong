@@ -170,14 +170,14 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
 /* ADD CLIENT MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--white);border-radius:10px;padding:28px;width:100%;max-width:480px;max-height:80vh;overflow-y:auto}
+.modal{background:var(--white);border-radius:10px;padding:24px;width:100%;max-width:480px;max-height:85vh;overflow-y:auto;display:flex;flex-direction:column}
 .modal-title{font-family:var(--font-d);font-size:24px;letter-spacing:1px;margin-bottom:16px}
-.form-group{margin-bottom:14px}
+.form-group{margin-bottom:10px}
 .form-label{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
 .form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:14px;color:var(--iron);background:var(--chalk);outline:none}
 .form-input:focus{border-color:var(--rust);background:#fff}
 .form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;-webkit-appearance:none}
-.modal-btns{display:flex;gap:8px;margin-top:16px}
+.modal-btns{display:flex;gap:8px;margin-top:16px;position:sticky;bottom:0;background:var(--white);padding-top:12px}
 .modal-btn{flex:1;padding:11px;border-radius:6px;border:none;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer}
 .modal-btn-rust{background:var(--rust);color:#fff}
 .modal-btn-ghost{background:var(--chalk);color:var(--muted)}
@@ -1027,15 +1027,33 @@ async function saveNewClient() {
       program_type: program, status: 'new',
       phone: phone || null, location: location || null
     });
-    if (result) {
-      allClients.unshift(result[0] || { email, first_name: first, last_name: last, program_type: program, status: 'new', created_at: new Date().toISOString() });
-      closeAddClient();
-      renderClientsList();
-      renderDashboard();
-      updateBadges();
-      showToast(`${first || email} added ✓`);
-    }
-  } catch(err) { showToast('Failed to add client'); }
+
+    // Add to local list — result may be array or null
+    const newClient = (Array.isArray(result) && result[0]) 
+      ? result[0] 
+      : { id: Date.now().toString(), email, first_name: first, last_name: last, program_type: program, status: 'new', created_at: new Date().toISOString() };
+    
+    // Remove duplicate if exists
+    const existingIdx = allClients.findIndex(c => c.email === email);
+    if (existingIdx > -1) allClients.splice(existingIdx, 1);
+    allClients.unshift(newClient);
+
+    closeAddClient();
+    renderClientsList();
+    renderDashboard();
+    updateBadges();
+    showToast(`${first || email} added ✓`);
+
+    // Clear form
+    ['newFirst','newLast','newEmail','newPhone','newLocation'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+  } catch(err) {
+    console.error('Save client error:', err);
+    showToast('Failed to add client — check connection');
+  }
 }
 
 // ── VIEW SWITCHING ────────────────────────────────────────────
