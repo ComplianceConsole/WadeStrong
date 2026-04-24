@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="program-generator.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Wade Strong — Program Builder</title>
@@ -249,6 +248,7 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
+  <script src="program-generator.js"></script>
 </head>
 <body>
 
@@ -526,16 +526,66 @@ async function loadClientForBuilder() {
     if (programs && programs.length) {
       programs.forEach(p => {
         if (p.sessions) {
-          // Map loaded sessions into sessionData
           Object.assign(sessionData, p.sessions);
         }
       });
       showToast(`Loaded ${programs.length} week(s) for ${name}`);
+    } else {
+      // No existing program — auto-generate from RPE + questionnaire
+      const q = await db.select('questionnaire_responses', { client_id: currentClientId }, { order: 'created_at.desc', limit: 1 });
+      const questionnaire = q && q.length ? q[0] : {};
+      
+      if (typeof generateProgram === 'function' && rpe && rpe.length) {
+        const generatedProgram = generateProgram({
+          gymType: questionnaire.raw_data?.gymType || 'commercial',
+          equipment: questionnaire.raw_data?.equipment || [],
+          trainingDays: parseInt(questionnaire.raw_data?.trainingDays) || 3,
+          rpe: {
+            deadlift_1rm: rpe[0].deadlift_1rm || 0,
+            squat_raw_1rm: rpe[0].squat_raw_1rm || 0,
+            bench_1rm: rpe[0].bench_1rm || 0,
+            press_1rm: rpe[0].press_1rm || 0,
+          }
+        });
+        
+        // Load generated program into sessionData
+        Object.assign(sessionData, generatedProgram);
+        
+        // Show auto-generate banner
+        showAutoGenerateBanner(name, questionnaire.raw_data?.gymType || 'commercial');
+        showToast(`Program auto-generated for ${name} — review and publish ✓`);
+      } else if (rpe && rpe.length) {
+        showToast(`RPE results loaded for ${name} — add program-generator.js to enable auto-build`);
+      } else {
+        showToast(`${name} loaded — awaiting RPE results to auto-generate program`);
+      }
     }
   } catch(err) {
     console.error('Load client error:', err);
     showToast('Error loading client');
   }
+}
+
+function showAutoGenerateBanner(clientName, gymType) {
+  // Create a banner at the top of the program builder
+  const gymLabel = gymType === 'strongman' ? 'Strongman gym' : gymType === 'home' ? 'Home gym' : 'Commercial gym';
+  const existing = document.getElementById('autogenBanner');
+  if (existing) existing.remove();
+  
+  const banner = document.createElement('div');
+  banner.id = 'autogenBanner';
+  banner.style.cssText = 'background:#e6f4ed;border:1px solid rgba(44,122,75,0.2);border-radius:8px;padding:14px 16px;margin:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px';
+  banner.innerHTML = `
+    <div>
+      <div style="font-size:13px;font-weight:700;color:#2c7a4b;margin-bottom:2px">✓ Program auto-generated for ${clientName}</div>
+      <div style="font-size:12px;color:#4a7a5a;line-height:1.5">Based on their RPE results · ${gymLabel} · Review each week and adjust weights/exercises as needed before publishing.</div>
+    </div>
+    <button onclick="this.parentElement.remove()" style="background:transparent;border:none;font-size:18px;color:#2c7a4b;cursor:pointer;flex-shrink:0">×</button>
+  `;
+  
+  // Insert after the toolbar
+  const toolbar = document.querySelector('.toolbar') || document.querySelector('.top-bar');
+  if (toolbar) toolbar.insertAdjacentElement('afterend', banner);
 }
 
 async function saveDraft() {
