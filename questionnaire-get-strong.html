@@ -425,29 +425,32 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 
     <div class="field">
       <label>Where do you train?</label>
+      <div class="hint">This helps Wade select the right exercises for your program.</div>
       <div class="choice-grid">
-        <label class="choice-card"><input type="radio" name="gymType" value="commercial"><span><strong>Commercial gym</strong>Full equipment available</span></label>
-        <label class="choice-card"><input type="radio" name="gymType" value="budget"><span><strong>Budget / basic gym</strong>Barbells, dumbbells, maybe a rack</span></label>
-        <label class="choice-card"><input type="radio" name="gymType" value="home"><span><strong>Home gym</strong>My own setup</span></label>
-        <label class="choice-card"><input type="radio" name="gymType" value="strongman"><span><strong>Strongman gym</strong>Has implements</span></label>
+        <label class="choice-card"><input type="radio" name="gymType" value="commercial" onchange="toggleEquipment(this.value)"><span><strong>🏋️ Commercial gym</strong>Standard gym with barbells, racks, cables, dumbbells</span></label>
+        <label class="choice-card"><input type="radio" name="gymType" value="home" onchange="toggleEquipment(this.value)"><span><strong>🏠 Home gym</strong>My own setup — I'll list what I have</span></label>
+        <label class="choice-card"><input type="radio" name="gymType" value="strongman" onchange="toggleEquipment(this.value)"><span><strong>🪨 Strongman gym</strong>Has implements — log, stones, yoke, farmers etc</span></label>
       </div>
     </div>
 
-    <div class="field">
-      <label>What equipment do you have access to? (select all that apply)</label>
+    <!-- Home gym equipment — only shows if home gym selected -->
+    <div class="field" id="homeEquipmentSection" style="display:none">
+      <label>What equipment do you have at home? (tick all that apply)</label>
       <div class="choices">
         <label class="choice"><input type="checkbox" name="equipment" value="barbell"><span>Barbell + plates</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="rack"><span>Squat rack / power rack</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="dumbbells"><span>Dumbbells</span></label>
-        <label class="choice"><input type="checkbox" name="equipment" value="cables"><span>Cables / machines</span></label>
+        <label class="choice"><input type="checkbox" name="equipment" value="kettlebells"><span>Kettlebells</span></label>
+        <label class="choice"><input type="checkbox" name="equipment" value="cables"><span>Cable machine</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="trap"><span>Trap / hex bar</span></label>
+        <label class="choice"><input type="checkbox" name="equipment" value="pullup"><span>Pull up bar</span></label>
+        <label class="choice"><input type="checkbox" name="equipment" value="bands"><span>Resistance bands</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="log"><span>Log</span></label>
-        <label class="choice"><input type="checkbox" name="equipment" value="yoke"><span>Yoke</span></label>
+        <label class="choice"><input type="checkbox" name="equipment" value="axel"><span>Axel bar</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="farmers"><span>Farmers handles</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="stones"><span>Atlas stones</span></label>
+        <label class="choice"><input type="checkbox" name="equipment" value="yoke"><span>Yoke</span></label>
         <label class="choice"><input type="checkbox" name="equipment" value="sled"><span>Sled / prowler</span></label>
-        <label class="choice"><input type="checkbox" name="equipment" value="bands"><span>Bands / chains</span></label>
-        <label class="choice"><input type="checkbox" name="equipment" value="cardio"><span>Cardio machines</span></label>
       </div>
     </div>
 
