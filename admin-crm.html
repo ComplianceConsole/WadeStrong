@@ -100,6 +100,8 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
 .status-complete{background:var(--chalk);color:var(--muted)}
 .status-paused{background:var(--blue-bg);color:var(--blue)}
 .status-declined{background:#fce8e8;color:#c03020}
+.status-archived{background:#ece8e2;color:#8a8278}
+.status-complete{background:var(--chalk);color:var(--muted)}
 
 /* PROGRAM STATUS */
 .prog-status{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600}
@@ -313,6 +315,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
             <button class="filter-btn" onclick="filterClients('active',this)">Active</button>
             <button class="filter-btn" onclick="filterClients('complete',this)">Complete</button>
             <button class="filter-btn" onclick="filterClients('pre_comp',this)">Athletes</button>
+            <button class="filter-btn" onclick="filterClients('archived',this)">Archived</button>
           </div>
           <input class="search-bar" type="text" placeholder="Search by name or email..." oninput="searchClients(this.value)">
           <div id="clientsTableWrap"></div>
@@ -370,6 +373,11 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
               <div class="detail-card" id="detailQuestionnaireCard" style="display:none">
                 <div class="detail-card-title">Questionnaire Answers</div>
                 <div id="detailQuestionnaire"></div>
+                <div id="detailQuestionnaireExtra" style="margin-top:12px;border-top:1px solid var(--border);padding-top:12px;display:none">
+                  <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">All data from questionnaire</div>
+                  <div id="detailQuestionnaireRaw"></div>
+                  <button onclick="toggleRawData()" id="rawDataToggle" style="font-size:12px;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 0;margin-top:6px">▼ Show all fields</button>
+                </div>
               </div>
 
               <!-- RPE Results -->
@@ -404,6 +412,7 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
                   <button class="act-btn act-btn-rust" onclick="sendWelcomeEmail()">📧 Send welcome + questionnaire</button>
                   <button class="act-btn act-btn-iron" onclick="openProgramBuilder()">🏋️ Build / edit program</button>
                   <button class="act-btn act-btn-ghost" onclick="viewClientPortal()">👤 View client portal</button>
+                  <button class="act-btn act-btn-ghost" onclick="archiveClient()" style="border-color:var(--muted)">📦 Archive client</button>
                 </div>
                 <div class="email-success" id="welcomeEmailSuccess">✓ Welcome email sent!</div>
               </div>
@@ -464,7 +473,9 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
                   <option value="complete">Complete</option>
                   <option value="paused">Paused</option>
                   <option value="declined">Declined</option>
+                  <option value="archived">Archived</option>
                 </select>
+                <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5">Setting to <strong>Complete</strong> or <strong>Archived</strong> will move this client out of active view. Complete triggers a re-engagement sequence.</div>
               </div>
             </div>
           </div>
@@ -655,8 +666,16 @@ function searchClients(q) {
 
 function getFilteredClients() {
   let clients = [...allClients];
-  if (currentFilter === 'pre_comp') clients = clients.filter(c => c.program_type === 'pre_comp');
-  else if (currentFilter !== 'all') clients = clients.filter(c => c.status === currentFilter);
+  if (currentFilter === 'pre_comp') {
+    clients = clients.filter(c => c.program_type === 'pre_comp' && c.status !== 'archived');
+  } else if (currentFilter === 'archived') {
+    clients = clients.filter(c => c.status === 'archived');
+  } else if (currentFilter === 'all') {
+    // Exclude archived from default view
+    clients = clients.filter(c => c.status !== 'archived');
+  } else {
+    clients = clients.filter(c => c.status === currentFilter);
+  }
   if (currentSearch) clients = clients.filter(c => {
     const name = [c.first_name, c.last_name].filter(Boolean).join(' ').toLowerCase();
     return name.includes(currentSearch) || (c.email || '').toLowerCase().includes(currentSearch);
@@ -803,20 +822,50 @@ function renderClientDetail() {
   const qContent = document.getElementById('detailQuestionnaire');
   if (q) {
     qCard.style.display = 'block';
-    const fields = [
-      { label:'Gym type', val: q.raw_data?.gymType || '—' },
-      { label:'Equipment', val: Array.isArray(q.raw_data?.equipment) ? q.raw_data.equipment.join(', ') : '—' },
-      { label:'Training days/week', val: q.raw_data?.trainingDays || '—' },
-      { label:'Training age', val: q.training_age || '—' },
-      { label:'Goals', val: Array.isArray(q.goals) ? q.goals.join(', ') : q.goals || '—' },
-      { label:'Injuries', val: q.injuries || 'None reported' },
-      { label:'Gym setup', val: q.gym_setup || '—' },
-      { label:'Comp name', val: q.comp_name || '—' },
-      { label:'Comp date', val: q.comp_date ? new Date(q.comp_date).toLocaleDateString('en-AU') : '—' },
-      { label:'Weight class', val: q.comp_weight_class || '—' },
-      { label:'Notes', val: q.anything_else || '—' },
-    ].filter(f => f.val && f.val !== '—' && f.val !== 'None reported' || f.label === 'Injuries');
-    qContent.innerHTML = fields.map(f => `<div class="q-answer"><div class="q-label">${f.label}</div><div class="q-val">${f.val}</div></div>`).join('');
+    const raw = q.raw_data || {};
+    
+    // Priority fields shown by default
+    const priorityFields = [
+      { label:'Gym type', val: q.gym_type || raw.gymType },
+      { label:'Training days/week', val: q.training_days_per_week || raw.trainingDays },
+      { label:'Session length', val: (q.session_length_minutes || raw.sessionLength) ? (q.session_length_minutes || raw.sessionLength) + ' min' : null },
+      { label:'Training age', val: q.training_age || raw.trainingAge },
+      { label:'Goals', val: Array.isArray(q.goals) ? q.goals.join(', ') : (Array.isArray(raw.goals) ? raw.goals.join(', ') : q.goals) },
+      { label:'Injuries', val: q.injury_detail || raw.injuries || 'None reported' },
+      { label:'Equipment', val: Array.isArray(q.equipment) ? q.equipment.join(', ') : (Array.isArray(raw.equipment) ? raw.equipment.join(', ') : null) },
+      { label:'Location', val: raw.location },
+      { label:'Age', val: raw.age ? raw.age + ' yrs' : null },
+      { label:'Height', val: raw.height ? raw.height + 'cm' : null },
+      { label:'Weight', val: raw.weight ? raw.weight + 'kg' : null },
+      { label:'Occupation', val: raw.occupation },
+      { label:'Estimated DL', val: raw.currentLifts?.deadlift ? raw.currentLifts.deadlift + 'kg' : null },
+      { label:'Estimated SQ', val: raw.currentLifts?.squat ? raw.currentLifts.squat + 'kg' : null },
+      { label:'Estimated BP', val: raw.currentLifts?.bench ? raw.currentLifts.bench + 'kg' : null },
+      { label:'Estimated OHP', val: raw.currentLifts?.ohp ? raw.currentLifts.ohp + 'kg' : null },
+      { label:'Notes', val: raw.anythingElse },
+      // Pre-comp fields
+      { label:'Competition', val: q.competition_name || raw.compName },
+      { label:'Comp date', val: q.competition_date ? new Date(q.competition_date).toLocaleDateString('en-AU') : null },
+      { label:'Weight class', val: q.weight_class || raw.weightClass },
+      { label:'Comp level', val: q.competition_level || raw.compLevel },
+      { label:'Events', val: Array.isArray(q.competition_events) ? q.competition_events.join(', ') : null },
+      { label:'Strong events', val: Array.isArray(q.strong_events) ? q.strong_events.join(', ') : null },
+      { label:'Weak events', val: Array.isArray(q.weak_events) ? q.weak_events.join(', ') : null },
+      { label:'Time to comp', val: q.time_to_comp ? q.time_to_comp + ' weeks' : null },
+    ].filter(f => f.val && f.val !== 'None reported' || f.label === 'Injuries');
+    
+    qContent.innerHTML = priorityFields.map(f => `<div class="q-answer"><div class="q-label">${f.label}</div><div class="q-val">${f.val || 'None reported'}</div></div>`).join('');
+
+    // Show extra raw data section
+    const extraSection = document.getElementById('detailQuestionnaireExtra');
+    const rawDiv = document.getElementById('detailQuestionnaireRaw');
+    if (extraSection && rawDiv && Object.keys(raw).length) {
+      extraSection.style.display = 'block';
+      // Show all raw fields not already shown
+      const shownKeys = ['gymType','trainingDays','sessionLength','trainingAge','goals','injuries','equipment','location','age','height','weight','occupation','currentLifts','anythingElse','compName','compDate','weightClass','compLevel','events','strongEvents','weakEvents','timeToComp'];
+      const extraFields = Object.entries(raw).filter(([k]) => !shownKeys.includes(k) && raw[k] !== null && raw[k] !== '' && raw[k] !== undefined);
+      rawDiv.innerHTML = extraFields.map(([k,v]) => `<div class="q-answer" style="display:none" class="raw-field"><div class="q-label">${k}</div><div class="q-val">${Array.isArray(v) ? v.join(', ') : v}</div></div>`).join('');
+    }
   } else {
     qCard.style.display = 'none';
   }
@@ -1042,6 +1091,14 @@ async function sendVoiceNoteToPortal(clientId) {
   }
 }
 
+function toggleRawData() {
+  const fields = document.querySelectorAll('.raw-field');
+  const btn = document.getElementById('rawDataToggle');
+  const showing = btn.textContent.includes('Hide');
+  fields.forEach(f => f.style.display = showing ? 'none' : 'block');
+  btn.textContent = showing ? '▼ Show all fields' : '▲ Hide extra fields';
+}
+
 async function sendWelcomeEmail() {
   if (!currentClient) return;
   const firstName = currentClient.first_name || 'there';
@@ -1092,6 +1149,16 @@ function openBuilderForClient(id) {
 function viewClientPortal() {
   if (!currentClient) return;
   window.open(`client-portal.html?email=${encodeURIComponent(currentClient.email)}`, '_blank');
+}
+
+async function archiveClient() {
+  if (!currentClient) return;
+  const name = [currentClient.first_name, currentClient.last_name].filter(Boolean).join(' ') || currentClient.email;
+  if (!confirm(`Archive ${name}? They'll be moved out of active view. You can find them under the Archived filter.`)) return;
+  await updateClientStatus('archived');
+  showToast(`${name} archived ✓`);
+  // Switch back to client list
+  switchView('clients', document.querySelector('.nav-btn[onclick*=clients]'));
 }
 
 async function updateClientStatus(status) {
