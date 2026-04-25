@@ -591,8 +591,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   <div class="success-screen" id="successScreen">
     <div class="success-icon">&#10003;</div>
     <h2>YOU'RE ALL SET.</h2>
-    <p>Wade has your details and will be in touch within 24 hours. Keep an eye on your inbox — he'll send you a link to your training portal once your program is ready.</p>
-    <p style="margin-top:16px;font-size:14px;color:var(--muted)">In the meantime, if you have any questions reach out directly via the contact on the main site.</p>
+    <p>Wade has your details. Your next step is RPE testing — we're taking you there now.</p>
+    <p style="margin-top:16px;font-size:14px;color:var(--muted)">Redirecting you to your RPE testing instructions in a few seconds...</p>
+    <div style="margin-top:24px">
+      <a href="rpe10-nextsteps.html" style="display:inline-block;background:#B85A30;color:#fff;text-decoration:none;padding:12px 28px;border-radius:5px;font-size:14px;font-weight:600">Go to RPE testing now →</a>
+    </div>
   </div>
 
 </div>
@@ -621,12 +624,79 @@ function toggleInjuries(show) {
   document.getElementById('injuryDetail').style.display = show ? 'block' : 'none';
 }
 
-function submitForm() {
+async function submitForm() {
   document.getElementById('step-6').style.display = 'none';
   document.getElementById('successScreen').style.display = 'block';
   document.getElementById('progressFill').style.width = '100%';
   document.getElementById('progressLabel').textContent = 'Completed — submitted to Wade';
   window.scrollTo({top:0, behavior:'smooth'});
+
+  // Gather all form data
+  const firstName = document.getElementById('firstName')?.value || document.getElementById('first_name')?.value || '';
+  const lastName = document.getElementById('lastName')?.value || document.getElementById('last_name')?.value || '';
+  const email = document.getElementById('email')?.value || '';
+  const location = document.getElementById('location')?.value || '';
+  const gymType = document.querySelector('input[name="gymType"]:checked')?.value || '';
+  const trainingDays = document.querySelector('input[name="trainingDays"]:checked')?.value || document.getElementById('trainingDays')?.value || '';
+  const goals = [...document.querySelectorAll('input[name="goals"]:checked')].map(el => el.value);
+  const injuries = document.getElementById('injuries')?.value || '';
+  const anythingElse = document.querySelector('textarea[placeholder*="success"]')?.value || '';
+
+  const formData = { firstName, lastName, email, location, gymType, trainingDays, goals, injuries, anythingElse };
+
+  // Save to Supabase
+  try {
+    if (typeof db !== 'undefined') {
+      // Upsert client
+      await db.upsert('clients', {
+        email, first_name: firstName, last_name: lastName,
+        program_type: 'get_strong', status: 'new', location: location || null
+      });
+      // Get client ID and save questionnaire
+      const clients = await db.select('clients', { email });
+      const clientId = clients && clients[0] ? clients[0].id : null;
+      if (clientId) {
+        await db.insert('questionnaire_responses', {
+          client_id: clientId, email,
+          program_type: 'get_strong',
+          training_age: document.getElementById('training_age')?.value || '',
+          goals: goals,
+          injuries: injuries,
+          raw_data: formData
+        });
+      }
+    }
+  } catch(err) { console.error('Supabase save error:', err); }
+
+  // Fire Slack notification to Wade
+  try {
+    await fetch('https://wade-slack-notifications.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'get_strong_questionnaire',
+        data: { name: firstName + ' ' + lastName, email, location, goals, trainingDays, gymType }
+      })
+    });
+  } catch(err) { console.error('Slack error:', err); }
+
+  // Send confirmation email to client
+  try {
+    await fetch('https://wade-send-email.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'questionnaire_received',
+        to: email,
+        data: { firstName }
+      })
+    });
+  } catch(err) { console.error('Email error:', err); }
+
+  // Redirect to RPE next steps after 4 seconds
+  setTimeout(() => {
+    window.location.href = 'rpe10-nextsteps.html';
+  }, 4000);
 }
 </script>
 </body>
