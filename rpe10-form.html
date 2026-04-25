@@ -304,10 +304,75 @@ function toggleSkip(liftId, skipped) {
   inputs.forEach(i => i.disabled = skipped);
 }
 
-function submitRPE() {
+async function submitRPE() {
   document.getElementById('liftForm').style.display = 'none';
   document.getElementById('successScreen').style.display = 'block';
   window.scrollTo({top:0, behavior:'smooth'});
+
+  // Gather all RPE values
+  const email = document.getElementById('email')?.value || new URLSearchParams(window.location.search).get('email') || '';
+  const firstName = document.getElementById('firstName')?.value || document.getElementById('first_name')?.value || '';
+
+  const getValue = (id) => parseFloat(document.getElementById(id)?.value) || null;
+
+  const rpeData = {
+    squat_raw_1rm: getValue('squat_raw_1rm'),
+    squat_raw_3rm: getValue('squat_raw_3rm'),
+    squat_raw_5rm: getValue('squat_raw_5rm'),
+    squat_wraps_1rm: getValue('squat_wraps_1rm'),
+    squat_wraps_3rm: getValue('squat_wraps_3rm'),
+    squat_wraps_5rm: getValue('squat_wraps_5rm'),
+    bench_1rm: getValue('bench_1rm'),
+    bench_3rm: getValue('bench_3rm'),
+    bench_5rm: getValue('bench_5rm'),
+    deadlift_1rm: getValue('deadlift_1rm'),
+    deadlift_3rm: getValue('deadlift_3rm'),
+    deadlift_5rm: getValue('deadlift_5rm'),
+    press_1rm: getValue('press_1rm'),
+    press_3rm: getValue('press_3rm'),
+    press_5rm: getValue('press_5rm'),
+  };
+
+  // Save to Supabase
+  try {
+    if (typeof db !== 'undefined' && email) {
+      const clients = await db.select('clients', { email });
+      const clientId = clients && clients[0] ? clients[0].id : null;
+      await db.insert('rpe_results', { client_id: clientId, email, ...rpeData });
+    }
+  } catch(err) { console.error('Supabase save error:', err); }
+
+  // Fire Slack to Wade
+  try {
+    await fetch('https://wade-slack-notifications.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'rpe10_submitted',
+        data: {
+          name: firstName,
+          email,
+          deadlift: rpeData.deadlift_1rm,
+          squat: rpeData.squat_raw_1rm,
+          bench: rpeData.bench_1rm,
+          ohp: rpeData.press_1rm,
+        }
+      })
+    });
+  } catch(err) { console.error('Slack error:', err); }
+
+  // Send email to client
+  try {
+    await fetch('https://wade-send-email.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'rpe_submitted',
+        to: email,
+        data: { firstName }
+      })
+    });
+  } catch(err) { console.error('Email error:', err); }
 }
 
 buildForm();
