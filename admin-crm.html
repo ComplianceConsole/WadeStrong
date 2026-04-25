@@ -408,6 +408,25 @@ html,body{height:100%;overflow:hidden;font-family:var(--font-b);background:var(-
                 <div class="email-success" id="welcomeEmailSuccess">✓ Welcome email sent!</div>
               </div>
 
+              <!-- Voice note for client -->
+              <div class="email-panel" style="border-color:var(--rust)">
+                <div class="email-panel-title" style="color:var(--iron)">🎤 Welcome Voice Note</div>
+                <div class="email-panel-sub">Record a personal welcome message for the client — it will appear in their messages tab when they open the portal.</div>
+                <div id="voiceNoteRecorder">
+                  <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+                    <button id="voiceRecordBtn" class="act-btn act-btn-iron" onclick="toggleVoiceRecord()" style="width:auto;padding:8px 16px">🎤 Start recording</button>
+                    <div id="voiceTimer" style="font-size:13px;color:var(--muted);display:none">⏺ <span id="voiceSeconds">0</span>s</div>
+                  </div>
+                  <div id="voicePreview" style="display:none;margin-bottom:10px">
+                    <audio id="voicePlayback" controls style="width:100%;height:36px"></audio>
+                    <div style="display:flex;gap:8px;margin-top:8px">
+                      <button onclick="clearVoiceNote()" class="act-btn act-btn-ghost" style="padding:6px 12px;font-size:12px">✗ Discard</button>
+                      <div style="font-size:12px;color:var(--green);align-self:center;font-weight:600">✓ Voice note ready</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Program ready email -->
               <div class="email-panel">
                 <div class="email-panel-title" style="color:var(--rust)">📧 Program Ready Email</div>
@@ -877,6 +896,88 @@ async function sendDetailMessage() {
 }
 
 // ── ACTIONS ───────────────────────────────────────────────────
+// ── VOICE NOTE ────────────────────────────────────────────────
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+let recInterval = null;
+let recSecs = 0;
+let voiceBlob = null;
+
+async function toggleVoiceRecord() {
+  isRecording ? stopVoiceRecord() : startVoiceRecord();
+}
+
+async function startVoiceRecord() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    recSecs = 0;
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      voiceBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      stream.getTracks().forEach(t => t.stop());
+      const url = URL.createObjectURL(voiceBlob);
+      document.getElementById('voicePlayback').src = url;
+      document.getElementById('voicePreview').style.display = 'block';
+      document.getElementById('voiceTimer').style.display = 'none';
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    const btn = document.getElementById('voiceRecordBtn');
+    btn.textContent = '⏹ Stop recording';
+    btn.style.background = '#c03020';
+    document.getElementById('voiceTimer').style.display = 'flex';
+    recInterval = setInterval(() => {
+      recSecs++;
+      document.getElementById('voiceSeconds').textContent = recSecs;
+      if (recSecs >= 120) stopVoiceRecord();
+    }, 1000);
+  } catch(err) {
+    showToast('Microphone access denied');
+  }
+}
+
+function stopVoiceRecord() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  isRecording = false;
+  clearInterval(recInterval);
+  const btn = document.getElementById('voiceRecordBtn');
+  btn.textContent = '🎤 Re-record';
+  btn.style.background = 'var(--iron)';
+}
+
+function clearVoiceNote() {
+  voiceBlob = null;
+  audioChunks = [];
+  document.getElementById('voicePreview').style.display = 'none';
+  document.getElementById('voiceRecordBtn').textContent = '🎤 Start recording';
+}
+
+async function sendVoiceNoteToPortal(clientId) {
+  if (!voiceBlob) return;
+  try {
+    // Convert blob to base64
+    const reader = new FileReader();
+    reader.readAsDataURL(voiceBlob);
+    reader.onloadend = async () => {
+      const base64 = reader.result;
+      // Save as message in Supabase
+      await db.insert('messages', {
+        client_id: clientId,
+        from_role: 'wade',
+        message_type: 'voice',
+        content: base64,
+        read: false
+      });
+      showToast('Voice note saved to client portal ✓');
+    };
+  } catch(err) {
+    console.error('Voice note save error:', err);
+  }
+}
+
 async function sendWelcomeEmail() {
   if (!currentClient) return;
   const firstName = currentClient.first_name || 'there';
@@ -948,20 +1049,30 @@ async function sendProgramReadyEmail() {
   if (!currentClient) return;
   const vipCode = document.getElementById('vipCodeInput').value || 'WADESTRONG';
   const firstName = currentClient.first_name || 'there';
+  const portalLink = `https://wadestrong.com.au/client-portal.html?email=${encodeURIComponent(currentClient.email)}`;
+
   try {
+    // Send voice note to portal first if recorded
+    if (voiceBlob && currentClient.id) {
+      await sendVoiceNoteToPortal(currentClient.id);
+    }
+
+    // Send program ready email
     const res = await fetch('https://wade-send-email.nameless-wind-f1be.workers.dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         type: 'program_ready',
         to: currentClient.email,
-        data: { firstName, portalLink: `https://wadestrong.com.au/client-portal.html?email=${encodeURIComponent(currentClient.email)}`, vipCode }
+        data: { firstName, portalLink, vipCode }
       })
     });
     if (res.ok) {
       document.getElementById('programEmailSuccess').style.display = 'block';
       await updateClientStatus('active');
       showToast(`Program ready email sent to ${currentClient.email} ✓`);
+      // Clear voice note after sending
+      clearVoiceNote();
       setTimeout(() => document.getElementById('programEmailSuccess').style.display = 'none', 4000);
     }
   } catch(err) { showToast('Email failed — check Resend is configured'); }
@@ -1060,11 +1171,12 @@ async function saveNewClient() {
   if (!email) { showToast('Email is required'); return; }
 
   try {
-    const result = await db.upsert('clients', {
-      email, first_name: first, last_name: last,
-      program_type: program, status: 'new',
-      phone: phone || null, location: location || null
-    });
+    // Only use columns that exist in the current schema
+    const clientData = { email, first_name: first, last_name: last, program_type: program, status: 'new' };
+    if (phone) clientData.phone = phone;
+    // Store location in internal_notes if location column doesn't exist
+    if (location) clientData.internal_notes = `Location: ${location}`;
+    const result = await db.upsert('clients', clientData);
 
     // Add to local list — result may be array or null
     const newClient = (Array.isArray(result) && result[0]) 
