@@ -639,29 +639,54 @@ async function submitForm() {
   document.getElementById('progressLabel').textContent='Completed — submitted to Wade';
   window.scrollTo({top:0,behavior:'smooth'});
 
-  // Gather all form data
+  // Gather ALL form data — everything goes to Supabase
   const firstName = document.getElementById('firstName')?.value?.trim() || '';
   const lastName = document.getElementById('lastName')?.value?.trim() || '';
   const email = document.getElementById('email')?.value?.trim() || '';
+
+  // Competition details
   const compName = document.getElementById('compName')?.value?.trim() || '';
   const compDate = document.getElementById('compDate')?.value || '';
   const compLocation = document.getElementById('compLocation')?.value?.trim() || '';
-  const weightClass = document.getElementById('weightClass')?.value?.trim() || document.querySelector('input[name="weightClass"]:checked')?.value || '';
-  const gymType = document.querySelector('input[name="gymType"]:checked')?.value || '';
-  const trainingDays = document.querySelector('input[name="trainingDays"]:checked')?.value || '';
-  const sessionLength = document.querySelector('input[name="sessionLength"]:checked')?.value || '';
+  const weightClass = document.querySelector('input[name="weightClass"]:checked')?.value || document.getElementById('weightClass')?.value?.trim() || '';
   const compLevel = document.querySelector('input[name="compLevel"]:checked')?.value || '';
   const timeToComp = document.querySelector('input[name="timeToComp"]:checked')?.value || '';
+  const numComps = document.querySelector('input[name="numComps"]:checked')?.value || '';
   const events = [...document.querySelectorAll('input[name="events"]:checked')].map(el => el.value);
   const strongEvents = [...document.querySelectorAll('input[name="strongEvents"]:checked')].map(el => el.value);
   const weakEvents = [...document.querySelectorAll('input[name="weakEvents"]:checked')].map(el => el.value);
+
+  // Training setup
+  const gymType = document.querySelector('input[name="gymType"]:checked')?.value || '';
+  const trainingDays = document.querySelector('input[name="trainingDays"]:checked')?.value || '';
+  const sessionLength = document.querySelector('input[name="sessionLength"]:checked')?.value || '';
+  const preferredDays = [...document.querySelectorAll('input[name="preferredDays"]:checked')].map(el => el.value);
   const equipment = [...document.querySelectorAll('input[name="equipment"]:checked')].map(el => el.value);
+  const implements_ = [...document.querySelectorAll('input[name="implements"]:checked')].map(el => el.value);
+  const smAccess = document.querySelector('input[name="smAccess"]:checked')?.value || '';
+
+  // Health & lifestyle
+  const hasInjuries = document.querySelector('input[name="hasInjuries"]:checked')?.value || 'no';
   const injuries = document.getElementById('injuries')?.value?.trim() || '';
+  const injuryDetail = document.getElementById('injuryDetail')?.value?.trim() || '';
+  const sleep = document.querySelector('input[name="sleep"]:checked')?.value || '';
+  const recovery = document.querySelector('input[name="recovery"]:checked')?.value || '';
+  const recoveryMethods = [...document.querySelectorAll('input[name="recovery_methods"]:checked')].map(el => el.value);
+  const pressure = document.querySelector('input[name="pressure"]:checked')?.value || '';
+
+  // Mindset / notes
+  const biggestWeakness = document.querySelector('textarea[name="biggestWeakness"], #biggestWeakness')?.value?.trim() || '';
+  const successDefinition = document.querySelector('textarea[name="successDefinition"], #successDefinition')?.value?.trim() || '';
+  const anythingElse = document.querySelectorAll('textarea')[document.querySelectorAll('textarea').length - 1]?.value?.trim() || '';
 
   const formData = {
-    firstName, lastName, email, compName, compDate, compLocation,
-    weightClass, gymType, trainingDays, sessionLength, compLevel,
-    timeToComp, events, strongEvents, weakEvents, equipment, injuries
+    firstName, lastName, email,
+    compName, compDate, compLocation, weightClass, compLevel, timeToComp, numComps,
+    events, strongEvents, weakEvents,
+    gymType, trainingDays, sessionLength, preferredDays, equipment, implements: implements_, smAccess,
+    injuries: hasInjuries === 'yes' ? (injuryDetail || injuries) : '',
+    sleep, recovery, recoveryMethods, pressure,
+    biggestWeakness, successDefinition, anythingElse
   };
 
   // Save to Supabase
@@ -682,23 +707,50 @@ async function submitForm() {
           client_id: clientId,
           email,
           program_type: 'pre_comp',
-          // Real Supabase column names
+
+          // Training setup — real Supabase column names
           gym_type: gymType || null,
-          equipment: equipment.length ? equipment : null,
+          equipment: [...equipment, ...implements_].length ? [...equipment, ...implements_] : null,
           training_days_per_week: trainingDays ? parseInt(trainingDays) : null,
+          preferred_days: preferredDays.length ? preferredDays : null,
           session_length_minutes: sessionLength ? parseInt(sessionLength) : null,
-          injury_status: injuries ? 'reported' : 'none',
-          injury_detail: injuries || null,
-          // Competition specific columns
+
+          // Health
+          injury_status: hasInjuries === 'yes' ? 'reported' : 'none',
+          injury_detail: hasInjuries === 'yes' ? (injuryDetail || injuries) : null,
+          sleep_quality: sleep || null,
+
+          // Competition — all columns
           competition_name: compName || null,
           competition_date: compDate || null,
           competition_location: compLocation || null,
-          weight_class: weightClass || null,
           competition_level: compLevel || null,
           time_to_comp: timeToComp || null,
+          weight_class: weightClass || null,
+          num_previous_comps: numComps || null,
           competition_events: events.length ? events : null,
           strong_events: strongEvents.length ? strongEvents : null,
           weak_events: weakEvents.length ? weakEvents : null,
+          biggest_weakness: biggestWeakness || null,
+          success_definition: successDefinition || null,
+          pressure_handling: pressure || null,
+          additional_notes: anythingElse || null,
+
+          // Full raw data for program builder
+          raw_data: {
+            ...formData,
+            smAccess,
+            recoveryMethods,
+          },
+        });
+
+        // Update client record with comp info
+        await db.upsert('clients', {
+          email,
+          comp_name: compName || null,
+          comp_date: compDate || null,
+          comp_location: compLocation || null,
+          weight_class: weightClass || null,
         });
       }
     }
