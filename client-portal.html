@@ -251,7 +251,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
   <div class="nav-logo">WADE<span>.</span>STRONG</div>
   <div class="nav-right">
     <div>
-      <div class="nav-name" id="navName">Chris T.</div>
+      <div class="nav-name" id="navName">Loading...</div>
       <div class="nav-week" id="navWeek">PRE-COMP · WEEK 5/8</div>
     </div>
     <div class="nav-avatar" id="navAvatar">CT</div>
@@ -287,7 +287,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
     <div class="card">
       <div class="card-title">Personal Info</div>
       <div class="profile-grid">
-        <div class="profile-item"><div class="profile-label">Name</div><div class="profile-val" id="profName">Chris Thompson</div></div>
+        <div class="profile-item"><div class="profile-label">Name</div><div class="profile-val" id="profName">—</div></div>
         <div class="profile-item"><div class="profile-label">Age</div><div class="profile-val">31</div></div>
         <div class="profile-item"><div class="profile-label">Height</div><div class="profile-val">178cm</div></div>
         <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val">91.5kg</div></div>
@@ -659,6 +659,11 @@ async function loadClientFromSupabase(email) {
     const lastName = c.last_name || '';
     const fullName = [firstName, lastName].filter(Boolean).join(' ') || email;
     const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?';
+    // Load questionnaire data
+    const qData = await db.select('questionnaire_responses', { client_id: c.id }, { order: 'created_at.desc', limit: 1 });
+    const q = qData && qData.length ? qData[0] : {};
+    const rawData = q.raw_data || {};
+
     CLIENT = {
       name: fullName,
       initials: initials,
@@ -668,10 +673,27 @@ async function loadClientFromSupabase(email) {
       totalWeeks: c.total_weeks || 6,
       type: c.program_type,
       email: c.email,
-      age: c.age,
-      height: c.height,
-      weight: c.weight,
-      location: c.location,
+      // Profile from clients table
+      age: c.age || rawData.age || null,
+      height: c.height || rawData.height || null,
+      weight: c.weight || rawData.weight || null,
+      location: c.location || rawData.location || null,
+      phone: c.phone || null,
+      // Training from questionnaire
+      gymType: q.gym_setup || rawData.gymType || null,
+      trainingDays: q.days_per_week || rawData.trainingDays || null,
+      sessionLength: q.session_length || rawData.sessionLength || null,
+      trainingAge: q.training_age || rawData.trainingAge || null,
+      // Competition (pre_comp only)
+      compName: q.comp_name || rawData.compName || c.comp_name || null,
+      compDate: q.comp_date || rawData.compDate || c.comp_date || null,
+      weightClass: q.comp_weight_class || rawData.weightClass || c.weight_class || null,
+      compLevel: q.comp_level || rawData.compLevel || null,
+      events: Array.isArray(q.comp_events) ? q.comp_events : (Array.isArray(rawData.events) ? rawData.events : []),
+      strongEvents: Array.isArray(q.strong_events) ? q.strong_events : (Array.isArray(rawData.strongEvents) ? rawData.strongEvents : []),
+      weakEvents: Array.isArray(q.weak_events) ? q.weak_events : (Array.isArray(rawData.weakEvents) ? rawData.weakEvents : []),
+      injuries: q.injuries || rawData.injuries || null,
+      goals: Array.isArray(q.goals) ? q.goals : (Array.isArray(rawData.goals) ? rawData.goals : []),
     };
 
     // Load RPE results
@@ -796,7 +818,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('navAvatar').textContent = CLIENT.initials;
   const weekLabel = CLIENT.type === 'pre_comp' ? 'PRE-COMP' : 'GET STRONG';
   document.getElementById('navWeek').textContent = `${weekLabel} · WEEK ${CLIENT.week}/${CLIENT.totalWeeks}`;
-  document.getElementById('profName').textContent = CLIENT.name;
+  document.getElementById('profName').textContent = CLIENT.name || '—';
+  document.getElementById('profAge').textContent = CLIENT.age ? CLIENT.age + ' yrs' : '—';
+  document.getElementById('profHeight').textContent = CLIENT.height || '—';
+  document.getElementById('profWeight').textContent = CLIENT.weight || '—';
+  document.getElementById('profLocation').textContent = CLIENT.location || '—';
+  document.getElementById('profProgram').textContent = (CLIENT.program || '—') + (CLIENT.week ? ` · Wk ${CLIENT.week}/${CLIENT.totalWeeks||6}` : '');
+  document.getElementById('profGym').textContent = CLIENT.gymType ? (CLIENT.gymType === 'commercial' ? '🏋️ Commercial gym' : CLIENT.gymType === 'home' ? '🏠 Home gym' : CLIENT.gymType === 'strongman' ? '🪨 Strongman gym' : CLIENT.gymType) : '—';
+  document.getElementById('profDays').textContent = CLIENT.trainingDays ? CLIENT.trainingDays + ' days/week' : '—';
+  document.getElementById('profSession').textContent = CLIENT.sessionLength ? CLIENT.sessionLength + ' min' : '—';
+  document.getElementById('profTrainingAge').textContent = CLIENT.trainingAge || '—';
+
+  // Also update nav name
+  document.getElementById('navName').textContent = CLIENT.short || CLIENT.name || '—';
+
+  // Show competition section for pre-comp clients
+  if (CLIENT.type === 'pre_comp') {
+    const compSection = document.getElementById('compSection');
+    if (compSection) compSection.style.display = 'block';
+    document.getElementById('profCompName').textContent = CLIENT.compName || '—';
+    document.getElementById('profCompDate').textContent = CLIENT.compDate ? new Date(CLIENT.compDate).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' }) : '—';
+    document.getElementById('profWeightClass').textContent = CLIENT.weightClass || '—';
+    document.getElementById('profCompLevel').textContent = CLIENT.compLevel || '—';
+    document.getElementById('profEvents').textContent = CLIENT.events?.length ? CLIENT.events.join(', ') : '—';
+    document.getElementById('profStrongEvents').textContent = CLIENT.strongEvents?.length ? CLIENT.strongEvents.join(', ') : '—';
+    document.getElementById('profWeakEvents').textContent = CLIENT.weakEvents?.length ? CLIENT.weakEvents.join(', ') : '—';
+  }
   curWeek = CLIENT.week;
 
   // Update profile fields from Supabase data
