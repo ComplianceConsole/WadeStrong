@@ -355,5 +355,140 @@ function generateProgram(clientData) {
   return program;
 }
 
+// ── PRE-COMP STRONGMAN GENERATOR ────────────────────────────
+
+function generatePreCompProgram(clientData) {
+  const {
+    gymType = 'strongman',
+    equipment = [],
+    trainingDays = 4,
+    sessionLength = 90,
+    questionnaire = {},
+    rpe = {}
+  } = clientData;
+
+  const q = questionnaire;
+  const rawData = q.raw_data || {};
+
+  const actualGymType = q.gym_setup || rawData.gymType || gymType;
+  const actualDays = parseInt(q.days_per_week || rawData.trainingDays || trainingDays) || 4;
+  const actualSessionLength = parseInt(q.session_length || rawData.sessionLength || sessionLength) || 90;
+  const events = Array.isArray(q.comp_events) ? q.comp_events : (Array.isArray(rawData.events) ? rawData.events : []);
+  const weakEvents = Array.isArray(q.weak_events) ? q.weak_events : (Array.isArray(rawData.weakEvents) ? rawData.weakEvents : []);
+  const timeToComp = q.time_to_comp || rawData.timeToComp || '7-10';
+
+  const maxes = {
+    deadlift: rpe.deadlift_1rm || 0,
+    squat: rpe.squat_raw_1rm || 0,
+    bench: rpe.bench_1rm || 0,
+    press: rpe.press_1rm || 0,
+  };
+
+  // Determine total weeks based on time to comp
+  const totalWeeks = timeToComp === '4-6' ? 6 : timeToComp === '11-14' ? 12 : timeToComp === '15plus' ? 16 : 8;
+
+  // Event-specific exercise selection
+  const hasLog = events.includes('log') || actualGymType === 'strongman' || equipment.includes('log');
+  const hasStones = events.includes('stones') || equipment.includes('stones');
+  const hasFarmers = events.includes('farmers') || equipment.includes('farmers');
+  const hasYoke = events.includes('yoke') || equipment.includes('yoke');
+
+  const program = {};
+
+  for (let week = 1; week <= totalWeeks; week++) {
+    const phase = week <= totalWeeks * 0.4 ? 'build' : week <= totalWeeks * 0.75 ? 'peak' : 'comp';
+    const sessions = [];
+
+    // Session A — Deadlift + Event specific
+    sessions.push({
+      id: `w${week}a`, name: 'Session A — Deadlift & Lower Events', day: 'Day 1', targetRpe: phase === 'build' ? '7-8' : phase === 'peak' ? '8-9' : '9',
+      blocks: [
+        {
+          name: 'DEADLIFT', rest: 240,
+          exercises: [
+            { id:`e${week}a1`, name: actualGymType === 'strongman' ? 'Axle deadlift' : 'Deadlift', sets: phase === 'build' ? 5 : 4, reps: phase === 'build' ? 3 : phase === 'peak' ? 2 : 1, weight: maxes.deadlift > 0 ? rpeToWeight(maxes.deadlift, phase === 'build' ? 7.5 : phase === 'peak' ? 8.5 : 9) : 0, rpe: phase === 'build' ? 7.5 : 8.5, note: '' },
+            { id:`e${week}a2`, name: 'Romanian deadlift', sets: 3, reps: 6, weight: maxes.deadlift > 0 ? rpeToWeight(maxes.deadlift * 0.6, 7) : 0, rpe: 7, note: '' },
+          ]
+        },
+        ...(hasFarmers ? [{
+          name: 'FARMERS CARRY', rest: 180,
+          exercises: [{ id:`e${week}a3`, name: 'Farmers carry', sets: 5, reps: 1, weight: 0, rpe: weakEvents.includes('carries') ? 8 : 7, note: weakEvents.includes('carries') ? 'Priority event — push the weight this cycle' : '5 × 30m runs' }]
+        }] : []),
+        ...(hasYoke ? [{
+          name: 'YOKE', rest: 180,
+          exercises: [{ id:`e${week}a4`, name: 'Yoke walk', sets: 4, reps: 1, weight: 0, rpe: 7.5, note: '20m runs — focus on speed under load' }]
+        }] : []),
+      ]
+    });
+
+    // Session B — Press
+    sessions.push({
+      id: `w${week}b`, name: 'Session B — Pressing', day: 'Day 2', targetRpe: phase === 'build' ? '7-8' : '8-9',
+      blocks: [
+        {
+          name: hasLog ? 'LOG PRESS' : 'OVERHEAD PRESS', rest: 240,
+          exercises: [
+            { id:`e${week}b1`, name: hasLog ? 'Log press' : 'Overhead press', sets: phase === 'build' ? 5 : 4, reps: phase === 'build' ? 3 : 2, weight: maxes.press > 0 ? rpeToWeight(maxes.press, phase === 'build' ? 7.5 : 8.5) : 0, rpe: phase === 'build' ? 7.5 : 8.5, note: weakEvents.includes('press') ? 'Priority — this is a weak event, push hard' : '' },
+            { id:`e${week}b2`, name: 'Bench press', sets: 3, reps: 6, weight: maxes.bench > 0 ? rpeToWeight(maxes.bench, 7) : 0, rpe: 7, note: '' },
+            { id:`e${week}b3`, name: 'Barbell row', sets: 4, reps: 8, weight: 0, rpe: 7.5, note: '' },
+          ]
+        }
+      ]
+    });
+
+    // Session C — Squat + Stones
+    if (actualDays >= 3) {
+      sessions.push({
+        id: `w${week}c`, name: 'Session C — Squat & Implements', day: 'Day 3', targetRpe: phase === 'build' ? '7' : '8',
+        blocks: [
+          {
+            name: 'SQUAT', rest: 240,
+            exercises: [
+              { id:`e${week}c1`, name: 'Squat', sets: 4, reps: phase === 'build' ? 4 : 3, weight: maxes.squat > 0 ? rpeToWeight(maxes.squat, phase === 'build' ? 7.5 : 8) : 0, rpe: phase === 'build' ? 7.5 : 8, note: '' },
+            ]
+          },
+          ...(hasStones ? [{
+            name: 'ATLAS STONES', rest: 180,
+            exercises: [{ id:`e${week}c2`, name: 'Atlas stone load', sets: 5, reps: 3, weight: 0, rpe: weakEvents.includes('stones') ? 8 : 7, note: weakEvents.includes('stones') ? 'Priority — work the technique hard this cycle' : 'Over bar — focus on lap technique' }]
+          }] : []),
+        ]
+      });
+    }
+
+    // Session D — Accessory / Event practice
+    if (actualDays >= 4) {
+      sessions.push({
+        id: `w${week}d`, name: 'Session D — Event Practice & Accessory', day: 'Day 4', targetRpe: '7',
+        blocks: [
+          {
+            name: 'EVENT PRACTICE', rest: 120,
+            exercises: events.filter(e => !['deadlift','log','stones','farmers','yoke'].includes(e)).map((ev, i) => ({
+              id: `e${week}d${i}`, name: ev.charAt(0).toUpperCase() + ev.slice(1), sets: 4, reps: 3, weight: 0, rpe: 7, note: 'Event practice — focus on technique'
+            }))
+          },
+          {
+            name: 'ACCESSORY', rest: 90,
+            exercises: [
+              { id:`e${week}d10`, name: 'Pull-ups', sets: 3, reps: 8, weight: 0, rpe: 7, note: '' },
+              { id:`e${week}d11`, name: 'Face pulls', sets: 3, reps: 15, weight: 0, rpe: 7, note: '' },
+            ]
+          }
+        ]
+      });
+    }
+
+    program[week] = sessions;
+  }
+
+  return program;
+}
+
+// Main entry point — detects program type
+function generateAnyProgram(clientData) {
+  const type = clientData.programType || clientData.questionnaire?.program_type || 'get_strong';
+  if (type === 'pre_comp') return generatePreCompProgram(clientData);
+  return generateProgram(clientData);
+}
+
 // Export for use in other files
-if (typeof module !== 'undefined') module.exports = { generateProgram, selectExercises, rpeToWeight };
+if (typeof module !== 'undefined') module.exports = { generateProgram, generatePreCompProgram, generateAnyProgram, selectExercises, rpeToWeight };
