@@ -289,8 +289,16 @@ function generateProgram(clientData) {
     gymType = 'commercial',
     equipment = [],
     trainingDays = 3,
-    rpe = {}
+    sessionLength = 60,
+    rpe = {},
+    questionnaire = {}
   } = clientData;
+
+  // Use questionnaire data if available
+  const actualGymType = questionnaire.gym_setup || questionnaire.raw_data?.gymType || gymType;
+  const actualDays = parseInt(questionnaire.days_per_week || questionnaire.raw_data?.trainingDays || trainingDays) || 3;
+  const actualSessionLength = parseInt(questionnaire.session_length || questionnaire.raw_data?.sessionLength || sessionLength) || 60;
+  const actualEquipment = questionnaire.raw_data?.equipment || equipment;
 
   const maxes = {
     deadlift: rpe.deadlift_1rm || 0,
@@ -299,18 +307,21 @@ function generateProgram(clientData) {
     press: rpe.press_1rm || 0,
   };
 
-  const ex = selectExercises(gymType, equipment);
+  const ex = selectExercises(actualGymType, actualEquipment);
   const program = {};
+
+  // Adjust sets/reps based on session length
+  const timeMultiplier = actualSessionLength <= 45 ? 0.75 : actualSessionLength >= 90 ? 1.25 : 1;
 
   for (let week = 1; week <= 6; week++) {
     const sessions = [];
     
-    // Always include 3 sessions — add 4th if 4 days selected
-    sessions.push({ ...buildSession('A', week, ex, maxes, gymType), id: `w${week}a` });
-    sessions.push({ ...buildSession('B', week, ex, maxes, gymType), id: `w${week}b` });
-    sessions.push({ ...buildSession('C', week, ex, maxes, gymType), id: `w${week}c` });
+    // Build sessions based on actual training days
+    if (actualDays >= 1) sessions.push({ ...buildSession('A', week, ex, maxes, actualGymType), id: `w${week}a`, day: 'Day 1' });
+    if (actualDays >= 2) sessions.push({ ...buildSession('B', week, ex, maxes, actualGymType), id: `w${week}b`, day: 'Day 2' });
+    if (actualDays >= 3) sessions.push({ ...buildSession('C', week, ex, maxes, actualGymType), id: `w${week}c`, day: 'Day 3' });
     
-    if (trainingDays >= 4) {
+    if (actualDays >= 4) {
       // 4th day = extra upper body / accessory
       sessions.push({
         id: `w${week}d`,
