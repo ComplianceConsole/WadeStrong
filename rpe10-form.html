@@ -373,6 +373,26 @@ async function submitRPE() {
       })
     });
   } catch(err) { console.error('Email error:', err); }
+
+  // Send alert email to Wade
+  try {
+    await fetch('https://wade-send-email.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'wade_rpe_alert',
+        to: 'info@wadestrong.com.au',
+        data: {
+          clientName: firstName,
+          clientEmail: email,
+          deadlift: rpeData.deadlift_1rm,
+          squat: rpeData.squat_raw_1rm,
+          bench: rpeData.bench_1rm,
+          ohp: rpeData.press_1rm,
+        }
+      })
+    });
+  } catch(err) { console.error('Wade RPE email error:', err); }
 }
 
 buildForm();
