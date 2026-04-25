@@ -534,6 +534,18 @@ async function loadClientForBuilder() {
       programs.forEach(p => {
         if (p.sessions) Object.assign(sessionData, p.sessions);
       });
+      // Rebuild week list from loaded data
+      const loadedWeekNums = Object.keys(sessionData).map(Number).filter(n=>!isNaN(n)).sort((a,b)=>a-b);
+      if (loadedWeekNums.length > 0) {
+        weeks.length = 0;
+        const weekTypes = ['build','build','build','peak','peak','deload'];
+        loadedWeekNums.forEach((n, i) => {
+          weeks.push({num:n, type: weekTypes[i] || 'build', label:`Week ${n}`});
+        });
+        renderWeeks();
+        switchWeek(loadedWeekNums[0]);
+        switchDay(1);
+      }
       showToast(`Loaded ${programs.length} week(s) for ${name}`);
     } else if (rpe && rpe.length) {
       // Auto-generate using REAL questionnaire column names
@@ -556,8 +568,20 @@ async function loadClientForBuilder() {
           }
         });
         Object.assign(sessionData, generated);
+        // Rebuild week list from generated program
+        const genWeekNums = Object.keys(generated).map(Number).sort((a,b)=>a-b);
+        if (genWeekNums.length > 0) {
+          weeks.length = 0;
+          const weekTypes = ['build','build','build','peak','peak','deload'];
+          genWeekNums.forEach((n, i) => {
+            weeks.push({num:n, type: weekTypes[i] || 'build', label:`Week ${n}`});
+          });
+        }
+        renderWeeks();
         showAutoGenerateBanner(name, gymType, c.program_type);
-        showToast(`Program auto-generated for ${name} ✓`);
+        showToast(`Program auto-generated for ${name} — ${weeks.length} weeks ✓`);
+        switchWeek(1);
+        switchDay(1);
       }
     } else {
       showToast(`${name} loaded — awaiting RPE testing`);
@@ -881,6 +905,10 @@ const progSuggestions = [];
 // ── RENDER WEEKS ──
 function renderWeeks() {
   const wl = document.getElementById('weekList');
+  if (!weeks.length) {
+    wl.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px">No weeks yet — add one below</div>';
+    return;
+  }
   wl.innerHTML = weeks.map(w=>{
     const badge = w.type==='deload'?'<span class="week-item-badge badge-deload">Deload</span>':
       w.type==='peak'?'<span class="week-item-badge badge-peak">Peak</span>':
@@ -905,10 +933,12 @@ function switchWeek(n) {
 }
 
 function addWeek() {
-  const n = weeks.length+1;
-  weeks.push({num:n,type:'build',label:`Week ${n}`});
+  const n = weeks.length + 1;
+  weeks.push({num:n, type:'build', label:`Week ${n}`});
+  if (!sessionData[n]) sessionData[n] = [];
   renderWeeks();
   switchWeek(n);
+  showToast(`Week ${n} added`);
 }
 
 function updateWeekType(type) {
@@ -1202,7 +1232,11 @@ function renderExercises(filter='') {
   const list = document.getElementById('exerciseList');
   const q = filter.toLowerCase();
   let html = '';
-  Object.entries(exerciseLibrary).forEach(([cat,exs])=>{
+  // Display in logical order
+  const categoryOrder = ['Warm-up / mobility', 'Lower body', 'Upper body', 'Strongman', 'Accessories', 'Conditioning', 'Active recovery'];
+  const orderedEntries = [...categoryOrder.map(c => [c, exerciseLibrary[c]]).filter(([,v])=>v), ...Object.entries(exerciseLibrary).filter(([k])=>!categoryOrder.includes(k))];
+  orderedEntries.forEach(([cat,exs])=>{
+    if (!exs) return;
     const filtered = exs.filter(e=>e.name.toLowerCase().includes(q)||cat.toLowerCase().includes(q));
     if(!filtered.length) return;
     html+=`<div class="ex-category"><div class="ex-category-title">${cat}</div>`;
@@ -1333,9 +1367,16 @@ renderDays();
 renderBlocks();
 renderExercises();
 renderProgSuggestions();
-// Start on week 1 day 1
-switchWeek(1);
-switchDay(1);
+// Load client from URL if present, otherwise show empty state
+const initParams = new URLSearchParams(window.location.search);
+if (initParams.get('client') || initParams.get('email')) {
+  loadClientForBuilder();
+} else {
+  // No client — just show the builder ready to use
+  switchWeek(1);
+  switchDay(1);
+  showToast('Open from Admin CRM to load a client');
+}
 </script>
 </body>
 </html>
