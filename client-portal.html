@@ -1025,14 +1025,21 @@ function renderEvents() {
 // ── MESSAGES ──────────────────────────────────────────────────
 function renderMessages() {
   const thread = document.getElementById('msgThread');
-  thread.innerHTML = MESSAGES.map(m => `
-    <div style="display:flex;flex-direction:column;align-items:${m.from==='wade'?'flex-start':'flex-end'}">
-      <div class="msg-bubble ${m.from==='wade'?'msg-from-wade':'msg-from-client'}">
-        ${m.from==='wade'?'<div class="msg-sender">Wade</div>':''}
-        ${m.text}
+  thread.innerHTML = MESSAGES.map(m => {
+    const isWade = m.from === 'wade';
+    const isVoice = m.type === 'voice' || (m.content && m.content.startsWith('data:audio'));
+    const msgContent = isVoice
+      ? `<div style="margin-bottom:4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust)">🎤 Voice note from Wade</div><audio controls src="${m.content || m.text}" style="width:200px;height:36px;margin-top:4px"></audio>`
+      : (m.text || m.content || '');
+    return `
+    <div style="display:flex;flex-direction:column;align-items:${isWade?'flex-start':'flex-end'}">
+      <div class="msg-bubble ${isWade?'msg-from-wade':'msg-from-client'}">
+        ${isWade?'<div class="msg-sender">Wade</div>':''}
+        ${msgContent}
       </div>
       <div class="msg-time">${m.time}</div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   setTimeout(() => {
     const s = document.getElementById('scrollArea');
     s.scrollTop = s.scrollHeight;
