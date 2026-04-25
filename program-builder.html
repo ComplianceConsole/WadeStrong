@@ -129,7 +129,7 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
 .block-body{padding:0}
 
 /* exercise rows */
-.ex-row{display:grid;grid-template-columns:22px 1fr 52px 52px 64px 72px 64px 28px;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border)}
+.ex-row{display:grid;grid-template-columns:22px 1fr 52px 52px 64px 72px 64px 28px 28px;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border)}
 .ex-row:last-child{border-bottom:none}
 .ex-row:hover{background:rgba(245,242,238,0.5)}
 .ex-drag{color:rgba(107,101,96,0.3);font-size:12px;cursor:grab;text-align:center}
@@ -151,7 +151,7 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
 .ex-delete-btn:hover{background:#fce8e8;color:#8c2020}
 
 /* col headers */
-.ex-headers{display:grid;grid-template-columns:22px 1fr 52px 52px 64px 72px 64px 28px;gap:6px;padding:5px 12px 4px;background:var(--chalk);border-bottom:1px solid var(--border)}
+.ex-headers{display:grid;grid-template-columns:22px 1fr 52px 52px 64px 72px 64px 28px 28px;gap:6px;padding:5px 12px 4px;background:var(--chalk);border-bottom:1px solid var(--border)}
 .ex-hdr{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:center}
 .ex-hdr:nth-child(2){text-align:left}
 
@@ -471,6 +471,23 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
   </div>
 </div>
 
+<!-- Note modal -->
+<div class="modal-overlay" id="noteModal">
+  <div class="modal">
+    <h3>EXERCISE NOTE</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">This note travels with the exercise every time it's added to a program.</p>
+    <div class="modal-field">
+      <label>Note for Wade (internal) or client instruction</label>
+      <textarea id="noteModalText" style="min-height:100px;width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-body);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;resize:vertical" placeholder="e.g. Use straps after warm-up sets. Touch and go only. Keep chest up out of the hole..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="clearExNote()">Clear note</button>
+      <button class="modal-cancel" onclick="closeModal('noteModal')">Cancel</button>
+      <button class="modal-confirm" onclick="saveExNote()">Save note</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
@@ -713,11 +730,21 @@ const exerciseLibrary = {
     {name:'Battle ropes',meta:'Time sets'},
   ],
   'Warm-up / mobility': [
-    {name:'Hip flexor stretch',meta:'2 min each'},
-    {name:'Thoracic rotation',meta:'10 each side'},
-    {name:'Banded pull-aparts',meta:'3×20'},
+    {name:'Hip flexor stretch',meta:'2 min each',defaultNote:'Keep movements controlled — gradually increase range. Don't force a cold muscle.'},
+    {name:'Thoracic rotation',meta:'10 each side',defaultNote:'Controlled rotation — don't bounce at end range.'},
+    {name:'Banded pull-aparts',meta:'3×20',defaultNote:'Band Pull-Aparts — 15 reps. No band? Reach arms overhead and pull one elbow across with opposite hand.'},
     {name:'Goblet squat',meta:'Light, deep'},
     {name:'Cat-cow',meta:'Spine mob'},
+    {name:'Shoulder rolls',meta:'Forward & back',defaultNote:'10 forward, 10 back. Controlled circles, not rushed.'},
+    {name:'Chest opener',meta:'Arms wide, breathe deep',defaultNote:'Arms wide, breathe deep. Gradually increase range — don't force it cold.'},
+    {name:'Front dumbbell raise',meta:'Light, controlled',defaultNote:'Light weight only. Slow and controlled — this is a warm-up, not a working set.'},
+    {name:'Band dislocates',meta:'Shoulder mobility'},
+    {name:'World's greatest stretch',meta:'5 each side'},
+    {name:'Ankle circles',meta:'10 each direction'},
+    {name:'Glute activation',meta:'Banded or bodyweight'},
+    {name:'Cross-body arm swings',meta:'15–20 reps',defaultNote:'Swing both arms wide open, then cross in front of chest. Start slow, progressively faster. 15–20 reps.'},
+    {name:'Wrist circles & finger spreads',meta:'10 circles each direction',defaultNote:'Essential before any lifting, push-ups, or grip work. 10 circles each direction, then spread fingers wide.'},
+    {name:'Overhead reach',meta:'Band or bodyweight',defaultNote:'15 reps with band, or reach both arms overhead and gently pull one elbow across with the opposite hand.'},
   ],
 };
 
@@ -850,6 +877,7 @@ function renderBlock(b) {
         <div class="ex-hdr">Weight</div>
         <div class="ex-hdr">RPE</div>
         <div class="ex-hdr">kg / %1RM</div>
+        <div class="ex-hdr" title="Notes">✎</div>
         <div class="ex-hdr"></div>
       </div>
       ${rows}
@@ -862,9 +890,13 @@ function renderExRow(e, blockId) {
   const rpeClass = e.rpe ? `r${e.rpe}` : '';
   const pct = e.weight && e.rpe ? calcPct(parseFloat(e.weight), e.name, parseInt(e.rpe)) : '';
   const highlight = pct && parseFloat(pct) > 95 ? ' highlight' : '';
+  const hasNote = e.note && e.note.trim().length > 0;
   return `<div class="ex-row" id="exrow_${e.id}">
     <div class="ex-drag">&#8942;</div>
-    <div class="ex-name" onclick="openExPicker('${blockId}','${e.id}')" title="Click to change">${e.name}</div>
+    <div>
+      <div class="ex-name" onclick="openExPicker('${blockId}','${e.id}')" title="Click to change">${e.name}</div>
+      ${hasNote ? `<div style="font-size:11px;color:var(--rust);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px" title="${e.note}">✎ ${e.note}</div>` : ''}
+    </div>
     <input class="ex-input" type="number" min="0" value="${e.sets}" placeholder="4" oninput="updateEx('${blockId}','${e.id}','sets',this.value)">
     <input class="ex-input" type="text" value="${e.reps}" placeholder="5" oninput="updateEx('${blockId}','${e.id}','reps',this.value)">
     <input class="ex-input" type="number" min="0" value="${e.weight}" placeholder="kg" oninput="updateEx('${blockId}','${e.id}','weight',this.value)">
@@ -873,6 +905,7 @@ function renderExRow(e, blockId) {
       ${[6,7,8,9,10].map(n=>`<option value="${n}"${e.rpe==n?' selected':''}>${n}</option>`).join('')}
     </select>
     <input class="ex-input${highlight}" type="text" value="${pct}" placeholder="%" oninput="updateEx('${blockId}','${e.id}','pct',this.value)" title="${parseFloat(pct)>95?'High % — check fatigue':''}">
+    <button class="ex-note-btn${hasNote?' has-note':''}" onclick="openNoteModal('${blockId}','${e.id}')" title="${hasNote ? e.note : 'Add note'}">✎</button>
     <button class="ex-delete-btn" onclick="deleteExercise('${blockId}','${e.id}')">&#215;</button>
   </div>`;
 }
@@ -936,11 +969,17 @@ function selectExercise(name) {
   if(!pendingBlockId) return;
   const b = getBlock(pendingBlockId);
   if(!b) return;
+  // Find default note from library
+  let defaultNote = '';
+  for (const cat of Object.values(exerciseLibrary)) {
+    const libEx = cat.find(e => e.name === name);
+    if (libEx && libEx.defaultNote) { defaultNote = libEx.defaultNote; break; }
+  }
   if(pendingExId) {
     const ex = b.exercises.find(e=>e.id===pendingExId);
-    if(ex) { ex.name=name; }
+    if(ex) { ex.name=name; if(defaultNote) ex.note=defaultNote; }
   } else {
-    b.exercises.push({id:'e'+Date.now(),name,sets:'4',reps:'6',weight:'',rpe:'8',note:''});
+    b.exercises.push({id:'e'+Date.now(),name,sets:'4',reps:'6',weight:'',rpe:'8',note:defaultNote});
   }
   pendingBlockId=null; pendingExId=null;
   renderBlocks();
@@ -1005,6 +1044,11 @@ function renderExercises(filter='') {
     const filtered = exs.filter(e=>e.name.toLowerCase().includes(q)||cat.toLowerCase().includes(q));
     if(!filtered.length) return;
     html+=`<div class="ex-category"><div class="ex-category-title">${cat}</div>`;
+    if(cat === 'Warm-up / mobility' && !q) {
+      html+=`<div style="background:#fef3d8;border:1px solid rgba(122,80,16,0.2);border-radius:5px;padding:8px 10px;margin-bottom:8px;font-size:11px;color:#7a5010;line-height:1.6">
+        <strong>Warm-up note:</strong> Spend 5–10 minutes total. Keep movements controlled, not bouncy. Gradually increase range of motion — don't force a cold muscle into a deep stretch right away.
+      </div>`;
+    }
     filtered.forEach(e=>{
       html+=`<div class="ex-item" onclick="selectExercise('${e.name}')">
         <div><div class="ex-item-name">${e.name}</div><div class="ex-item-meta">${e.meta}</div></div>
@@ -1066,6 +1110,42 @@ function switchRpTab(id, el) {
 function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function openClientModal() { showToast('Client switcher — coming in admin panel'); }
+
+// ── EXERCISE NOTES ──
+let noteBlockId = null;
+let noteExId = null;
+
+function openNoteModal(blockId, exId) {
+  noteBlockId = blockId;
+  noteExId = exId;
+  const b = getBlock(blockId);
+  const ex = b && b.exercises.find(e => e.id === exId);
+  document.getElementById('noteModalText').value = ex?.note || '';
+  openModal('noteModal');
+  setTimeout(() => document.getElementById('noteModalText').focus(), 100);
+}
+
+function saveExNote() {
+  if (!noteBlockId || !noteExId) return;
+  const b = getBlock(noteBlockId);
+  const ex = b && b.exercises.find(e => e.id === noteExId);
+  if (ex) {
+    ex.note = document.getElementById('noteModalText').value.trim();
+    // Also update the exercise library default note for this exercise name
+    for (const cat of Object.values(exerciseLibrary)) {
+      const libEx = cat.find(e => e.name === ex.name);
+      if (libEx) libEx.defaultNote = ex.note;
+    }
+  }
+  closeModal('noteModal');
+  renderBlocks();
+  showToast('Note saved ✓');
+}
+
+function clearExNote() {
+  document.getElementById('noteModalText').value = '';
+  saveExNote();
+}
 
 // ── TOAST ──
 function showToast(msg) {
