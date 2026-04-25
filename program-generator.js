@@ -294,11 +294,11 @@ function generateProgram(clientData) {
     questionnaire = {}
   } = clientData;
 
-  // Use questionnaire data if available
-  const actualGymType = questionnaire.gym_setup || questionnaire.raw_data?.gymType || gymType;
-  const actualDays = parseInt(questionnaire.days_per_week || questionnaire.raw_data?.trainingDays || trainingDays) || 3;
-  const actualSessionLength = parseInt(questionnaire.session_length || questionnaire.raw_data?.sessionLength || sessionLength) || 60;
-  const actualEquipment = questionnaire.raw_data?.equipment || equipment;
+  // Use REAL Supabase column names from questionnaire
+  const actualGymType = questionnaire.gym_type || questionnaire.gym_setup || gymType;
+  const actualDays = parseInt(questionnaire.training_days_per_week || questionnaire.days_per_week || trainingDays) || 3;
+  const actualSessionLength = parseInt(questionnaire.session_length_minutes || questionnaire.session_length || sessionLength) || 60;
+  const actualEquipment = Array.isArray(questionnaire.equipment) ? questionnaire.equipment : equipment;
 
   const maxes = {
     deadlift: rpe.deadlift_1rm || 0,
@@ -370,12 +370,13 @@ function generatePreCompProgram(clientData) {
   const q = questionnaire;
   const rawData = q.raw_data || {};
 
-  const actualGymType = q.gym_setup || rawData.gymType || gymType;
-  const actualDays = parseInt(q.days_per_week || rawData.trainingDays || trainingDays) || 4;
-  const actualSessionLength = parseInt(q.session_length || rawData.sessionLength || sessionLength) || 90;
-  const events = Array.isArray(q.comp_events) ? q.comp_events : (Array.isArray(rawData.events) ? rawData.events : []);
-  const weakEvents = Array.isArray(q.weak_events) ? q.weak_events : (Array.isArray(rawData.weakEvents) ? rawData.weakEvents : []);
-  const timeToComp = q.time_to_comp || rawData.timeToComp || '7-10';
+  // Use REAL Supabase column names
+  const actualGymType = q.gym_type || q.gym_setup || gymType;
+  const actualDays = parseInt(q.training_days_per_week || q.days_per_week || trainingDays) || 4;
+  const actualSessionLength = parseInt(q.session_length_minutes || q.session_length || sessionLength) || 90;
+  const events = Array.isArray(q.competition_events) ? q.competition_events : (Array.isArray(q.comp_events) ? q.comp_events : []);
+  const weakEvents = Array.isArray(q.weak_events) ? q.weak_events : [];
+  const timeToComp = q.time_to_comp || '8';
 
   const maxes = {
     deadlift: rpe.deadlift_1rm || 0,
