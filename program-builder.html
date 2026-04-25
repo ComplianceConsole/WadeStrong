@@ -529,7 +529,7 @@ async function loadClientForBuilder() {
     updateClientSnapshot(c, q, rpe);
 
     // Load existing programs
-    const programs = await db.select('programs', { client_id: currentClientId }, { order: 'week_number.asc' });
+    const programs = await db.select('programs', { client_id: currentClientId });
     if (programs && programs.length) {
       programs.forEach(p => {
         if (p.sessions) Object.assign(sessionData, p.sessions);
@@ -783,8 +783,8 @@ function updateClientDataPanel(c, q, rpe) {
 }
 
 function showAutoGenerateBanner(clientName, gymType, programType) {
-  // Create a banner at the top of the program builder
   const gymLabel = gymType === 'strongman' ? 'Strongman gym' : gymType === 'home' ? 'Home gym' : 'Commercial gym';
+  const progLabel = programType === 'pre_comp' ? 'Pre-Comp Build Up' : 'Get Strong';
   const existing = document.getElementById('autogenBanner');
   if (existing) existing.remove();
   
@@ -808,13 +808,15 @@ async function saveDraft() {
   if (!currentClientId) { showToast('No client selected  -  open from admin CRM'); return; }
   try {
     // Save current week's session data
-    await db.insert('programs', {
+    await db.upsert('programs', {
       client_id: currentClientId,
-      week_number: currentWeek,
+      title: 'Get Strong Program',
+      program_type: 'get_strong',
+      total_weeks: weeks.length || 6,
       status: 'draft',
       sessions: sessionData,
       notes: document.getElementById('progNotes')?.value || ''
-    });
+    }, 'client_id');
     showToast('Draft saved ✓');
   } catch(err) {
     console.error('Save draft error:', err);
@@ -829,10 +831,13 @@ async function publishProgram() {
     for (const weekNum of Object.keys(sessionData)) {
       await db.upsert('programs', {
         client_id: currentClientId,
-        week_number: parseInt(weekNum),
+        title: currentClientEmail ? currentClientEmail + ' Program' : 'Get Strong Program',
+        program_type: 'get_strong',
+        total_weeks: weeks.length || 6,
         status: 'published',
         sessions: sessionData,
-      }, 'client_id,week_number');
+        published_at: new Date().toISOString(),
+      }, 'client_id');
     }
     showToast('Program published to client portal ✓');
   } catch(err) {
@@ -1247,7 +1252,23 @@ function openExPicker(blockId, exId=null) {
 }
 
 function selectExercise(name) {
-  if(!pendingBlockId) return;
+  if(!pendingBlockId) {
+    // No block selected — add to first block or show message
+    const d = sessionData[currentDay];
+    if (d && d.blocks && d.blocks.length > 0) {
+      pendingBlockId = d.blocks[0].id;
+    } else {
+      // No blocks yet — create a main lift block first
+      addBlock('main');
+      const d2 = sessionData[currentDay];
+      if (d2 && d2.blocks && d2.blocks.length > 0) {
+        pendingBlockId = d2.blocks[0].id;
+      } else {
+        showToast('Add a block first using the buttons below');
+        return;
+      }
+    }
+  }
   const b = getBlock(pendingBlockId);
   if(!b) return;
   // Find default note from library
