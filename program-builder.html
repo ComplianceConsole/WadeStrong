@@ -248,11 +248,26 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:2px}
+.btn-preset{background:#B85A30;color:#fff;border:none;padding:8px 14px;border-radius:5px;font-family:var(--font-b);font-size:12px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn-preset:hover{background:#8C4122}
+#clientSwitcherDropdown .client-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;font-size:13px;font-weight:500}
+#clientSwitcherDropdown .client-item:hover{background:var(--rust-l)}
+#clientSwitcherDropdown .client-item.active{background:var(--rust-l);border-left:3px solid var(--rust);padding-left:9px}
+#clientSwitcherDropdown .client-item-sub{font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
+
 </style>
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="program-generator.js"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3WQRC6JDFR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3WQRC6JDFR');
+</script>
 </head>
 <body>
 
@@ -951,14 +966,23 @@ const exerciseLibrary = {
   ],
   "Conditioning": [
     {name:"Sled push",meta:"Distance or time"},
-    {name:"Assault bike",meta:"Calories or time"},
     {name:"Prowler sprint",meta:"20m sets"},
-    {name:"Rowing",meta:"Erg"},
     {name:"Battle ropes",meta:"Time sets"},
     {name:"KB suitcase carry",meta:"Single arm"},
     {name:"KB swing",meta:"Hip hinge"},
     {name:"Box jumps",meta:"Power"},
     {name:"Farmers carry",meta:"Conditioning pace"},
+    {name:"Treadmill - incline walk",meta:"Set incline and speed",defaultNote:"Set incline % and speed km/h in the notes. e.g. 10% incline at 5km/h for 20 min."},
+    {name:"Treadmill - run",meta:"Set speed",defaultNote:"Set speed in km/h. e.g. 10km/h for 20 min steady state."},
+    {name:"Treadmill - intervals",meta:"Speed intervals",defaultNote:"e.g. 30 sec sprint at 14km/h, 30 sec walk at 5km/h. Repeat for time."},
+    {name:"Stair climber",meta:"Level and duration",defaultNote:"Set level in the notes. e.g. Level 8 for 20 minutes. Keep an upright posture."},
+    {name:"Ski Erg",meta:"Calories or time",defaultNote:"Drive through the pull, hinge at the hips. Great for upper back and conditioning."},
+    {name:"Assault bike",meta:"Calories or time",defaultNote:"e.g. 50 calories for time, or 20 min at steady pace."},
+    {name:"Rowing - erg",meta:"Calories or time",defaultNote:"Drive with the legs first, then lean back, then pull the handle. e.g. 2000m for time."},
+    {name:"Cycling - stationary",meta:"Watts or time",defaultNote:"Set resistance level. e.g. 20 min at moderate pace or intervals."},
+    {name:"Cross trainer / elliptical",meta:"Level and duration",defaultNote:"Low impact cardio. Set resistance and aim for consistent pace."},
+    {name:"Swimming",meta:"Laps or time"},
+    {name:"Jump rope",meta:"Time or reps",defaultNote:"Great for conditioning and coordination. e.g. 3 x 2 min rounds."},
   ],
   "Active recovery": [
     {name:"Body work - Massage",meta:"Sports or remedial"},
