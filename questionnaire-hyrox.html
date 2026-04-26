@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wade Strong — Hyrox Coaching Questionnaire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#B85A30;--rust-d:#8C4122;--rust-l:#FAECE7;
+  --iron:#1a1a1a;--chalk:#f5f2ee;--white:#fff;--muted:#6b6560;
+  --border:rgba(0,0,0,0.09);--green:#2c7a4b;--green-bg:#e6f4ed;
+  --amber:#e08020;--amber-bg:#fef3e0;
+  --font-d:'Bebas Neue',sans-serif;--font-b:'Instrument Sans',sans-serif;
+}
+html,body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);min-height:100vh}
+.header{background:var(--iron);padding:20px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--font-d);font-size:22px;letter-spacing:2px;color:#f5f0e0}
+.logo span{color:var(--rust)}
+.hyrox-badge{background:var(--rust);color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:100px}
+.progress-bar{height:4px;background:rgba(255,255,255,0.1);position:relative}
+.progress-fill{height:100%;background:var(--rust);transition:width 0.4s ease;width:0%}
+.progress-label{text-align:center;font-size:11px;color:var(--muted);padding:8px;letter-spacing:1px;text-transform:uppercase;background:var(--iron)}
+.container{max-width:680px;margin:0 auto;padding:32px 20px 80px}
+.step{display:none}
+.step.active{display:block}
+.step-title{font-family:var(--font-d);font-size:28px;letter-spacing:1px;margin-bottom:6px}
+.step-sub{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.field{margin-bottom:22px}
+.field label{display:block;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:15px;color:var(--iron);background:var(--white);outline:none;transition:border 0.2s}
+.input:focus{border-color:var(--rust);background:var(--white)}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.input-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;background:var(--white);transition:all 0.2s}
+.choice:hover{border-color:var(--rust);background:var(--rust-l)}
+.choice input{accent-color:var(--rust);flex-shrink:0;width:16px;height:16px}
+.choice span{font-size:14px;font-weight:500}
+.choice small{font-size:12px;color:var(--muted);margin-top:2px;display:block}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.choice-card{display:flex;align-items:flex-start;gap:10px;padding:14px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;background:var(--white);transition:all 0.2s}
+.choice-card:hover{border-color:var(--rust);background:var(--rust-l)}
+.choice-card input{accent-color:var(--rust);flex-shrink:0;margin-top:2px}
+.choice-card span{font-size:14px;font-weight:600;display:block;line-height:1.4}
+.choice-card small{font-size:12px;color:var(--muted);margin-top:3px;display:block;font-weight:400}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1.5px solid var(--border);border-radius:6px;cursor:pointer;background:var(--white);transition:all 0.2s;font-size:13px;font-weight:500}
+.check:hover{border-color:var(--rust);background:var(--rust-l)}
+.check input{accent-color:var(--rust);flex-shrink:0}
+textarea.input{min-height:80px;resize:vertical}
+.station-grid{display:flex;flex-direction:column;gap:10px}
+.station-card{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:14px 16px}
+.station-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.station-num{width:28px;height:28px;border-radius:50%;background:var(--iron);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.station-name{font-size:14px;font-weight:700}
+.station-desc{font-size:12px;color:var(--muted)}
+.station-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mini-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.effort-scale{display:flex;gap:4px}
+.effort-btn{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:5px;background:var(--white);font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s}
+.effort-btn:hover{border-color:var(--rust)}
+.effort-btn.selected{background:var(--iron);color:#fff;border-color:var(--iron)}
+.effort-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:4px;padding:0 2px}
+.info-box{background:var(--amber-bg);border:1px solid rgba(224,128,32,0.2);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#5a3800;line-height:1.6}
+.info-box strong{display:block;margin-bottom:4px}
+.divider{border:none;border-top:1px solid var(--border);margin:20px 0}
+.btn-row{display:flex;gap:10px;margin-top:28px}
+.btn{padding:14px 28px;border-radius:6px;font-family:var(--font-b);font-size:15px;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+.btn-rust{background:var(--rust);color:#fff}
+.btn-rust:hover{background:var(--rust-d)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--iron);color:var(--iron)}
+.btn-full{width:100%;text-align:center}
+.success-screen{display:none;text-align:center;padding:48px 20px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-family:var(--font-d);font-size:36px;letter-spacing:1px;margin-bottom:10px}
+.success-sub{font-size:16px;color:var(--muted);line-height:1.7;max-width:440px;margin:0 auto 28px}
+.next-steps{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:left;max-width:440px;margin:0 auto}
+.next-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05)}
+.next-step:last-child{border-bottom:none}
+.next-num{width:24px;height:24px;border-radius:50%;background:var(--rust);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.next-text{font-size:13px;line-height:1.5}
+</style>
+<script src="supabase-config.js"></script>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">WADE<span>.</span>STRONG</div>
+  <div class="hyrox-badge">Hyrox Program</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="progress-label" id="progressLabel">Step 1 of 6 — About You</div>
+
+<div class="container">
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🏅</div>
+    <div class="success-title">You're in, let's get to work.</div>
+    <div class="success-sub">Wade has everything he needs to build your Hyrox program. Keep an eye on your inbox — he'll be in touch within 24 hours.</div>
+    <div class="next-steps">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rust);margin-bottom:10px">What happens next</div>
+      <div class="next-step"><div class="next-num">1</div><div class="next-text"><strong>Wade reviews your answers</strong> — he looks at your current fitness, race goals and station times.</div></div>
+      <div class="next-step"><div class="next-num">2</div><div class="next-text"><strong>6-week program built</strong> — structured weekly training with a baby Hyrox sim each week.</div></div>
+      <div class="next-step"><div class="next-num">3</div><div class="next-text"><strong>Portal access sent</strong> — your program, session logs and direct messaging with Wade.</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: ABOUT YOU -->
+  <div class="step active" id="step-1">
+    <div class="step-title">Let's start with you.</div>
+    <div class="step-sub">Basic info so Wade can personalise your program and track your progress.</div>
+    <div class="field">
+      <label>First name</label>
+      <input class="input" type="text" id="firstName" placeholder="e.g. Sarah">
+    </div>
+    <div class="field">
+      <label>Last name</label>
+      <input class="input" type="text" id="lastName" placeholder="e.g. Thompson">
+    </div>
+    <div class="field">
+      <label>Email</label>
+      <input class="input" type="email" id="email" placeholder="your@email.com">
+    </div>
+    <div class="input-row">
+      <div class="field">
+        <label>Age</label>
+        <input class="input" type="number" id="age" placeholder="32" min="16" max="80">
+      </div>
+      <div class="field">
+        <label>Gender</label>
+        <select class="input" id="gender">
+          <option value="">Select...</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other / prefer not to say</option>
+        </select>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="field">
+        <label>Height (cm)</label>
+        <input class="input" type="number" id="height" placeholder="170">
+      </div>
+      <div class="field">
+        <label>Weight (kg)</label>
+        <input class="input" type="number" id="weight" placeholder="72">
+      </div>
+    </div>
+    <div class="field">
+      <label>Location</label>
+      <input class="input" type="text" id="location" placeholder="e.g. Brisbane, QLD">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-rust btn-full" onclick="nextStep(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: HYROX BACKGROUND -->
+  <div class="step" id="step-2">
+    <div class="step-title">Your Hyrox background.</div>
+    <div class="step-sub">Whether you're a total beginner or a seasoned racer, this helps Wade set the right starting point.</div>
+
+    <div class="field">
+      <label>Have you done a Hyrox race before?</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="hyroxExperience" value="never"><span>Never — first race incoming</span></label>
+        <label class="choice"><input type="radio" name="hyroxExperience" value="1-2"><span>1–2 races<small>Getting the hang of it</small></span></label>
+        <label class="choice"><input type="radio" name="hyroxExperience" value="3-5"><span>3–5 races<small>Consistent competitor</small></span></label>
+        <label class="choice"><input type="radio" name="hyroxExperience" value="5plus"><span>5+ races<small>Experienced — chasing times</small></span></label>
+      </div>
+    </div>
+
+    <div class="field" id="bestTimeField" style="display:none">
+      <label>Best Hyrox finish time</label>
+      <input class="input" type="text" id="bestTime" placeholder="e.g. 1:28:30">
+      <div class="hint">Include your division (e.g. Open Women, Pro Men)</div>
+    </div>
+
+    <div class="field">
+      <label>What division are you targeting?</label>
+      <div class="choice-grid">
+        <label class="choice-card"><input type="radio" name="division" value="open_male"><span>Open Men<small>Standard weights</small></span></label>
+        <label class="choice-card"><input type="radio" name="division" value="open_female"><span>Open Women<small>Standard weights</small></span></label>
+        <label class="choice-card"><input type="radio" name="division" value="pro_male"><span>Pro Men<small>Heavier weights</small></span></label>
+        <label class="choice-card"><input type="radio" name="division" value="pro_female"><span>Pro Women<small>Heavier weights</small></span></label>
+        <label class="choice-card"><input type="radio" name="division" value="doubles"><span>Doubles<small>With a partner</small></span></label>
+        <label class="choice-card"><input type="radio" name="division" value="unsure"><span>Not sure yet<small>Wade will advise</small></span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Do you have a target race? (optional)</label>
+      <input class="input" type="text" id="targetRace" placeholder="e.g. Hyrox Sydney, Nov 2026">
+    </div>
+
+    <div class="field">
+      <label>What is your main goal?</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="hyroxGoal" value="finish"><span>Just finish — completing my first Hyrox</span></label>
+        <label class="choice"><input type="radio" name="hyroxGoal" value="time"><span>Beat a target time</span></label>
+        <label class="choice"><input type="radio" name="hyroxGoal" value="improve"><span>Improve on my previous result</span></label>
+        <label class="choice"><input type="radio" name="hyroxGoal" value="compete"><span>Compete — aiming for age group podium</span></label>
+      </div>
+    </div>
+
+    <div class="field" id="targetTimeField" style="display:none">
+      <label>What time are you targeting?</label>
+      <input class="input" type="text" id="targetTime" placeholder="e.g. sub 1:15:00">
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="prevStep(2)">← Back</button>
+      <button class="btn btn-rust" onclick="nextStep(2)" style="flex:1">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: CURRENT FITNESS -->
+  <div class="step" id="step-3">
+    <div class="step-title">Your current fitness.</div>
+    <div class="step-sub">Wade programs around where you are right now — not where you think you should be.</div>
+
+    <div class="field">
+      <label>Running background</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="runBackground" value="beginner"><span>Beginner — running is a struggle<small>Less than 5km comfortable</small></span></label>
+        <label class="choice"><input type="radio" name="runBackground" value="recreational"><span>Recreational runner<small>Comfortable up to 10km</small></span></label>
+        <label class="choice"><input type="radio" name="runBackground" value="regular"><span>Regular runner<small>Half marathon or similar</small></span></label>
+        <label class="choice"><input type="radio" name="runBackground" value="strong"><span>Strong runner<small>Sub 50-min 10km or faster</small></span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Approximate 1km run pace</label>
+      <input class="input" type="text" id="kmPace" placeholder="e.g. 5:30 min/km">
+      <div class="hint">Best guess is fine — this helps Wade set realistic running targets in the program</div>
+    </div>
+
+    <div class="field">
+      <label>Gym and strength training background</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="gymBackground" value="none"><span>Little to none</span></label>
+        <label class="choice"><input type="radio" name="gymBackground" value="casual"><span>Casual — a few sessions a week<small>Familiar with basic movements</small></span></label>
+        <label class="choice"><input type="radio" name="gymBackground" value="regular"><span>Regular gym-goer<small>Comfortable with barbells, dumbbells, machines</small></span></label>
+        <label class="choice"><input type="radio" name="gymBackground" value="strong"><span>Strength-focused background<small>Powerlifting, strongman, CrossFit etc</small></span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>How many days per week can you train?</label>
+      <div class="choice-grid">
+        <label class="choice-card"><input type="radio" name="trainingDays" value="3"><span>3 days</span></label>
+        <label class="choice-card"><input type="radio" name="trainingDays" value="4"><span>4 days</span></label>
+        <label class="choice-card"><input type="radio" name="trainingDays" value="5"><span>5 days</span></label>
+        <label class="choice-card"><input type="radio" name="trainingDays" value="6"><span>6 days</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Session length available</label>
+      <div class="choice-grid">
+        <label class="choice-card"><input type="radio" name="sessionLength" value="45"><span>45 min</span></label>
+        <label class="choice-card"><input type="radio" name="sessionLength" value="60"><span>60 min</span></label>
+        <label class="choice-card"><input type="radio" name="sessionLength" value="75"><span>75 min</span></label>
+        <label class="choice-card"><input type="radio" name="sessionLength" value="90"><span>90 min+</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>What gym do you have access to?</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="gymAccess" value="commercial"><span>Commercial gym<small>Standard equipment — treadmill, cables, dumbbells, machines</small></span></label>
+        <label class="choice"><input type="radio" name="gymAccess" value="hyrox_equipped"><span>Hyrox-equipped gym<small>Has Ski Erg, sled, rowing, wall balls etc</small></span></label>
+        <label class="choice"><input type="radio" name="gymAccess" value="crossfit"><span>CrossFit / functional gym<small>Most Hyrox equipment available</small></span></label>
+        <label class="choice"><input type="radio" name="gymAccess" value="home"><span>Home gym<small>Limited equipment</small></span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>What Hyrox-specific equipment is available to you? (tick all that apply)</label>
+      <div class="checks">
+        <label class="check"><input type="checkbox" name="equipment" value="ski_erg"> Ski Erg</label>
+        <label class="check"><input type="checkbox" name="equipment" value="sled"> Sled</label>
+        <label class="check"><input type="checkbox" name="equipment" value="rowing"> Rowing erg</label>
+        <label class="check"><input type="checkbox" name="equipment" value="wall_balls"> Wall balls</label>
+        <label class="check"><input type="checkbox" name="equipment" value="farmers_kb"> Kettlebells (farmers carry)</label>
+        <label class="check"><input type="checkbox" name="equipment" value="sandbag"> Sandbag</label>
+        <label class="check"><input type="checkbox" name="equipment" value="assault_bike"> Assault bike</label>
+        <label class="check"><input type="checkbox" name="equipment" value="treadmill"> Treadmill</label>
+        <label class="check"><input type="checkbox" name="equipment" value="track"> Outdoor track / running space</label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="prevStep(3)">← Back</button>
+      <button class="btn btn-rust" onclick="nextStep(3)" style="flex:1">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: STATION SELF-ASSESSMENT -->
+  <div class="step" id="step-4">
+    <div class="step-title">How do you feel about each station?</div>
+    <div class="step-sub">Rate your confidence at each Hyrox station. Be honest — this is how Wade identifies where you'll gain the most time.</div>
+
+    <div class="info-box">
+      <strong>How to rate yourself:</strong>
+      1 = Never done it or very weak | 3 = Average | 5 = Strong and confident
+    </div>
+
+    <div class="station-grid">
+      <!-- Station 1 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">1</div>
+          <div><div class="station-name">Ski Erg — 1000m</div><div class="station-desc">Upper body + core pulling movement</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="ski_conf">
+          <button class="effort-btn" onclick="setRating('ski_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('ski_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('ski_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('ski_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('ski_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 2 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">2</div>
+          <div><div class="station-name">Sled Push — 50m</div><div class="station-desc">Leg drive + full body power</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="sled_push_conf">
+          <button class="effort-btn" onclick="setRating('sled_push_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('sled_push_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('sled_push_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('sled_push_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('sled_push_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 3 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">3</div>
+          <div><div class="station-name">Sled Pull — 50m</div><div class="station-desc">Back + grip + core endurance</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="sled_pull_conf">
+          <button class="effort-btn" onclick="setRating('sled_pull_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('sled_pull_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('sled_pull_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('sled_pull_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('sled_pull_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 4 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">4</div>
+          <div><div class="station-name">Burpee Broad Jump — 80m</div><div class="station-desc">Power + conditioning + mental toughness</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="burpee_conf">
+          <button class="effort-btn" onclick="setRating('burpee_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('burpee_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('burpee_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('burpee_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('burpee_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 5 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">5</div>
+          <div><div class="station-name">Rowing — 1000m</div><div class="station-desc">Full body aerobic endurance</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="row_conf">
+          <button class="effort-btn" onclick="setRating('row_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('row_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('row_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('row_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('row_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 6 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">6</div>
+          <div><div class="station-name">Farmers Carry — 200m</div><div class="station-desc">Grip + core + mental endurance</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="farmers_conf">
+          <button class="effort-btn" onclick="setRating('farmers_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('farmers_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('farmers_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('farmers_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('farmers_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 7 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">7</div>
+          <div><div class="station-name">Sandbag Lunges — 100m</div><div class="station-desc">Leg strength + balance under fatigue</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="lunge_conf">
+          <button class="effort-btn" onclick="setRating('lunge_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('lunge_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('lunge_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('lunge_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('lunge_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+
+      <!-- Station 8 -->
+      <div class="station-card">
+        <div class="station-header">
+          <div class="station-num">8</div>
+          <div><div class="station-name">Wall Balls — 100 reps</div><div class="station-desc">The make-or-break final station</div></div>
+        </div>
+        <div class="mini-label">Confidence (1–5)</div>
+        <div class="effort-scale" id="wallball_conf">
+          <button class="effort-btn" onclick="setRating('wallball_conf',1,this)">1</button>
+          <button class="effort-btn" onclick="setRating('wallball_conf',2,this)">2</button>
+          <button class="effort-btn" onclick="setRating('wallball_conf',3,this)">3</button>
+          <button class="effort-btn" onclick="setRating('wallball_conf',4,this)">4</button>
+          <button class="effort-btn" onclick="setRating('wallball_conf',5,this)">5</button>
+        </div>
+        <div class="effort-labels"><span>Never done it</span><span>Strong</span></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="prevStep(4)">← Back</button>
+      <button class="btn btn-rust" onclick="nextStep(4)" style="flex:1">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: HEALTH + LIFESTYLE -->
+  <div class="step" id="step-5">
+    <div class="step-title">Health and lifestyle.</div>
+    <div class="step-sub">This helps Wade build a program that works with your life, not against it.</div>
+
+    <div class="field">
+      <label>Any injuries or physical limitations?</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="hasInjuries" value="no" onclick="toggleInjuries(false)"><span>No current injuries</span></label>
+        <label class="choice"><input type="radio" name="hasInjuries" value="yes" onclick="toggleInjuries(true)"><span>Yes — I have something to flag</span></label>
+      </div>
+    </div>
+    <div id="injuryDetail" style="display:none;margin-top:-10px;margin-bottom:22px">
+      <textarea class="input" id="injuries" placeholder="e.g. Left knee issue — some pain when running downhill. Cleared by physio to train."></textarea>
+    </div>
+
+    <div class="field">
+      <label>Sleep quality</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="sleep" value="poor"><span>Poor — often less than 6 hours or broken sleep</span></label>
+        <label class="choice"><input type="radio" name="sleep" value="average"><span>Average — 6–7 hours most nights</span></label>
+        <label class="choice"><input type="radio" name="sleep" value="good"><span>Good — 7–8 hours consistently</span></label>
+        <label class="choice"><input type="radio" name="sleep" value="excellent"><span>Excellent — 8+ hours, wake up recovered</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Current stress level (work, life etc)</label>
+      <div class="choice-grid">
+        <label class="choice-card"><input type="radio" name="stress" value="low"><span>Low</span></label>
+        <label class="choice-card"><input type="radio" name="stress" value="moderate"><span>Moderate</span></label>
+        <label class="choice-card"><input type="radio" name="stress" value="high"><span>High</span></label>
+        <label class="choice-card"><input type="radio" name="stress" value="very_high"><span>Very high</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Do you have a physically demanding job?</label>
+      <div class="choice-grid">
+        <label class="choice-card"><input type="radio" name="physicalJob" value="no"><span>No — mostly desk-based</span></label>
+        <label class="choice-card"><input type="radio" name="physicalJob" value="yes"><span>Yes — on my feet or active all day</span></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Anything else Wade should know?</label>
+      <textarea class="input" id="anythingElse" placeholder="Previous injuries, upcoming events, time constraints, specific concerns..."></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="prevStep(5)">← Back</button>
+      <button class="btn btn-rust" onclick="nextStep(5)" style="flex:1">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: REVIEW + SUBMIT -->
+  <div class="step" id="step-6">
+    <div class="step-title">Almost there.</div>
+    <div class="step-sub">Wade will use all of this to build your 6-week Hyrox program with weekly "baby Hyrox" simulations and targeted station work.</div>
+
+    <div class="info-box" style="background:var(--green-bg);border-color:rgba(44,122,75,0.2);color:#1a4a2a">
+      <strong>What you get:</strong>
+      A 6-week program including one Hyrox simulation session per week (doable in a commercial gym), plus targeted training for your weakest stations. Wade builds it around your division, your equipment and your current fitness.
+    </div>
+
+    <div class="field">
+      <label>How did you hear about Wade Strong?</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="referral" value="instagram"><span>Instagram</span></label>
+        <label class="choice"><input type="radio" name="referral" value="friend"><span>Friend or training partner</span></label>
+        <label class="choice"><input type="radio" name="referral" value="google"><span>Google search</span></label>
+        <label class="choice"><input type="radio" name="referral" value="hyrox_community"><span>Hyrox community / event</span></label>
+        <label class="choice"><input type="radio" name="referral" value="other"><span>Other</span></label>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="prevStep(6)">← Back</button>
+      <button class="btn btn-rust" onclick="submitForm()" style="flex:1">Submit to Wade →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 6;
+const ratings = {};
+
+function setRating(id, val, btn) {
+  ratings[id] = val;
+  const group = document.getElementById(id);
+  group.querySelectorAll('.effort-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function updateProgress() {
+  const pct = ((currentStep - 1) / totalSteps) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  const labels = ['About You','Hyrox Background','Current Fitness','Station Self-Assessment','Health & Lifestyle','Review & Submit'];
+  document.getElementById('progressLabel').textContent = `Step ${currentStep} of ${totalSteps} - ${labels[currentStep-1]}`;
+}
+
+function nextStep(from) {
+  document.getElementById('step-' + from).classList.remove('active');
+  currentStep = from + 1;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function prevStep(from) {
+  document.getElementById('step-' + from).classList.remove('active');
+  currentStep = from - 1;
+  document.getElementById('step-' + currentStep).classList.add('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleInjuries(show) {
+  document.getElementById('injuryDetail').style.display = show ? 'block' : 'none';
+}
+
+// Show best time field if they have race experience
+document.querySelectorAll('input[name="hyroxExperience"]').forEach(el => {
+  el.addEventListener('change', () => {
+    document.getElementById('bestTimeField').style.display = el.value !== 'never' ? 'block' : 'none';
+  });
+});
+
+// Show target time if goal is time-based
+document.querySelectorAll('input[name="hyroxGoal"]').forEach(el => {
+  el.addEventListener('change', () => {
+    document.getElementById('targetTimeField').style.display = ['time','improve','compete'].includes(el.value) ? 'block' : 'none';
+  });
+});
+
+async function submitForm() {
+  // Gather all data
+  const g = (id) => document.getElementById(id)?.value?.trim() || '';
+  const r = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value || '';
+  const checks = (name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(e => e.value);
+
+  const firstName = g('firstName');
+  const lastName = g('lastName');
+  const email = g('email');
+
+  const formData = {
+    firstName, lastName, email,
+    age: g('age'), gender: g('gender'), height: g('height'), weight: g('weight'), location: g('location'),
+    hyroxExperience: r('hyroxExperience'), bestTime: g('bestTime'),
+    division: r('division'), targetRace: g('targetRace'),
+    hyroxGoal: r('hyroxGoal'), targetTime: g('targetTime'),
+    runBackground: r('runBackground'), kmPace: g('kmPace'),
+    gymBackground: r('gymBackground'),
+    trainingDays: r('trainingDays'), sessionLength: r('sessionLength'),
+    gymAccess: r('gymAccess'), equipment: checks('equipment'),
+    stationRatings: {
+      ski_erg: ratings['ski_conf'] || null,
+      sled_push: ratings['sled_push_conf'] || null,
+      sled_pull: ratings['sled_pull_conf'] || null,
+      burpee_broad_jump: ratings['burpee_conf'] || null,
+      rowing: ratings['row_conf'] || null,
+      farmers_carry: ratings['farmers_conf'] || null,
+      sandbag_lunges: ratings['lunge_conf'] || null,
+      wall_balls: ratings['wallball_conf'] || null,
+    },
+    hasInjuries: r('hasInjuries'), injuries: g('injuries'),
+    sleep: r('sleep'), stress: r('stress'),
+    physicalJob: r('physicalJob'), anythingElse: g('anythingElse'),
+    referral: r('referral'),
+  };
+
+  // Identify weak stations (rating 1-2)
+  const weakStations = Object.entries(formData.stationRatings)
+    .filter(([,v]) => v && v <= 2).map(([k]) => k.replace(/_/g,' '));
+
+  // Save to Supabase
+  try {
+    if (typeof db !== 'undefined' && email) {
+      await db.upsert('clients', {
+        email, first_name: firstName, last_name: lastName,
+        program_type: 'hyrox', status: 'new',
+        age: formData.age ? parseInt(formData.age) : null,
+        height: formData.height || null,
+        weight: formData.weight || null,
+        location: formData.location || null,
+      });
+      const clients = await db.select('clients', { email });
+      const clientId = clients && clients[0] ? clients[0].id : null;
+      if (clientId) {
+        await db.insert('questionnaire_responses', {
+          client_id: clientId, email,
+          program_type: 'hyrox',
+          age: formData.age ? parseInt(formData.age) : null,
+          height: formData.height || null,
+          weight: formData.weight ? parseFloat(formData.weight) : null,
+          location: formData.location || null,
+          gym_type: formData.gymAccess || null,
+          equipment: formData.equipment.length ? formData.equipment : null,
+          training_days_per_week: formData.trainingDays ? parseInt(formData.trainingDays) : null,
+          session_length_minutes: formData.sessionLength ? parseInt(formData.sessionLength) : null,
+          injury_status: formData.hasInjuries === 'yes' ? 'reported' : 'none',
+          injury_detail: formData.injuries || null,
+          sleep_quality: formData.sleep || null,
+          stress_level: formData.stress || null,
+          physical_job: formData.physicalJob || null,
+          additional_notes: formData.anythingElse || null,
+          referral_source: formData.referral || null,
+          raw_data: formData,
+        });
+      }
+    }
+  } catch(err) { console.error('Save error:', err); }
+
+  // Slack notification
+  try {
+    await fetch('https://wade-slack-notifications.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'hyrox_questionnaire',
+        data: {
+          name: firstName + ' ' + lastName,
+          email,
+          division: formData.division,
+          goal: formData.hyroxGoal,
+          experience: formData.hyroxExperience,
+          weakStations: weakStations.join(', ') || 'none identified',
+          targetRace: formData.targetRace,
+        }
+      })
+    });
+  } catch(err) { console.error('Slack error:', err); }
+
+  // Email to client
+  try {
+    await fetch('https://wade-send-email.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'questionnaire_received',
+        to: email,
+        data: { firstName }
+      })
+    });
+  } catch(err) { console.error('Email error:', err); }
+
+  // Email to Wade
+  try {
+    await fetch('https://wade-send-email.nameless-wind-f1be.workers.dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'wade_hyrox_alert',
+        to: 'info@wadestrong.com.au',
+        data: {
+          clientName: firstName + ' ' + lastName,
+          clientEmail: email,
+          division: formData.division,
+          experience: formData.hyroxExperience,
+          goal: formData.hyroxGoal,
+          gymAccess: formData.gymAccess,
+          weakStations: weakStations.join(', ') || 'None flagged',
+          targetRace: formData.targetRace || 'Not specified',
+        }
+      })
+    });
+  } catch(err) { console.error('Wade email error:', err); }
+
+  // Show success
+  document.getElementById('step-6').classList.remove('active');
+  document.getElementById('successScreen').style.display = 'block';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Submitted — Wade is on it!';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+updateProgress();
+</script>
+</body>
+</html>

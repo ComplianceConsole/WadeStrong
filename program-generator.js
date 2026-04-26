@@ -491,5 +491,199 @@ function generateAnyProgram(clientData) {
   return generateProgram(clientData);
 }
 
+
+// ============================================================
+// HYROX PROGRAM GENERATOR
+// Official race order: Ski Erg, Sled Push, Sled Pull,
+// Burpee Broad Jump, Rowing, Farmers Carry, Sandbag Lunges,
+// Wall Balls. 8 x 1km runs between each.
+// 
+// Open Men weights = Pro Women weights
+// ============================================================
+
+const HYROX_WEIGHTS = {
+  open_male:   { sled_push: 152, sled_pull: 103, farmers: 24, sandbag: 20, wall_ball: 6, wall_ball_height: 3.05 },
+  open_female: { sled_push: 102, sled_pull: 78,  farmers: 16, sandbag: 10, wall_ball: 4, wall_ball_height: 2.75 },
+  pro_male:    { sled_push: 202, sled_pull: 153, farmers: 32, sandbag: 30, wall_ball: 9, wall_ball_height: 3.05 },
+  pro_female:  { sled_push: 152, sled_pull: 103, farmers: 24, sandbag: 20, wall_ball: 6, wall_ball_height: 2.75 },
+  doubles:     { sled_push: 152, sled_pull: 103, farmers: 24, sandbag: 20, wall_ball: 6, wall_ball_height: 3.05 },
+};
+
+// Equipment substitutions for commercial gym (no sled etc)
+function getCommercialGymSubstitute(station) {
+  const subs = {
+    'Sled Push':        'Heavy prowler push (or treadmill incline walk at 15% x 50m)',
+    'Sled Pull':        'Seated cable row / heavy band pull (simulate pulling motion)',
+    'Ski Erg':         'Ski Erg (if available) or seated cable pull-down x 1000m effort',
+    'Farmers Carry':   'Farmers carry with dumbbells / kettlebells',
+    'Sandbag Lunges':  'Barbell back rack lunges or dumbbell walking lunges',
+    'Wall Balls':      'Wall balls (if available) or goblet squat + dumbbell press combo',
+    'Rowing':          'Rowing erg (or assault bike for equivalent effort)',
+    'Burpee Broad Jump': 'Burpee broad jump (no equipment needed)',
+  };
+  return subs[station] || station;
+}
+
+function generateHyroxProgram(clientData) {
+  const {
+    division = 'open_male',
+    gymAccess = 'commercial',
+    trainingDays = 4,
+    sessionLength = 60,
+    stationRatings = {},
+    questionnaire = {}
+  } = clientData;
+
+  const weights = HYROX_WEIGHTS[division] || HYROX_WEIGHTS['open_male'];
+  const hasHyroxEquip = gymAccess === 'hyrox_equipped' || gymAccess === 'crossfit';
+
+  // Identify weak stations (rating 1-2) for extra focus
+  const weakStations = Object.entries(stationRatings)
+    .filter(([,v]) => v && v <= 2).map(([k]) => k);
+  const strongStations = Object.entries(stationRatings)
+    .filter(([,v]) => v && v >= 4).map(([k]) => k);
+
+  const program = {};
+
+  for (let week = 1; week <= 6; week++) {
+    const phase = week <= 2 ? 'build' : week <= 4 ? 'develop' : 'peak';
+    // Load progression: start at 60-70% of race weight, build to 100% by week 5-6
+    const loadPct = week === 1 ? 0.60 : week === 2 ? 0.70 : week === 3 ? 0.80 : week === 4 ? 0.85 : week === 5 ? 0.95 : 1.0;
+
+    const sessions = [];
+
+    // SESSION 1: Baby Hyrox Simulation (every week - the centrepiece)
+    sessions.push({
+      id: `w${week}s1`,
+      name: week <= 2 ? 'Baby Hyrox Sim - Intro' : week <= 4 ? 'Baby Hyrox Sim - Building' : 'Full Hyrox Sim - Race Pace',
+      day: 'Day 1',
+      targetRpe: phase === 'build' ? '7' : phase === 'develop' ? '8' : '9',
+      notes: `RACE SIMULATION SESSION - Do all stations in official Hyrox order. Run 400m between each station (sub for 1km). Week ${week}: Use ${Math.round(loadPct * 100)}% of race weight. Focus on transitions and pacing, not just raw effort.`,
+      blocks: [
+        {
+          name: 'HYROX SIMULATION',
+          rest: 60,
+          exercises: [
+            { id:`w${week}s1e1`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: 'Race pace effort - build into it' },
+            { id:`w${week}s1e2`, name: 'Ski Erg', sets: 1, reps: 1, weight: 0, rpe: 8, note: `500m (half race distance). Focus on rhythm and breathing. Damper 4-5.` },
+            { id:`w${week}s1e3`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: 'Recover your breathing - do not stop' },
+            { id:`w${week}s1e4`, name: hasHyroxEquip ? 'Sled Push' : 'Heavy Treadmill Incline Walk', sets: 1, reps: 1, weight: Math.round(weights.sled_push * loadPct), rpe: 9, note: `${hasHyroxEquip ? '4 x 12.5m' : '2 x 25m at max incline'}. ${Math.round(weights.sled_push * loadPct)}kg. Drive through the heel - low hips.` },
+            { id:`w${week}s1e5`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: 'Legs will be heavy - expected. Keep moving.' },
+            { id:`w${week}s1e6`, name: hasHyroxEquip ? 'Sled Pull' : 'Seated Cable Row (heavy)', sets: 1, reps: 1, weight: Math.round(weights.sled_pull * loadPct), rpe: 8, note: `${hasHyroxEquip ? '4 x 12.5m rope pull' : '20 heavy reps, back straight'}. ${Math.round(weights.sled_pull * loadPct)}kg.` },
+            { id:`w${week}s1e7`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: '' },
+            { id:`w${week}s1e8`, name: 'Burpee Broad Jump', sets: 1, reps: 1, weight: 0, rpe: 9, note: '40m (half). Stay explosive - do not rest hands on knees.' },
+            { id:`w${week}s1e9`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: '' },
+            { id:`w${week}s1e10`, name: 'Rowing', sets: 1, reps: 1, weight: 0, rpe: 8, note: '500m. Find your race split and hold it. Aim for negative split.' },
+            { id:`w${week}s1e11`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: '' },
+            { id:`w${week}s1e12`, name: 'Farmers Carry', sets: 1, reps: 1, weight: weights.farmers, rpe: 8, note: `2 x ${weights.farmers}kg - 100m (half). Unbroken if possible. Head up, shoulders back.` },
+            { id:`w${week}s1e13`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: '' },
+            { id:`w${week}s1e14`, name: 'Sandbag Lunges', sets: 1, reps: 1, weight: Math.round(weights.sandbag * loadPct), rpe: 9, note: `50m (half). ${Math.round(weights.sandbag * loadPct)}kg sandbag. Alternate knees - do not rush, this is where races fall apart.` },
+            { id:`w${week}s1e15`, name: '400m Run', sets: 1, reps: 1, weight: 0, rpe: 7, note: 'Last run - push now' },
+            { id:`w${week}s1e16`, name: 'Wall Balls', sets: 1, reps: week <= 2 ? 50 : week <= 4 ? 75 : 100, weight: weights.wall_ball, rpe: 10, note: `${week <= 2 ? 50 : week <= 4 ? 75 : 100} reps at ${weights.wall_ball}kg to ${weights.wall_ball_height}m target. Break into sets - e.g. 25-20-15-10-10. This is the finish line.` },
+          ]
+        }
+      ]
+    });
+
+    // SESSION 2: Run + Weak Station Focus
+    const weakFocusStation = weakStations[0] || 'wall_balls';
+    sessions.push({
+      id: `w${week}s2`,
+      name: 'Run Intervals + Weak Station',
+      day: 'Day 2',
+      targetRpe: '7-8',
+      notes: `Run work + targeted station training. Focus: ${weakFocusStation.replace(/_/g,' ')}`,
+      blocks: [
+        {
+          name: 'RUN INTERVALS',
+          rest: 90,
+          exercises: [
+            { id:`w${week}s2e1`, name: 'Treadmill - intervals', sets: week <= 2 ? 6 : week <= 4 ? 8 : 10, reps: 1, weight: 0, rpe: 8, note: `${week <= 2 ? '6' : week <= 4 ? '8' : '10'} x 400m at race pace. 60 sec recovery jog between. This is how you get faster between stations.` },
+          ]
+        },
+        {
+          name: `WEAK STATION - ${weakFocusStation.replace(/_/g,' ').toUpperCase()}`,
+          rest: 120,
+          exercises: [
+            { id:`w${week}s2e2`, name: weakFocusStation === 'wall_balls' ? 'Wall Balls' : weakFocusStation === 'ski_erg' ? 'Ski Erg' : weakFocusStation === 'rowing' ? 'Rowing' : 'Station practice', sets: 4, reps: 1, weight: 0, rpe: 8, note: `4 x max effort sets. Focus on technique and efficiency. Log your times each set. Week ${week}: target consistent pacing across all 4 sets.` },
+          ]
+        }
+      ]
+    });
+
+    if (trainingDays >= 3) {
+      // SESSION 3: Strength - Station-Specific
+      sessions.push({
+        id: `w${week}s3`,
+        name: 'Strength - Hyrox Station Builders',
+        day: 'Day 3',
+        targetRpe: '8',
+        notes: 'Build the strength needed for each station. Heavier than race weight to build capacity.',
+        blocks: [
+          {
+            name: 'LOWER BODY - SLED + LUNGE STRENGTH',
+            rest: 180,
+            exercises: [
+              { id:`w${week}s3e1`, name: 'Squat', sets: 4, reps: 5, weight: 0, rpe: 8, note: 'Build leg drive for sled push. Controlled descent, explosive drive up.' },
+              { id:`w${week}s3e2`, name: 'Bulgarian split squat', sets: 3, reps: 10, weight: 0, rpe: 8, note: 'Unilateral strength for lunges. Per leg.' },
+              { id:`w${week}s3e3`, name: 'Romanian deadlift', sets: 3, reps: 8, weight: 0, rpe: 7, note: 'Posterior chain for sled pull and rowing.' },
+            ]
+          },
+          {
+            name: 'UPPER BODY + CARRY',
+            rest: 120,
+            exercises: [
+              { id:`w${week}s3e4`, name: 'Farmers carry', sets: 4, reps: 1, weight: Math.round(weights.farmers * 1.1), rpe: 8, note: `Heavier than race weight: ${Math.round(weights.farmers * 1.1)}kg per hand x 40m. Build grip capacity.` },
+              { id:`w${week}s3e5`, name: 'Seated row', sets: 4, reps: 8, weight: 0, rpe: 8, note: 'Simulate sled pull. Heavy. Full range of motion.' },
+              { id:`w${week}s3e6`, name: 'Pull-ups', sets: 3, reps: 8, weight: 0, rpe: 7, note: 'Lat strength for ski erg and rowing.' },
+            ]
+          }
+        ]
+      });
+    }
+
+    if (trainingDays >= 4) {
+      // SESSION 4: Steady State Run + Ski/Row
+      sessions.push({
+        id: `w${week}s4`,
+        name: 'Aerobic Base - Long Run + Erg',
+        day: 'Day 4',
+        targetRpe: '6-7',
+        notes: 'Build your aerobic engine. Easy effort - you should be able to hold a conversation.',
+        blocks: [
+          {
+            name: 'LONG RUN',
+            rest: 0,
+            exercises: [
+              { id:`w${week}s4e1`, name: 'Treadmill - run', sets: 1, reps: 1, weight: 0, rpe: 6, note: `${week <= 2 ? '20' : week <= 4 ? '25' : '30'} min steady state at comfortable pace. Zone 2 effort - nasal breathing.` },
+            ]
+          },
+          {
+            name: 'ERG WORK',
+            rest: 90,
+            exercises: [
+              { id:`w${week}s4e2`, name: 'Ski Erg', sets: 3, reps: 1, weight: 0, rpe: 7, note: '3 x 3 min steady. Focus on technique - push through the whole body, not just arms.' },
+              { id:`w${week}s4e3`, name: 'Rowing - erg', sets: 3, reps: 1, weight: 0, rpe: 7, note: '3 x 3 min. Legs first, then lean, then arms. Consistent split pace.' },
+            ]
+          }
+        ]
+      });
+    }
+
+    program[week] = sessions;
+  }
+
+  return program;
+}
+
+// Main entry point - check for hyrox program type
+const _origGenerateAnyProgram = typeof generateAnyProgram === 'function' ? generateAnyProgram : null;
+function generateAnyProgram(clientData) {
+  const type = clientData.programType || clientData.questionnaire?.program_type || 'get_strong';
+  if (type === 'hyrox') return generateHyroxProgram(clientData);
+  if (type === 'pre_comp') return generatePreCompProgram(clientData);
+  return generateProgram(clientData);
+}
+
 // Export for use in other files
-if (typeof module !== 'undefined') module.exports = { generateProgram, generatePreCompProgram, generateAnyProgram, selectExercises, rpeToWeight };
+if (typeof module !== 'undefined') module.exports = { generateProgram, generatePreCompProgram, generateHyroxProgram, generateAnyProgram, selectExercises, rpeToWeight };
