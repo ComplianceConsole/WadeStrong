@@ -255,6 +255,27 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
 #clientSwitcherDropdown .client-item.active{background:var(--rust-l);border-left:3px solid var(--rust);padding-left:9px}
 #clientSwitcherDropdown .client-item-sub{font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
 
+/* PRESETS */
+.preset-card{background:var(--white);border:1.5px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden}
+.preset-card:hover{border-color:var(--rust);box-shadow:0 2px 8px rgba(184,90,48,0.12)}
+.preset-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--rust)}
+.preset-badge{display:inline-block;background:var(--rust-light);color:var(--rust-dark);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:100px;margin-bottom:6px}
+.preset-title{font-size:14px;font-weight:700;color:var(--iron);margin-bottom:3px}
+.preset-meta{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:4px}
+.preset-weeks{font-size:11px;color:var(--rust);font-weight:600;margin-bottom:10px}
+.preset-btn{background:var(--iron);color:#fff;border:none;padding:7px 14px;border-radius:5px;font-family:var(--font-body);font-size:12px;font-weight:600;cursor:pointer;transition:background 0.15s;width:100%}
+.preset-btn:hover{background:var(--rust)}
+/* CLIENT SWITCHER */
+.switcher-dropdown{display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--border);border-radius:8px;margin-top:4px;box-shadow:0 6px 20px rgba(0,0,0,0.12);z-index:200;max-height:320px;overflow:hidden}
+.switcher-search{padding:8px;border-bottom:1px solid var(--border)}
+.switcher-search input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:13px;outline:none;font-family:var(--font-body)}
+.switcher-list{max-height:240px;overflow-y:auto}
+.switcher-item{padding:10px 12px;border-bottom:1px solid rgba(0,0,0,0.04);cursor:pointer;transition:background 0.1s}
+.switcher-item:hover{background:var(--rust-light)}
+.switcher-item.current{border-left:3px solid var(--rust);padding-left:9px;background:var(--rust-light)}
+.switcher-name{font-size:13px;font-weight:600;color:var(--iron)}
+.switcher-meta{font-size:11px;color:var(--muted);margin-top:1px}
+
 </style>
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -298,8 +319,12 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
     <!-- Client snapshot -->
     <div class="sidebar-section">
       <div class="sidebar-section-title">Client snapshot</div>
-      <div class="client-card">
-        <div class="client-card-name" id="sidebarClientName">Loading...</div>
+      <div class="client-card" style="position:relative">
+        <div class="client-card-name" id="sidebarClientName" title="Click to switch client">Loading...</div>
+        <div class="switcher-dropdown" id="clientSwitcherDropdown">
+          <div class="switcher-search"><input id="switcherSearch" placeholder="Search clients..." oninput="filterSwitcher(this.value)"></div>
+          <div class="switcher-list" id="switcherList"></div>
+        </div>
         <div class="client-card-meta" id="sidebarClientMeta"> - </div>
         <div class="client-stats">
           <div class="cs"><div class="cs-val" id="snapWeight"> - </div><div class="cs-lbl">Bodyweight</div></div>
@@ -405,6 +430,7 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
   <div class="right-panel">
     <div class="rp-tabs">
       <div class="rp-tab active" onclick="switchRpTab('exercises',this)">Exercises</div>
+      <div class="rp-tab" onclick="switchRpTab('presets',this)" id="rp-tab-presets">Presets</div>
       <div class="rp-tab" onclick="switchRpTab('client',this)">Client data</div>
       <div class="rp-tab" onclick="switchRpTab('notes',this)">Notes</div>
     </div>
@@ -418,6 +444,49 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
         </div>
         <div id="exerciseList"></div>
         <button class="ex-add-custom" onclick="openAddExerciseModal()">+ Add custom exercise</button>
+      </div>
+
+      <!-- Presets panel -->
+      <div class="rp-panel" id="rp-presets">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5">Fixed 6-week programs. One click auto-populates all weeks. Adjust and publish as normal.</div>
+
+        <!-- Hyrox Male -->
+        <div class="preset-card" onclick="applyPreset('hyrox_male')">
+          <div class="preset-badge">🏅 Hyrox</div>
+          <div class="preset-title">Hyrox — Open Men</div>
+          <div class="preset-meta">152kg sled · 2×24kg carry · 20kg sandbag · 6kg wall ball</div>
+          <div class="preset-weeks">6 weeks · 4 days/week · RoxSim every week</div>
+          <button class="preset-btn">Apply program →</button>
+        </div>
+
+        <!-- Hyrox Female -->
+        <div class="preset-card" onclick="applyPreset('hyrox_female')">
+          <div class="preset-badge">🏅 Hyrox</div>
+          <div class="preset-title">Hyrox — Open Women</div>
+          <div class="preset-meta">102kg sled · 2×16kg carry · 10kg sandbag · 4kg wall ball</div>
+          <div class="preset-weeks">6 weeks · 4 days/week · RoxSim every week</div>
+          <button class="preset-btn">Apply program →</button>
+        </div>
+
+        <!-- Hyrox Pro Male -->
+        <div class="preset-card" onclick="applyPreset('hyrox_pro_male')">
+          <div class="preset-badge" style="background:#1a1a1a;color:#fff">🏅 Pro</div>
+          <div class="preset-title">Hyrox — Pro Men</div>
+          <div class="preset-meta">202kg sled · 2×32kg carry · 30kg sandbag · 9kg wall ball</div>
+          <div class="preset-weeks">6 weeks · 5 days/week · RoxSim every week</div>
+          <button class="preset-btn">Apply program →</button>
+        </div>
+
+        <!-- Hyrox Pro Female -->
+        <div class="preset-card" onclick="applyPreset('hyrox_pro_female')">
+          <div class="preset-badge" style="background:#1a1a1a;color:#fff">🏅 Pro</div>
+          <div class="preset-title">Hyrox — Pro Women</div>
+          <div class="preset-meta">152kg sled · 2×24kg carry · 20kg sandbag · 6kg wall ball</div>
+          <div class="preset-weeks">6 weeks · 5 days/week · RoxSim every week</div>
+          <button class="preset-btn">Apply program →</button>
+        </div>
+
+        <div style="margin-top:16px;padding:12px;background:var(--chalk);border-radius:6px;font-size:11px;color:var(--muted);text-align:center">More presets coming — Pre-Comp Peak, Strongman Base...</div>
       </div>
 
       <!-- Client data panel  -  populated from Supabase -->
@@ -878,6 +947,182 @@ async function sendMessageToClient(msg) {
   } catch(err) {
     console.error('Message send error:', err);
   }
+}
+
+// ── CLIENT SWITCHER ──────────────────────────────────────────
+let allClientsForSwitcher = [];
+
+async function loadAllClients() {
+  try {
+    const result = await db.select('clients');
+    allClientsForSwitcher = (result || []).filter(c => c.status !== 'archived');
+    renderSwitcherList(allClientsForSwitcher);
+  } catch(e) { console.error('Load clients error:', e); }
+}
+
+function toggleClientSwitcher() {
+  const dd = document.getElementById('clientSwitcherDropdown');
+  const isOpen = dd.style.display === 'block';
+  dd.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    document.getElementById('switcherSearch').focus();
+    loadAllClients();
+  }
+}
+
+function filterSwitcher(q) {
+  const filtered = !q ? allClientsForSwitcher :
+    allClientsForSwitcher.filter(c =>
+      (c.first_name + ' ' + c.last_name + ' ' + c.email).toLowerCase().includes(q.toLowerCase())
+    );
+  renderSwitcherList(filtered);
+}
+
+function renderSwitcherList(clients) {
+  const list = document.getElementById('switcherList');
+  if (!list) return;
+  if (!clients.length) { list.innerHTML = '<div style="padding:12px;font-size:13px;color:var(--muted);text-align:center">No clients found</div>'; return; }
+  const progLabel = t => t === 'hyrox' ? '🏅 Hyrox' : t === 'pre_comp' ? '💪 Pre-Comp' : '📈 Get Strong';
+  list.innerHTML = clients.map(c => `
+    <div class="switcher-item${c.email === currentClientEmail ? ' current' : ''}" onclick="switchToClient('${c.email}')">
+      <div class="switcher-name">${c.first_name} ${c.last_name}</div>
+      <div class="switcher-meta">${progLabel(c.program_type)} · ${c.status || 'new'}</div>
+    </div>`).join('');
+}
+
+function switchToClient(email) {
+  if (email === currentClientEmail) return;
+  window.location.href = 'program-builder.html?client=' + encodeURIComponent(email);
+}
+
+// Close switcher on outside click
+document.addEventListener('click', e => {
+  const dd = document.getElementById('clientSwitcherDropdown');
+  const name = document.getElementById('sidebarClientName');
+  if (dd && !dd.contains(e.target) && e.target !== name) dd.style.display = 'none';
+});
+
+// ── PRESET PROGRAMS ──────────────────────────────────────────
+const HYROX_WEIGHTS_PRESETS = {
+  hyrox_male:     { sled: 152, farmers: 24, sandbag: 20, wall_ball: 6,  wb_height: 3.05, label: 'Open Men',   days: 4 },
+  hyrox_female:   { sled: 102, farmers: 16, sandbag: 10, wall_ball: 4,  wb_height: 2.75, label: 'Open Women', days: 4 },
+  hyrox_pro_male: { sled: 202, farmers: 32, sandbag: 30, wall_ball: 9,  wb_height: 3.05, label: 'Pro Men',    days: 5 },
+  hyrox_pro_female:{ sled: 152, farmers: 24, sandbag: 20, wall_ball: 6, wb_height: 2.75, label: 'Pro Women',  days: 5 },
+};
+
+function applyPreset(type) {
+  const w = HYROX_WEIGHTS_PRESETS[type];
+  if (!w) return;
+  if (!confirm('Apply the ' + w.label + ' Hyrox 6-week program? This will replace any existing session data.')) return;
+
+  weeks = [];
+  sessionData = {};
+
+  const dayNames = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+  const phases = ['Build','Build','Develop','Develop','Peak','Peak'];
+  const loadPcts = [0.60, 0.70, 0.80, 0.85, 0.95, 1.00];
+
+  for (let wk = 1; wk <= 6; wk++) {
+    weeks.push({ num: wk, type: phases[wk-1].toLowerCase(), label: 'Week ' + wk });
+    const load = loadPcts[wk-1];
+    const isEarly = wk <= 2;
+    const isMid = wk === 3 || wk === 4;
+
+    // Build sessions for this week
+    const daySessions = {};
+
+    // Day 1 — RoxSim
+    daySessions['monday'] = {
+      name: 'RoxSim — ' + (isEarly ? 'Intro' : isMid ? 'Building' : 'Race Pace'),
+      notes: 'All 7 stations in race order. ' + Math.round(load*100) + '% of race weight. Focus on pacing and transitions.',
+      blocks: [
+        { id:'b'+Date.now()+'_1', type:'conditioning', title:'RoxSim', rest:60, exercises:[
+          { id:'e1', name:'Run',            sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' run — race pace effort' },
+          { id:'e2', name:'Ski Erg',         sets:1, reps:1, weight:0,   rpe:8,  note: (isEarly?'500m':'1000m') + '. Rhythm and breathing. Damper 4–5.' },
+          { id:'e3', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' — keep moving' },
+          { id:'e4', name:'Sled Push',       sets:1, reps:1, weight:Math.round(w.sled*load), rpe:9, note: (isEarly?'25m':'50m') + ' · ' + Math.round(w.sled*load) + 'kg · low hips, drive through heel' },
+          { id:'e5', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' — legs will be heavy, expected' },
+          { id:'e6', name:'Burpee Broad Jump',sets:1,reps:1, weight:0,   rpe:9,  note: (isEarly?'40m':'80m') + ' — stay explosive, no resting hands on knees' },
+          { id:'e7', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') },
+          { id:'e8', name:'Rowing - erg',    sets:1, reps:1, weight:0,   rpe:8,  note: (isEarly?'500m':'1000m') + ' — find race split and hold. Legs → lean → arms.' },
+          { id:'e9', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') },
+          { id:'e10', name:'Farmers carry',  sets:1, reps:1, weight:w.farmers, rpe:8, note: (isEarly?'100m':'200m') + ' · ' + w.farmers + 'kg/hand · unbroken if possible' },
+          { id:'e11', name:'Run',            sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') },
+          { id:'e12', name:'Sandbag Lunges', sets:1, reps:1, weight:Math.round(w.sandbag*load), rpe:9, note: (isEarly?'50m':'100m') + ' · ' + Math.round(w.sandbag*load) + 'kg · alternate knees' },
+          { id:'e13', name:'Run',            sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' — last run, push now' },
+          { id:'e14', name:'Wall Balls',     sets:1, reps:isEarly?50:isMid?75:100, weight:w.wall_ball, rpe:10, note: (isEarly?50:isMid?75:100) + ' reps · ' + w.wall_ball + 'kg to ' + w.wb_height + 'm · break into sets' },
+        ]}
+      ]
+    };
+
+    // Day 2 — Run Intervals + Station Work
+    daySessions['tuesday'] = {
+      name: 'Run Intervals + Station Focus',
+      notes: 'Running capacity + targeted station training',
+      blocks: [
+        { id:'b'+Date.now()+'_2a', type:'conditioning', title:'Run Intervals', rest:90, exercises:[
+          { id:'e20', name:'Treadmill - intervals', sets:isEarly?6:isMid?8:10, reps:1, weight:0, rpe:8, note:(isEarly?6:isMid?8:10)+'×400m at race pace · 60 sec recovery jog between' },
+        ]},
+        { id:'b'+Date.now()+'_2b', type:'conditioning', title:'Station Practice', rest:120, exercises:[
+          { id:'e21', name:'Wall Balls', sets:4, reps:25, weight:w.wall_ball, rpe:8, note:'4×25 reps at race weight · focus on consistent rhythm · rest 90 sec between' },
+          { id:'e22', name:'Ski Erg',   sets:3, reps:1,  weight:0,            rpe:8, note:'3×250m · technique focus — full hip hinge, not just arms' },
+        ]}
+      ]
+    };
+
+    daySessions['wednesday'] = { name: 'Rest', notes: '', rest: true, blocks: [] };
+
+    // Day 3 — Strength
+    daySessions['thursday'] = {
+      name: 'Strength — Station Builders',
+      notes: 'Build the strength capacity needed for each station. Heavier than race weight.',
+      blocks: [
+        { id:'b'+Date.now()+'_3a', type:'main', title:'Lower Body', rest:180, exercises:[
+          { id:'e30', name:'Squat',                 sets:4, reps:5,  weight:0, rpe:8, note:'Leg drive for sled push. Controlled down, explosive up.' },
+          { id:'e31', name:'Bulgarian split squat', sets:3, reps:10, weight:0, rpe:8, note:'Unilateral strength for lunges. Per leg.' },
+          { id:'e32', name:'Romanian deadlift',     sets:3, reps:8,  weight:0, rpe:7, note:'Posterior chain for rowing and carries.' },
+        ]},
+        { id:'b'+Date.now()+'_3b', type:'accessory', title:'Carry + Pull', rest:120, exercises:[
+          { id:'e33', name:'Farmers carry', sets:4, reps:1, weight:Math.round(w.farmers*1.15), rpe:8, note: Math.round(w.farmers*1.15)+'kg/hand × 40m · heavier than race weight to build capacity' },
+          { id:'e34', name:'Seated row',    sets:4, reps:8, weight:0, rpe:8, note:'Heavy. Simulate sled pull resistance. Full range of motion.' },
+          { id:'e35', name:'Pull-ups',      sets:3, reps:8, weight:0, rpe:7, note:'Lat strength for ski erg and rowing.' },
+        ]}
+      ]
+    };
+
+    // Day 4 — Aerobic base (only for 4+ day programs)
+    daySessions['friday'] = {
+      name: 'Aerobic Base',
+      notes: 'Easy effort — should be able to hold a conversation throughout.',
+      blocks: [
+        { id:'b'+Date.now()+'_4a', type:'conditioning', title:'Steady Run', rest:0, exercises:[
+          { id:'e40', name:'Treadmill - run', sets:1, reps:1, weight:0, rpe:6, note:(isEarly?20:isMid?25:30)+' min steady state · Zone 2 · nasal breathing' },
+        ]},
+        { id:'b'+Date.now()+'_4b', type:'conditioning', title:'Erg Work', rest:90, exercises:[
+          { id:'e41', name:'Ski Erg',      sets:3, reps:1, weight:0, rpe:6, note:'3×3 min · technique focus, not effort. Hip hinge, drive through body.' },
+          { id:'e42', name:'Rowing - erg', sets:3, reps:1, weight:0, rpe:6, note:'3×3 min · consistent split. Legs → lean → arms.' },
+        ]}
+      ]
+    };
+
+    daySessions['saturday'] = { name: 'Rest', notes: '', rest: true, blocks: [] };
+    daySessions['sunday']   = { name: 'Rest', notes: '', rest: true, blocks: [] };
+
+    sessionData[wk] = daySessions;
+  }
+
+  currentWeek = 1;
+  currentDay = 'monday';
+
+  renderWeeks();
+  renderDays();
+  renderBlocks();
+  saveDraft();
+
+  // Switch to exercises tab
+  switchRpTab('exercises', document.querySelector('.rp-tab'));
+
+  showToast('✅ ' + w.label + ' Hyrox program loaded — 6 weeks ready to review and publish');
 }
 
 document.addEventListener('DOMContentLoaded', () => { loadClientForBuilder(); });
