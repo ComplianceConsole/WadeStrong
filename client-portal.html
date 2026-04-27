@@ -301,6 +301,21 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
         <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val" id="profWeight">—</div></div>
         <div class="profile-item"><div class="profile-label">Location</div><div class="profile-val" id="profLocation">—</div></div>
         <div class="profile-item"><div class="profile-label">Program</div><div class="profile-val" id="profProgram">—</div></div>
+        <div class="profile-item"><div class="profile-label">Gym type</div><div class="profile-val" id="profGym">—</div></div>
+        <div class="profile-item"><div class="profile-label">Training days</div><div class="profile-val" id="profDays">—</div></div>
+        <div class="profile-item"><div class="profile-label">Session length</div><div class="profile-val" id="profSession">—</div></div>
+        <div class="profile-item"><div class="profile-label">Training age</div><div class="profile-val" id="profTrainingAge">—</div></div>
+      </div>
+    </div>
+
+    <!-- Comp details (pre-comp only) -->
+    <div class="card" id="profCompCard" style="display:none">
+      <div class="card-title">Competition</div>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="profile-label">Competition</div><div class="profile-val" id="profCompName">—</div></div>
+        <div class="profile-item"><div class="profile-label">Date</div><div class="profile-val" id="profCompDate">—</div></div>
+        <div class="profile-item"><div class="profile-label">Weight class</div><div class="profile-val" id="profWeightClass">—</div></div>
+        <div class="profile-item"><div class="profile-label">Level</div><div class="profile-val" id="profCompLevel">—</div></div>
       </div>
     </div>
 
@@ -991,7 +1006,9 @@ async function loadClientFromSupabase(email) {
     };
 
     // Load RPE results
-    const rpe = await db.select('rpe_results', { email }, { order: 'created_at.desc', limit: 1 });
+    const rpe = await db.select('rpe_results', { client_id: c.id }, { order: 'created_at.desc', limit: 1 });
+    const rpeByEmail = !rpe?.length ? await db.select('rpe_results', { email }, { order: 'created_at.desc', limit: 1 }) : null;
+    const rpeResult = (rpe && rpe.length ? rpe : rpeByEmail) || [];
     if (rpe && rpe.length) CLIENT.rpe = rpe[0];
 
     // Show comp tab for pre_comp clients
@@ -1070,43 +1087,9 @@ async function loadClientFromSupabase(email) {
   }
 }
 
-let WEEKS = [
-  {n:1,label:'Week 1',complete:true},{n:2,label:'Week 2',complete:true},
-  {n:3,label:'Week 3',complete:true},{n:4,label:'Week 4',complete:true},
-  {n:5,label:'Week 5',complete:false,current:true},
-  {n:6,label:'Week 6',complete:false},{n:7,label:'Week 7',complete:false},
-  {n:8,label:'Week 8',complete:false}
-];
+let WEEKS = [];
 
-let SESSIONS = {
-  5: [
-    { id:'5a', name:'Event Specific A', day:'Monday', rpe:'8', blocks:[
-      { name:'LOG PRESS', rest:180, exercises:[
-        {name:'Log Press',notes:'Competition grip',sets:5,reps:3,weight:80,rpe:8},
-        {name:'Log Press — Heavy Singles',notes:'Work up to comp opener',sets:3,reps:1,weight:92,rpe:9},
-      ]},
-      { name:'DEADLIFT', rest:240, exercises:[
-        {name:'Deadlift',notes:'Sumo stance',sets:4,reps:2,weight:200,rpe:8.5},
-        {name:'Deficit Deadlift',notes:'5cm deficit',sets:3,reps:3,weight:170,rpe:8},
-      ]},
-    ]},
-    { id:'5b', name:'Carries & Yoke', day:'Wednesday', rpe:'8-9', blocks:[
-      { name:'FARMERS CARRY', rest:180, exercises:[
-        {name:'Farmers Carry',notes:'60m runs, full speed',sets:5,reps:1,weight:110,rpe:9},
-        {name:'Farmers — Heavy Load',notes:'30m, max weight',sets:3,reps:1,weight:130,rpe:9.5},
-      ]},
-      { name:'YOKE WALK', rest:300, exercises:[
-        {name:'Yoke Walk',notes:'60m, fast turnover',sets:4,reps:1,weight:280,rpe:8},
-      ]},
-    ]},
-    { id:'5c', name:'Atlas Stones', day:'Saturday', rpe:'8-9', blocks:[
-      { name:'ATLAS STONES', rest:300, exercises:[
-        {name:'Atlas Stone — Progressive Ladder',notes:'Load 4 stones to platform',sets:3,reps:1,weight:100,rpe:8},
-        {name:'Stone to Shoulder',notes:'Alternate sides',sets:4,reps:2,weight:80,rpe:8.5},
-      ]},
-    ]},
-  ]
-};
+let SESSIONS = {};
 
 const EVENTS = [
   {order:1,name:'Log Press',strategy:"Stay tight, big breath before the dip. Drive through the heels. Don't re-dip unless you have to.",opener:'100kg',second:'110kg',third:'117.5kg'},
@@ -1147,43 +1130,51 @@ document.addEventListener('DOMContentLoaded', async () => {
   const weekLabel = CLIENT.type === 'pre_comp' ? 'PRE-COMP' : 'GET STRONG';
   document.getElementById('navWeek').textContent = `${weekLabel} · WEEK ${CLIENT.week}/${CLIENT.totalWeeks}`;
   document.getElementById('profName').textContent = CLIENT.name || '—';
-  document.getElementById('profAge').textContent = CLIENT.age ? CLIENT.age + ' yrs' : '—';
-  document.getElementById('profHeight').textContent = CLIENT.height || '—';
-  document.getElementById('profWeight').textContent = CLIENT.weight || '—';
-  document.getElementById('profLocation').textContent = CLIENT.location || '—';
-  document.getElementById('profProgram').textContent = (CLIENT.program || '—') + (CLIENT.week ? ` · Wk ${CLIENT.week}/${CLIENT.totalWeeks||6}` : '');
-  document.getElementById('profGym').textContent = CLIENT.gymType ? (CLIENT.gymType === 'commercial' ? '🏋️ Commercial gym' : CLIENT.gymType === 'home' ? '🏠 Home gym' : CLIENT.gymType === 'strongman' ? '🪨 Strongman gym' : CLIENT.gymType) : '—';
-  document.getElementById('profDays').textContent = CLIENT.trainingDays ? CLIENT.trainingDays + ' days/week' : '—';
-  document.getElementById('profSession').textContent = CLIENT.sessionLength ? CLIENT.sessionLength + ' min' : '—';
-  document.getElementById('profTrainingAge').textContent = CLIENT.trainingAge || '—';
+  const _s = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+  _s('profAge',    CLIENT.age ? CLIENT.age + ' yrs' : null);
+  _s('profHeight', CLIENT.height ? CLIENT.height + 'cm' : null);
+  _s('profWeight', CLIENT.weight ? CLIENT.weight + 'kg' : null);
+  _s('profLocation', CLIENT.location);
+  _s('profProgram', (CLIENT.program || '') + (CLIENT.week ? ' · Wk ' + CLIENT.week + '/' + (CLIENT.totalWeeks||6) : ''));
+  _s('profGym', CLIENT.gymType === 'commercial' ? '🏋️ Commercial gym' : CLIENT.gymType === 'home' ? '🏠 Home gym' : CLIENT.gymType === 'strongman' ? '🪨 Strongman gym' : CLIENT.gymType);
+  _s('profDays', CLIENT.trainingDays ? CLIENT.trainingDays + ' days/week' : null);
+  _s('profSession', CLIENT.sessionLength ? CLIENT.sessionLength + ' min' : null);
+  _s('profTrainingAge', CLIENT.trainingAge);
 
-  // Also update nav name
-  document.getElementById('navName').textContent = CLIENT.short || CLIENT.name || '—';
+  // Nav name
+  const navNameEl = document.getElementById('navName');
+  if (navNameEl) navNameEl.textContent = CLIENT.short || CLIENT.name || '—';
 
-  // Show competition section for pre-comp clients
-  if (CLIENT.type === 'pre_comp') {
-    const compSection = document.getElementById('compSection');
-    if (compSection) compSection.style.display = 'block';
-    document.getElementById('profCompName').textContent = CLIENT.compName || '—';
-    document.getElementById('profCompDate').textContent = CLIENT.compDate ? new Date(CLIENT.compDate).toLocaleDateString('en-AU', { day:'numeric', month:'long', year:'numeric' }) : '—';
-    document.getElementById('profWeightClass').textContent = CLIENT.weightClass || '—';
-    document.getElementById('profCompLevel').textContent = CLIENT.compLevel || '—';
-    document.getElementById('profEvents').textContent = CLIENT.events?.length ? CLIENT.events.join(', ') : '—';
-    document.getElementById('profStrongEvents').textContent = CLIENT.strongEvents?.length ? CLIENT.strongEvents.join(', ') : '—';
-    document.getElementById('profWeakEvents').textContent = CLIENT.weakEvents?.length ? CLIENT.weakEvents.join(', ') : '—';
+  // Comp card - show for pre-comp only, hide for others
+  const compCard = document.getElementById('profCompCard');
+  if (compCard) compCard.style.display = CLIENT.type === 'pre_comp' ? 'block' : 'none';
+  _s('profCompName', CLIENT.compName);
+  _s('profCompDate', CLIENT.compDate);
+  _s('profWeightClass', CLIENT.weightClass);
+  _s('profCompLevel', CLIENT.compLevel);
+
+  // Comp/Race nav tab
+  const bnavComp = document.getElementById('bnav-comp');
+  if (bnavComp) {
+    if (CLIENT.type === 'hyrox') {
+      bnavComp.style.display = 'flex';
+      const icon = document.getElementById('bnav-comp-icon');
+      const label = document.getElementById('bnav-comp-label');
+      if (icon) icon.textContent = '🏅';
+      if (label) label.textContent = 'Race';
+    } else if (CLIENT.type === 'pre_comp') {
+      bnavComp.style.display = 'flex';
+    } else {
+      bnavComp.style.display = 'none';
+    }
   }
-  curWeek = CLIENT.week;
-
-  // Update profile fields from Supabase data
-  if (CLIENT.age) document.querySelector('[data-field="age"]') && (document.querySelector('[data-field="age"]').textContent = CLIENT.age);
-  if (CLIENT.weight) document.querySelector('[data-field="weight"]') && (document.querySelector('[data-field="weight"]').textContent = CLIENT.weight);
-  if (CLIENT.location) document.querySelector('[data-field="location"]') && (document.querySelector('[data-field="location"]').textContent = CLIENT.location);
 
   renderWeekTabs();
   renderSessions(curWeek);
   renderProgress();
   renderEvents();
   renderMessages();
+  scrollMsgsToBottom();
 });
 
 // ── TAB SWITCHING ─────────────────────────────────────────────
@@ -1200,8 +1191,13 @@ function switchTab(id, el) {
 // ── WEEK TABS ─────────────────────────────────────────────────
 function renderWeekTabs() {
   const container = document.getElementById('weekTabs');
+  if (!container) return;
+  if (!WEEKS || !WEEKS.length) {
+    container.innerHTML = '';
+    return;
+  }
   container.innerHTML = WEEKS.map(w => `
-    <button class="week-tab ${w.complete?'done':''} ${w.current?'active':''}" onclick="selectWeek(${w.n},this)">
+    <button class="week-tab${w.current?' active':''}${w.complete?' done':''}" onclick="switchWeek(${w.n})">
       ${w.label}${w.complete?' ✓':''}
     </button>`).join('');
 }
@@ -1520,7 +1516,32 @@ function setSQ(q) {
   });
 }
 
-function saveCheckIn() {
+async function saveCheckIn() {
+  const soreness = selectedSoreness || null;
+  const sleep = parseFloat(document.getElementById('sleepSlider')?.value) || null;
+  const sleepQ = selectedSQ || null;
+  const hrv = parseFloat(document.getElementById('hrvInput')?.value) || null;
+  const cal = parseFloat(document.getElementById('nutCal')?.value) || null;
+  const water = parseFloat(document.getElementById('nutWater')?.value) || null;
+  const mood = selectedMood || null;
+  const notes = document.getElementById('checkInNotes')?.value?.trim() || null;
+
+  try {
+    if (clientId) {
+      await db.insert('client_health', {
+        client_id: clientId,
+        date: new Date().toISOString().split('T')[0],
+        soreness_score: soreness,
+        sleep_hours: sleep,
+        sleep_quality: sleepQ,
+        hrv: hrv,
+        calories: cal,
+        water_litres: water,
+        mood: mood,
+        notes: notes,
+      });
+    }
+  } catch(e) { console.error('Check-in save:', e); }
   showSuccess('checkInSuccess');
   showToast('Check-in logged ✓');
 }
