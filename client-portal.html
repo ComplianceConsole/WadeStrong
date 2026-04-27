@@ -1267,7 +1267,7 @@ function renderSessions(week) {
       <div class="session-head" onclick="toggleSession('${s.id}')">
         <div>
           <div class="session-name">${s.name}</div>
-          <div class="session-meta">${s.day} · Target RPE ${s.rpe}</div>
+          <div class="session-meta">${s.day} · Target RPE ${s.rpe && s.rpe !== "undefined" ? s.rpe : "-"}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="session-badge ${done?'badge-done':'badge-today'}">${done?'✓ Done':'Today'}</span>
