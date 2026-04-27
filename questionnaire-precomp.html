@@ -614,19 +614,111 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <p style="margin-top:16px;font-size:14px;color:var(--muted)">He'll send you a link to your training portal once the program is locked in. Get some good sleep in the meantime.</p>
   </div>
 
+
+  <!-- WAIVER STEP -->
+  <div class="step" id="step-8">
+    <div class="step-title">Medical disclosure & waiver.</div>
+    <div class="step-sub">Please read carefully and complete before submitting. This is required for all Wade Strong athletes.</div>
+
+    <div class="info-box" style="background:#fff8f8;border-color:rgba(180,0,0,0.15);color:#5a1010;margin-bottom:24px">
+      <strong>Important — please read before ticking.</strong><br>
+      This waiver is a legal document. By signing below you confirm you have read, understood and agree to the statements on this page. If you have any questions, contact Wade before submitting.
+    </div>
+
+    <div class="field">
+      <label>Medical history disclosure</label>
+      <div class="hint" style="margin-bottom:12px">List any current or past medical conditions, injuries, surgeries, medications, or physical limitations that may affect your ability to exercise. Include anything your GP or specialist has flagged. Write "None" if not applicable.</div>
+      <textarea class="input" id="medicalHistory" rows="4" placeholder="e.g. Left knee ACL reconstruction 2022, cleared for full training by physio June 2023. Currently taking blood pressure medication (Ramipril). No other conditions."></textarea>
+    </div>
+
+    <div class="field">
+      <label>GP / doctor clearance</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="gpClearance" value="yes"><span>Yes — I have been cleared by a medical professional to participate in high-intensity exercise</span></label>
+        <label class="choice"><input type="radio" name="gpClearance" value="no_needed"><span>I have not seen a GP but I have no known conditions that require clearance</span></label>
+        <label class="choice"><input type="radio" name="gpClearance" value="no_required"><span>No — I have a condition that may require GP clearance before starting</span></label>
+      </div>
+      <div class="hint" style="color:#c03020;margin-top:8px" id="gpWarning" style="display:none">If you require GP clearance, please obtain this before starting the program. Wade may request a copy before publishing your program.</div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
+
+    <div class="field">
+      <label>Participant waiver & acknowledgements</label>
+      <div class="hint" style="margin-bottom:16px">You must tick all boxes to proceed.</div>
+
+      <div class="choices" style="gap:10px">
+        <label class="choice" style="align-items:flex-start;gap:12px">
+          <input type="checkbox" id="waiver1" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
+          <span style="font-size:13px;line-height:1.6"><strong>Voluntary participation.</strong> I confirm that my participation in the Wade Strong coaching program is entirely voluntary. I understand that physical training involves inherent risks including but not limited to muscular strain, injury, and cardiovascular stress.</span>
+        </label>
+
+        <label class="choice" style="align-items:flex-start;gap:12px">
+          <input type="checkbox" id="waiver2" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
+          <span style="font-size:13px;line-height:1.6"><strong>Medical fitness.</strong> I confirm that I am in suitable physical condition to undertake the program I am applying for. I have disclosed all relevant medical conditions, injuries and medications above. I will notify Wade immediately if my medical status changes.</span>
+        </label>
+
+        <label class="choice" style="align-items:flex-start;gap:12px">
+          <input type="checkbox" id="waiver3" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
+          <span style="font-size:13px;line-height:1.6"><strong>Assumption of risk.</strong> I acknowledge and accept the risks associated with physical training. I agree to exercise within my limits and to stop immediately if I experience pain, dizziness, shortness of breath or any unusual symptoms. I will seek medical attention when appropriate.</span>
+        </label>
+
+        <label class="choice" style="align-items:flex-start;gap:12px">
+          <input type="checkbox" id="waiver4" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
+          <span style="font-size:13px;line-height:1.6"><strong>Release of liability.</strong> To the fullest extent permitted by law, I release Wade Blackburn and Wade Strong from any liability for injury, loss or damage arising from my participation in the program, except where caused by gross negligence or wilful misconduct.</span>
+        </label>
+
+        <label class="choice" style="align-items:flex-start;gap:12px">
+          <input type="checkbox" id="waiver5" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
+          <span style="font-size:13px;line-height:1.6"><strong>Program modifications.</strong> I understand that the program provided is a coaching guide and not a substitute for medical advice. I accept responsibility for modifying or skipping exercises as needed based on how I feel on a given day.</span>
+        </label>
+
+        <label class="choice" style="align-items:flex-start;gap:12px">
+          <input type="checkbox" id="waiver6" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
+          <span style="font-size:13px;line-height:1.6"><strong>Privacy.</strong> I consent to Wade Strong storing and using my personal and health information for the purpose of delivering my coaching program. This information will not be shared with third parties without my consent.</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Digital signature</label>
+      <div class="hint" style="margin-bottom:8px">Type your full legal name as your digital signature. This confirms your agreement to the above waiver.</div>
+      <input class="input" type="text" id="digitalSignature" placeholder="e.g. Sarah Jane Thompson">
+      <div class="hint" style="margin-top:6px" id="signatureDate"></div>
+    </div>
+
+    <div id="waiverError" style="display:none;background:#fff0f0;border:1px solid rgba(200,0,0,0.2);border-radius:6px;padding:12px;font-size:13px;color:#c03020;margin-bottom:16px"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="prevStep(8)">← Back</button>
+      <button class="btn btn-rust" onclick="submitForm()" style="flex:1">Submit & agree →</button>
+    </div>
+  </div>
 </div>
 
 <script>
 let currentStep = 1;
-const totalSteps = 7;
+const totalSteps = 8;
 
 function goTo(n) {
   document.getElementById('step-' + currentStep).classList.remove('active');
   currentStep = n;
   document.getElementById('step-' + currentStep).classList.add('active');
   updateProgress();
+setSignatureDate();
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+function setSignatureDate() {
+  const el = document.getElementById('signatureDate');
+  if (el) el.textContent = 'Date: ' + new Date().toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'});
+}
+document.addEventListener('change', function(e) {
+  if (e.target.name === 'gpClearance') {
+    const warn = document.getElementById('gpWarning');
+    if (warn) warn.style.display = e.target.value === 'no_required' ? 'block' : 'none';
+  }
+});
 
 function updateProgress() {
   const pct = ((currentStep-1)/totalSteps)*100;
@@ -641,6 +733,41 @@ function toggleInjuries(show) {
 }
 
 async function submitForm() {
+
+  // Waiver validation
+  const waiverBoxes = ['waiver1','waiver2','waiver3','waiver4','waiver5','waiver6'];
+  const allTicked = waiverBoxes.every(id => document.getElementById(id)?.checked);
+  const sig = document.getElementById('digitalSignature')?.value?.trim();
+  const gpClearance = document.querySelector('input[name="gpClearance"]:checked')?.value;
+  const medHistory = document.getElementById('medicalHistory')?.value?.trim();
+
+  const errEl = document.getElementById('waiverError');
+  const errors = [];
+  if (!allTicked) errors.push('Please tick all acknowledgement boxes.');
+  if (!sig) errors.push('Please enter your full name as a digital signature.');
+  if (!gpClearance) errors.push('Please select your GP clearance status.');
+  if (!medHistory) errors.push('Please complete the medical history disclosure (write "None" if not applicable).');
+
+  if (errors.length) {
+    errEl.innerHTML = '<strong>Please complete the waiver:</strong><ul style="margin:8px 0 0 16px">' + errors.map(e=>`<li>${e}</li>`).join('') + '</ul>';
+    errEl.style.display = 'block';
+    // Switch to waiver step
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    const lastStep = document.getElementById('step-8') || document.getElementById('step-8');
+    if (lastStep) lastStep.classList.add('active');
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const waiverData = {
+    medicalHistory: medHistory,
+    gpClearance,
+    digitalSignature: sig,
+    waiverTimestamp: new Date().toISOString(),
+    waiverAgreed: true,
+    waiverVersion: '1.0',
+  };
+
   document.getElementById('step-7').style.display='none';
   document.getElementById('successScreen').style.display='block';
   document.getElementById('progressFill').style.width='100%';
