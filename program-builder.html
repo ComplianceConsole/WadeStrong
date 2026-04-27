@@ -306,7 +306,7 @@ body{font-family:var(--font-body);background:var(--chalk);color:var(--iron);disp
   </div>
   <div class="topbar-right">
     <button class="tb-btn tb-btn-ghost" onclick="saveDraft()">Save draft</button>
-    <button class="tb-btn tb-btn-ghost" onclick="showToast('Preview opened in new tab')">Preview</button>
+    <button class="tb-btn tb-btn-ghost" onclick="previewPortal()">Preview</button>
     <button class="tb-btn tb-btn-rust" onclick="publishProgram()">Publish to client</button>
   </div>
 </div>
@@ -909,6 +909,15 @@ async function saveDraft() {
     console.error('Save draft error:', err);
     showToast('Save failed  -  check connection');
   }
+}
+
+async function previewPortal() {
+  if (!currentClientEmail) { showToast('No client loaded'); return; }
+  // Save draft first so portal shows latest
+  await saveDraft();
+  const url = 'client-portal.html?email=' + encodeURIComponent(currentClientEmail) + '&preview=1&t=' + Date.now();
+  window.open(url, '_blank');
+  showToast('Opening client portal preview...');
 }
 
 async function publishProgram() {
