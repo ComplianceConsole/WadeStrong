@@ -296,11 +296,11 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
       <div class="card-title">Personal Info</div>
       <div class="profile-grid">
         <div class="profile-item"><div class="profile-label">Name</div><div class="profile-val" id="profName">—</div></div>
-        <div class="profile-item"><div class="profile-label">Age</div><div class="profile-val">31</div></div>
-        <div class="profile-item"><div class="profile-label">Height</div><div class="profile-val">178cm</div></div>
-        <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val">91.5kg</div></div>
-        <div class="profile-item"><div class="profile-label">Location</div><div class="profile-val">Auckland, NZ</div></div>
-        <div class="profile-item"><div class="profile-label">Program</div><div class="profile-val">Pre-Comp · Wk 5/8</div></div>
+        <div class="profile-item"><div class="profile-label">Age</div><div class="profile-val" id="profAge">—</div></div>
+        <div class="profile-item"><div class="profile-label">Height</div><div class="profile-val" id="profHeight">—</div></div>
+        <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val" id="profWeight">—</div></div>
+        <div class="profile-item"><div class="profile-label">Location</div><div class="profile-val" id="profLocation">—</div></div>
+        <div class="profile-item"><div class="profile-label">Program</div><div class="profile-val" id="profProgram">—</div></div>
       </div>
     </div>
 
@@ -308,30 +308,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
     <div class="card">
       <div class="card-title">RPE Testing Results</div>
       <div class="rpe-results">
-        <div class="rpe-lift-card">
-          <div class="rpe-lift-name">Squat (Raw)</div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">1RM</span><span class="rpe-lift-val">175kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">3RM</span><span class="rpe-lift-val">160kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">5RM</span><span class="rpe-lift-val">150kg</span></div>
-        </div>
-        <div class="rpe-lift-card">
-          <div class="rpe-lift-name">Deadlift</div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">1RM</span><span class="rpe-lift-val">220kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">3RM</span><span class="rpe-lift-val">200kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">5RM</span><span class="rpe-lift-val">185kg</span></div>
-        </div>
-        <div class="rpe-lift-card">
-          <div class="rpe-lift-name">Bench Press</div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">1RM</span><span class="rpe-lift-val">130kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">3RM</span><span class="rpe-lift-val">120kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">5RM</span><span class="rpe-lift-val">112.5kg</span></div>
-        </div>
-        <div class="rpe-lift-card">
-          <div class="rpe-lift-name">Push Press</div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">1RM</span><span class="rpe-lift-val">95kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">3RM</span><span class="rpe-lift-val">87.5kg</span></div>
-          <div class="rpe-lift-row"><span class="rpe-lift-label">5RM</span><span class="rpe-lift-val">80kg</span></div>
-        </div>
+        <div id="rpeResultsGrid" style="display:contents"></div>
       </div>
       <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">Tested: 8 March 2025</div>
     </div>
@@ -1071,9 +1048,10 @@ async function loadClientFromSupabase(email) {
       }
 
       // Load messages
-      const msgs = await db.select('messages', { client_id: clientId }, { order: 'created_at.asc' });
+      const msgs = await db.select('messages', { client_id: clientId });
       if (msgs && msgs.length) {
-        msgs.forEach(m => MESSAGES.push({ from: m.from_role, text: m.content, time: new Date(m.created_at).toLocaleString('en-AU',{hour:'2-digit',minute:'2-digit',day:'numeric',month:'short'}) }));
+        msgs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+        msgs.forEach(m => MESSAGES.push({ ...m, delivered: true }));
       }
 
       // Load comp plan
@@ -1083,7 +1061,7 @@ async function loadClientFromSupabase(email) {
         window.LOADED_COMP_PLAN = cp;
         if (cp.events && cp.events.length) window.EVENTS = cp.events;
       }
-    }
+    } // end if (clientId)
 
     return true;
   } catch(err) {
@@ -1138,13 +1116,9 @@ const EVENTS = [
   {order:5,name:'Yoke Walk',strategy:"Short steps, fast feet. Eyes forward. If it starts to drift — short steps, don't fight it.",opener:'300kg',second:null,third:null},
 ];
 
-const PROGRESS_DATA = [
-  {name:'Log Press',data:[{week:'Wk1',w:72.5},{week:'Wk2',w:75},{week:'Wk3',w:77.5},{week:'Wk4',w:80},{week:'Wk5',w:82.5}]},
-  {name:'Deadlift',data:[{week:'Wk1',w:185},{week:'Wk2',w:190},{week:'Wk3',w:195},{week:'Wk4',w:200},{week:'Wk5',w:205}]},
-  {name:'Farmers Carry',data:[{week:'Wk1',w:100},{week:'Wk2',w:105},{week:'Wk3',w:107.5},{week:'Wk4',w:110},{week:'Wk5',w:112.5}]},
-];
+let PROGRESS_DATA = [];
 
-const MESSAGES = [];
+let MESSAGES = [];
 
 let curWeek = 5;
 let openSessions = new Set();
@@ -1366,41 +1340,37 @@ async function logSession(sid) {
 // ── PROGRESS ──────────────────────────────────────────────────
 function renderProgress() {
   const container = document.getElementById('progressCharts');
+  if (!container) return;
+  if (!PROGRESS_DATA || !PROGRESS_DATA.length) {
+    container.innerHTML = `<div class="card" style="text-align:center;padding:32px 20px">
+      <div style="font-size:28px;margin-bottom:10px">📊</div>
+      <div style="font-size:15px;font-weight:700;color:var(--iron);margin-bottom:8px">Progress tracking starts here</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">Complete sessions and log your lifts to see your progress charts here. Your RPE testing numbers will set the baseline.</div>
+    </div>`;
+    return;
+  }
   container.innerHTML = PROGRESS_DATA.map(lift => {
+    if (!lift.data || !lift.data.length) return '';
     const latest = lift.data[lift.data.length-1].w;
     const first = lift.data[0].w;
     const gain = latest - first;
     const min = Math.min(...lift.data.map(d=>d.w)) - 5;
     const max = Math.max(...lift.data.map(d=>d.w));
     const range = max - min || 1;
-    const W = 280, H = 70;
-    const pts = lift.data.map((d,i) => {
-      const x = (i/(lift.data.length-1))*(W-20)+10;
-      const y = H - ((d.w-min)/range)*(H-20) - 10;
-      return `${x},${y}`;
-    }).join(' ');
-    return `
-    <div class="progress-chart">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-        <div>
-          <div class="progress-lift-name">${lift.name}</div>
-          <div style="font-size:12px;font-weight:600;color:var(--green)">+${gain}kg since start</div>
-        </div>
-        <div style="text-align:right">
-          <div class="progress-latest">${latest}kg</div>
-          <div style="font-size:11px;color:var(--muted)">latest</div>
-        </div>
+    const bars = lift.data.map(d => {
+      const h = Math.round(((d.w - min) / range) * 60) + 10;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+        <div style="font-size:10px;font-weight:700;color:var(--iron)">${d.w}</div>
+        <div style="width:100%;height:${h}px;background:var(--rust);border-radius:3px 3px 0 0;min-height:8px"></div>
+        <div style="font-size:9px;color:var(--muted)">${d.week}</div>
+      </div>`;
+    }).join('');
+    return `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700">${lift.name}</div>
+        <div style="font-size:13px;color:${gain>=0?'var(--green)':'#c03020'};font-weight:600">${gain>=0?'+':''}${gain}kg</div>
       </div>
-      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="overflow:visible">
-        <polyline points="${pts}" fill="none" stroke="var(--rust)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        ${lift.data.map((d,i)=>{
-          const x=(i/(lift.data.length-1))*(W-20)+10;
-          const y=H-((d.w-min)/range)*(H-20)-10;
-          return `<circle cx="${x}" cy="${y}" r="4" fill="var(--rust)" stroke="white" stroke-width="2"/>
-                  <text x="${x}" y="${y-8}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="Instrument Sans,sans-serif">${d.w}kg</text>
-                  <text x="${x}" y="${H+14}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="Instrument Sans,sans-serif">${d.week}</text>`;
-        }).join('')}
-      </svg>
+      <div style="display:flex;gap:6px;align-items:flex-end;height:90px">${bars}</div>
     </div>`;
   }).join('');
 }
@@ -1429,48 +1399,87 @@ function renderEvents() {
 // ── MESSAGES ──────────────────────────────────────────────────
 function renderMessages() {
   const thread = document.getElementById('msgThread');
-  thread.innerHTML = MESSAGES.map(m => {
-    const isWade = m.from === 'wade';
-    const isVoice = m.type === 'voice' || (m.content && m.content.startsWith('data:audio'));
-    const msgContent = isVoice
-      ? `<div style="margin-bottom:4px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust)">🎤 Voice note from Wade</div><audio controls src="${m.content || m.text}" style="width:200px;height:36px;margin-top:4px"></audio>`
-      : (m.text || m.content || '');
-    return `
-    <div style="display:flex;flex-direction:column;align-items:${isWade?'flex-start':'flex-end'}">
-      <div class="msg-bubble ${isWade?'msg-from-wade':'msg-from-client'}">
-        ${isWade?'<div class="msg-sender">Wade</div>':''}
-        ${msgContent}
-      </div>
-      <div class="msg-time">${m.time}</div>
+  if (!thread) return;
+  if (!MESSAGES.length) {
+    thread.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:12px">💬</div>
+      <div style="font-size:14px;font-weight:600;color:var(--iron);margin-bottom:6px">No messages yet</div>
+      <div style="font-size:13px">Send Wade a message below — questions, updates, how training is going.</div>
     </div>`;
+    return;
+  }
+  thread.innerHTML = MESSAGES.map(m => {
+    const isWade = m.from_role === 'wade' || m.from === 'wade';
+    const isVoice = m.message_type === 'voice' || m.type === 'voice' || (m.content || m.text || '').startsWith('data:audio');
+    const text = m.content || m.text || '';
+    const time = m.time || (m.created_at ? new Date(m.created_at).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}) : '');
+    // Tick status: ✓ = delivered, ✓✓ = wade has seen it (read=true)
+    const ticks = isWade ? '' : (m.read ? '<span style="color:var(--rust);font-size:11px">✓✓</span>' : m.delivered !== false ? '<span style="color:var(--muted);font-size:11px">✓</span>' : '<span style="color:rgba(107,101,96,0.4);font-size:11px">○</span>');
+
+    if (isVoice && isWade) {
+      return `<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Wade</div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%">
+          <div style="font-size:11px;font-weight:700;color:var(--rust);margin-bottom:6px">🎤 Voice note</div>
+          <audio controls src="${text}" style="width:200px;height:32px"></audio>
+        </div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${time}</div>
+      </div>`;
+    }
+
+    return isWade
+      ? `<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:12px">
+          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Wade</div>
+          <div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%;font-size:14px;line-height:1.5;color:var(--iron)">${text}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px">${time}</div>
+        </div>`
+      : `<div style="display:flex;flex-direction:column;align-items:flex-end;margin-bottom:12px">
+          <div style="background:var(--iron);border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:80%;font-size:14px;line-height:1.5;color:#fff">${text}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px">${time} ${ticks}</div>
+        </div>`;
   }).join('');
-  setTimeout(() => {
-    const s = document.getElementById('scrollArea');
-    s.scrollTop = s.scrollHeight;
-  }, 100);
 }
 
 async function sendMessage() {
   const input = document.getElementById('msgInput');
   const text = input.value.trim();
   if (!text) return;
-  MESSAGES.push({from:'client',text,time:'Just now'});
   input.value = '';
   input.style.height = 'auto';
+
+  // Optimistically add to UI with pending state
+  const tempId = 'tmp_' + Date.now();
+  MESSAGES.push({ id: tempId, from: 'client', text, content: text, time: 'Just now', delivered: false });
   renderMessages();
-  showToast('Message sent to Wade ✓');
+  scrollMsgsToBottom();
 
   if (clientId) {
     try {
-      await db.insert('messages', {
+      const result = await db.insert('messages', {
         client_id: clientId,
         from_role: 'client',
         message_type: 'text',
         content: text,
         read: false,
       });
-    } catch(err) { console.error('Message save error:', err); }
+      // Mark delivered
+      const msg = MESSAGES.find(m => m.id === tempId);
+      if (msg) { msg.delivered = true; msg.id = result?.[0]?.id || tempId; }
+      renderMessages();
+      scrollMsgsToBottom();
+    } catch(err) {
+      console.error('Message save error:', err);
+    }
+  } else {
+    const msg = MESSAGES.find(m => m.id === tempId);
+    if (msg) msg.delivered = true;
+    renderMessages();
   }
+}
+
+function scrollMsgsToBottom() {
+  const t = document.getElementById('msgThread');
+  if (t) setTimeout(() => { t.scrollTop = t.scrollHeight; }, 50);
 }
 
 function autoResize(el) {
