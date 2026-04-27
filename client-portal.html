@@ -547,7 +547,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
   </div>
 
   <!-- ══ COMP DAY PANEL ══ -->
-  <div class="panid="panel-comp">
+  <div class="panel" id="panel-comp">
 
     <!-- ─ RACE DAY (Hyrox) view ─ -->
     <div id="view-race" style="display:none">
@@ -691,7 +691,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
       </div>
     </div>
 
-  el" id="panel-messages">
+  <div class="panel" id="panel-messages">
     <div class="panel-title">Messages</div>
     <div class="msg-thread" id="msgThread"></div>
   </div>
@@ -1024,13 +1024,50 @@ async function loadClientFromSupabase(email) {
 
     // Load program for current week
     if (clientId) {
-      const programs = await db.select('programs', { client_id: clientId }, { order: 'week_number.asc' });
+      const programs = await db.select('programs', { client_id: clientId });
       if (programs && programs.length) {
         window.LOADED_PROGRAMS = programs;
-        // Override SESSIONS with Supabase data
-        programs.forEach(p => {
-          if (p.sessions) SESSIONS[p.week_number] = p.sessions;
-        });
+        const prog = programs[0]; // One program record per client
+        if (prog && prog.sessions) {
+          const sess = prog.sessions;
+          // sessions can be:
+          // A) Object keyed by week number: { "1": [...], "2": [...] }
+          // B) Array of sessions (legacy)
+          if (Array.isArray(sess)) {
+            SESSIONS[1] = sess;
+          } else if (typeof sess === 'object') {
+            Object.keys(sess).forEach(k => {
+              const weekSessions = sess[k];
+              // Each week's value can be array or object keyed by day name
+              if (Array.isArray(weekSessions)) {
+                SESSIONS[parseInt(k)] = weekSessions;
+              } else if (typeof weekSessions === 'object') {
+                // Day-keyed format: { monday: {name, blocks}, tuesday: {...} }
+                const dayOrder = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                SESSIONS[parseInt(k)] = dayOrder
+                  .filter(d => weekSessions[d] && !weekSessions[d].rest)
+                  .map((d, i) => ({
+                    id: k + '_' + (i+1),
+                    name: weekSessions[d].name || d.charAt(0).toUpperCase() + d.slice(1),
+                    day: d.charAt(0).toUpperCase() + d.slice(1),
+                    notes: weekSessions[d].notes || '',
+                    blocks: weekSessions[d].blocks || [],
+                    rpe: weekSessions[d].rpe || '-'
+                  }));
+              }
+            });
+          }
+          // Build WEEKS dynamically from loaded sessions
+          const weekNums = Object.keys(SESSIONS).map(Number).sort((a,b)=>a-b);
+          if (weekNums.length > 0) {
+            WEEKS.splice(0, WEEKS.length, ...weekNums.map(n => ({
+              n, label: 'Week ' + n,
+              complete: n < (c.current_week || 1),
+              current: n === (c.current_week || 1)
+            })));
+            curWeek = c.current_week || weekNums[0];
+          }
+        }
       }
 
       // Load messages
@@ -1055,7 +1092,7 @@ async function loadClientFromSupabase(email) {
   }
 }
 
-const WEEKS = [
+let WEEKS = [
   {n:1,label:'Week 1',complete:true},{n:2,label:'Week 2',complete:true},
   {n:3,label:'Week 3',complete:true},{n:4,label:'Week 4',complete:true},
   {n:5,label:'Week 5',complete:false,current:true},
@@ -1063,7 +1100,7 @@ const WEEKS = [
   {n:8,label:'Week 8',complete:false}
 ];
 
-const SESSIONS = {
+let SESSIONS = {
   5: [
     { id:'5a', name:'Event Specific A', day:'Monday', rpe:'8', blocks:[
       { name:'LOG PRESS', rest:180, exercises:[
