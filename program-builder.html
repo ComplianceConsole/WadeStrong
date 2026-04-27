@@ -1013,122 +1013,149 @@ const HYROX_WEIGHTS_PRESETS = {
 function applyPreset(type) {
   const w = HYROX_WEIGHTS_PRESETS[type];
   if (!w) return;
-  if (!confirm('Apply the ' + w.label + ' Hyrox 6-week program? This will replace any existing session data.')) return;
+  if (!confirm('Apply the ' + w.label + ' Hyrox 6-week program? This will overwrite any existing sessions.')) return;
 
-  weeks = [];
-  sessionData = {};
+  // Clear existing data in place (works with const or let)
+  weeks.splice(0, weeks.length);
+  Object.keys(sessionData).forEach(k => delete sessionData[k]);
 
-  const dayNames = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-  const phases = ['Build','Build','Develop','Develop','Peak','Peak'];
+  const phases = ['build','build','develop','develop','peak','peak'];
+  const phaseLabels = ['Build','Build','Develop','Develop','Peak','Peak'];
   const loadPcts = [0.60, 0.70, 0.80, 0.85, 0.95, 1.00];
 
+  function mkId() { return 'b' + Math.random().toString(36).substr(2,8); }
+  function ex(name, sets, reps, weight, rpe, note) {
+    return { id:'e'+Math.random().toString(36).substr(2,6), name, sets, reps, weight: weight||0, rpe: rpe||'-', note: note||'' };
+  }
+  function block(type, title, rest, exercises) {
+    return { id: mkId(), type, title, rest: rest||90, exercises };
+  }
+
   for (let wk = 1; wk <= 6; wk++) {
-    weeks.push({ num: wk, type: phases[wk-1].toLowerCase(), label: 'Week ' + wk });
+    weeks.push({ num: wk, type: phases[wk-1], label: 'Week ' + wk });
+
     const load = loadPcts[wk-1];
     const isEarly = wk <= 2;
     const isMid = wk === 3 || wk === 4;
+    const runDist = isEarly ? '400m' : '1km';
+    const skiDist = isEarly ? '500m' : '1000m';
+    const burpeeDist = isEarly ? '40m' : '80m';
+    const rowDist = isEarly ? '500m' : '1000m';
+    const carryDist = isEarly ? '100m' : '200m';
+    const lungeDist = isEarly ? '50m' : '100m';
+    const wbReps = isEarly ? 50 : isMid ? 75 : 100;
+    const sledKg = Math.round(w.sled * load);
+    const sandbagKg = Math.round(w.sandbag * load);
+    const phaseName = phaseLabels[wk-1];
 
-    // Build sessions for this week
-    const daySessions = {};
-
-    // Day 1 — RoxSim
-    daySessions['monday'] = {
-      name: 'RoxSim — ' + (isEarly ? 'Intro' : isMid ? 'Building' : 'Race Pace'),
-      notes: 'All 7 stations in race order. ' + Math.round(load*100) + '% of race weight. Focus on pacing and transitions.',
-      blocks: [
-        { id:'b'+Date.now()+'_1', type:'conditioning', title:'RoxSim', rest:60, exercises:[
-          { id:'e1', name:'Run',            sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' run — race pace effort' },
-          { id:'e2', name:'Ski Erg',         sets:1, reps:1, weight:0,   rpe:8,  note: (isEarly?'500m':'1000m') + '. Rhythm and breathing. Damper 4–5.' },
-          { id:'e3', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' — keep moving' },
-          { id:'e4', name:'Sled Push',       sets:1, reps:1, weight:Math.round(w.sled*load), rpe:9, note: (isEarly?'25m':'50m') + ' · ' + Math.round(w.sled*load) + 'kg · low hips, drive through heel' },
-          { id:'e5', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' — legs will be heavy, expected' },
-          { id:'e6', name:'Burpee Broad Jump',sets:1,reps:1, weight:0,   rpe:9,  note: (isEarly?'40m':'80m') + ' — stay explosive, no resting hands on knees' },
-          { id:'e7', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') },
-          { id:'e8', name:'Rowing - erg',    sets:1, reps:1, weight:0,   rpe:8,  note: (isEarly?'500m':'1000m') + ' — find race split and hold. Legs → lean → arms.' },
-          { id:'e9', name:'Run',             sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') },
-          { id:'e10', name:'Farmers carry',  sets:1, reps:1, weight:w.farmers, rpe:8, note: (isEarly?'100m':'200m') + ' · ' + w.farmers + 'kg/hand · unbroken if possible' },
-          { id:'e11', name:'Run',            sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') },
-          { id:'e12', name:'Sandbag Lunges', sets:1, reps:1, weight:Math.round(w.sandbag*load), rpe:9, note: (isEarly?'50m':'100m') + ' · ' + Math.round(w.sandbag*load) + 'kg · alternate knees' },
-          { id:'e13', name:'Run',            sets:1, reps:1, weight:0,   rpe:7,  note: (isEarly?'400m':'1km') + ' — last run, push now' },
-          { id:'e14', name:'Wall Balls',     sets:1, reps:isEarly?50:isMid?75:100, weight:w.wall_ball, rpe:10, note: (isEarly?50:isMid?75:100) + ' reps · ' + w.wall_ball + 'kg to ' + w.wb_height + 'm · break into sets' },
-        ]}
-      ]
-    };
-
-    // Day 2 — Run Intervals + Station Work
-    daySessions['tuesday'] = {
-      name: 'Run Intervals + Station Focus',
-      notes: 'Running capacity + targeted station training',
-      blocks: [
-        { id:'b'+Date.now()+'_2a', type:'conditioning', title:'Run Intervals', rest:90, exercises:[
-          { id:'e20', name:'Treadmill - intervals', sets:isEarly?6:isMid?8:10, reps:1, weight:0, rpe:8, note:(isEarly?6:isMid?8:10)+'×400m at race pace · 60 sec recovery jog between' },
-        ]},
-        { id:'b'+Date.now()+'_2b', type:'conditioning', title:'Station Practice', rest:120, exercises:[
-          { id:'e21', name:'Wall Balls', sets:4, reps:25, weight:w.wall_ball, rpe:8, note:'4×25 reps at race weight · focus on consistent rhythm · rest 90 sec between' },
-          { id:'e22', name:'Ski Erg',   sets:3, reps:1,  weight:0,            rpe:8, note:'3×250m · technique focus — full hip hinge, not just arms' },
-        ]}
-      ]
-    };
-
-    daySessions['wednesday'] = { name: 'Rest', notes: '', rest: true, blocks: [] };
-
-    // Day 3 — Strength
-    daySessions['thursday'] = {
-      name: 'Strength — Station Builders',
-      notes: 'Build the strength capacity needed for each station. Heavier than race weight.',
-      blocks: [
-        { id:'b'+Date.now()+'_3a', type:'main', title:'Lower Body', rest:180, exercises:[
-          { id:'e30', name:'Squat',                 sets:4, reps:5,  weight:0, rpe:8, note:'Leg drive for sled push. Controlled down, explosive up.' },
-          { id:'e31', name:'Bulgarian split squat', sets:3, reps:10, weight:0, rpe:8, note:'Unilateral strength for lunges. Per leg.' },
-          { id:'e32', name:'Romanian deadlift',     sets:3, reps:8,  weight:0, rpe:7, note:'Posterior chain for rowing and carries.' },
-        ]},
-        { id:'b'+Date.now()+'_3b', type:'accessory', title:'Carry + Pull', rest:120, exercises:[
-          { id:'e33', name:'Farmers carry', sets:4, reps:1, weight:Math.round(w.farmers*1.15), rpe:8, note: Math.round(w.farmers*1.15)+'kg/hand × 40m · heavier than race weight to build capacity' },
-          { id:'e34', name:'Seated row',    sets:4, reps:8, weight:0, rpe:8, note:'Heavy. Simulate sled pull resistance. Full range of motion.' },
-          { id:'e35', name:'Pull-ups',      sets:3, reps:8, weight:0, rpe:7, note:'Lat strength for ski erg and rowing.' },
-        ]}
-      ]
-    };
-
-    // Day 4 — Aerobic base (only for 4+ day programs)
-    daySessions['friday'] = {
-      name: 'Aerobic Base',
-      notes: 'Easy effort — should be able to hold a conversation throughout.',
-      blocks: [
-        { id:'b'+Date.now()+'_4a', type:'conditioning', title:'Steady Run', rest:0, exercises:[
-          { id:'e40', name:'Treadmill - run', sets:1, reps:1, weight:0, rpe:6, note:(isEarly?20:isMid?25:30)+' min steady state · Zone 2 · nasal breathing' },
-        ]},
-        { id:'b'+Date.now()+'_4b', type:'conditioning', title:'Erg Work', rest:90, exercises:[
-          { id:'e41', name:'Ski Erg',      sets:3, reps:1, weight:0, rpe:6, note:'3×3 min · technique focus, not effort. Hip hinge, drive through body.' },
-          { id:'e42', name:'Rowing - erg', sets:3, reps:1, weight:0, rpe:6, note:'3×3 min · consistent split. Legs → lean → arms.' },
-        ]}
-      ]
-    };
-
-    daySessions['saturday'] = { name: 'Rest', notes: '', rest: true, blocks: [] };
-    daySessions['sunday']   = { name: 'Rest', notes: '', rest: true, blocks: [] };
-
-    sessionData[wk] = daySessions;
+    // sessionData[week] = array of 7 sessions (indexed by day id - 1)
+    sessionData[wk] = [
+      // Day 1 — RoxSim
+      {
+        name: 'RoxSim — ' + (isEarly ? 'Intro' : isMid ? 'Building' : 'Race Pace'),
+        notes: 'All stations in race order. ' + Math.round(load*100) + '% race weight. Focus on pacing + transitions.',
+        rest: false, activeRest: false,
+        blocks: [block('conditioning','RoxSim',60,[
+          ex('Run',            1,1,0,  7, runDist+' — race pace effort, controlled start'),
+          ex('Ski Erg',        1,1,0,  8, skiDist+'. Full hip hinge. Damper 4–5.'),
+          ex('Run',            1,1,0,  7, runDist+' — keep moving, breathe'),
+          ex('Sled Push',      1,1,sledKg,9,  '50m · '+sledKg+'kg · low hips, drive through heel, short fast steps'),
+          ex('Run',            1,1,0,  7, runDist+' — legs heavy after sled, expected'),
+          ex('Burpee Broad Jump',1,1,0,9, burpeeDist+' — jump forward, no resting hands on knees'),
+          ex('Run',            1,1,0,  7, runDist),
+          ex('Rowing - erg',   1,1,0,  8, rowDist+' — legs first, lean, then arms. Hold race split.'),
+          ex('Run',            1,1,0,  7, runDist),
+          ex('Farmers carry',  1,1,w.farmers,8, carryDist+' · '+w.farmers+'kg/hand · unbroken if possible, deliberate turns'),
+          ex('Run',            1,1,0,  7, runDist),
+          ex('Sandbag Lunges', 1,1,sandbagKg,9, lungeDist+' · '+sandbagKg+'kg · alternate knees, stay upright'),
+          ex('Run',            1,1,0,  7, runDist+' — last run, push now'),
+          ex('Wall Balls',     1,wbReps,w.wall_ball,10, wbReps+' reps · '+w.wall_ball+'kg to '+w.wb_height+'m · break into sets e.g. 25-20-15-10-10'),
+        ])]
+      },
+      // Day 2 — Run Intervals + Station Work
+      {
+        name: 'Run Intervals + Station Focus',
+        notes: 'Running capacity and targeted station training.',
+        rest: false, activeRest: false,
+        blocks: [
+          block('conditioning','Run Intervals',90,[
+            ex('Treadmill - intervals', isEarly?6:isMid?8:10, 1, 0, 8, (isEarly?6:isMid?8:10)+'×400m at race pace · 60 sec recovery jog between sets'),
+          ]),
+          block('conditioning','Station Practice',120,[
+            ex('Wall Balls', 4,25,w.wall_ball,8,'4×25 reps · consistent rhythm · rest 90 sec between sets'),
+            ex('Ski Erg',    3,1, 0,          8,'3×250m · technique focus — full body hip hinge, not just arms'),
+            ex('Rowing - erg',2,1,0,          7,'2×500m · hold target race split pace'),
+          ])
+        ]
+      },
+      // Day 3 — Rest
+      { name: 'Rest', notes: '', rest: true, activeRest: false, blocks: [] },
+      // Day 4 — Strength
+      {
+        name: 'Strength — Station Builders',
+        notes: 'Build capacity for race stations. Heavier than race weight.',
+        rest: false, activeRest: false,
+        blocks: [
+          block('main','Lower Body',180,[
+            ex('Squat',                 4,5, 0,8,'Leg drive for sled push. Controlled descent, explosive drive.'),
+            ex('Bulgarian split squat', 3,10,0,8,'Unilateral strength for sandbag lunges. Per leg.'),
+            ex('Romanian deadlift',     3,8, 0,7,'Posterior chain for rowing and carries.'),
+          ]),
+          block('accessory','Carry + Pull',120,[
+            ex('Farmers carry',Math.round(w.farmers*1.15)>0?4:4,1,Math.round(w.farmers*1.15),8,'40m · '+Math.round(w.farmers*1.15)+'kg/hand — heavier than race to build capacity'),
+            ex('Seated row',  4,8,0,8,'Heavy. Full range of motion. Simulate sled resistance.'),
+            ex('Pull-ups',    3,8,0,7,'Lat strength for ski erg and rowing.'),
+          ])
+        ]
+      },
+      // Day 5 — Aerobic Base
+      {
+        name: 'Aerobic Base',
+        notes: 'Easy effort — Zone 2. Should be able to hold a conversation.',
+        rest: false, activeRest: false,
+        blocks: [
+          block('conditioning','Steady Run',0,[
+            ex('Treadmill - run',1,1,0,6,(isEarly?20:isMid?25:30)+' min steady state · nasal breathing · Zone 2'),
+          ]),
+          block('conditioning','Erg Work',90,[
+            ex('Ski Erg',     3,1,0,6,'3×3 min · technique over effort — hip hinge, drive through whole body'),
+            ex('Rowing - erg',3,1,0,6,'3×3 min · consistent split, legs → lean → arms'),
+          ])
+        ]
+      },
+      // Day 6 — Rest
+      { name: 'Rest', notes: '', rest: true, activeRest: false, blocks: [] },
+      // Day 7 — Rest
+      { name: 'Rest', notes: '', rest: true, activeRest: false, blocks: [] },
+    ];
   }
 
+  // Reset days array to match
+  days.splice(0, days.length,
+    {id:1, name:'Monday',   session:'RoxSim',            rest:false, activeRest:false},
+    {id:2, name:'Tuesday',  session:'Run + Station Work', rest:false, activeRest:false},
+    {id:3, name:'Wednesday',session:'',                  rest:true,  activeRest:false},
+    {id:4, name:'Thursday', session:'Strength',          rest:false, activeRest:false},
+    {id:5, name:'Friday',   session:'Aerobic Base',      rest:false, activeRest:false},
+    {id:6, name:'Saturday', session:'',                  rest:true,  activeRest:false},
+    {id:7, name:'Sunday',   session:'',                  rest:true,  activeRest:false}
+  );
+
   currentWeek = 1;
-  currentDay = 'monday';
+  currentDay = 1;
 
   renderWeeks();
   renderDays();
   renderBlocks();
   saveDraft();
 
-  // Switch to exercises tab
-  switchRpTab('exercises', document.querySelector('.rp-tab'));
-
-  showToast('✅ ' + w.label + ' Hyrox program loaded — 6 weeks ready to review and publish');
+  showToast('✅ ' + w.label + ' Hyrox program loaded — 6 weeks ready!');
 }
 
 document.addEventListener('DOMContentLoaded', () => { loadClientForBuilder(); });
 
 // Weeks built dynamically  -  start with 6 weeks default, overridden by program data
-const weeks = [
+let weeks = [
   {num:1,type:'build',label:'Week 1'},{num:2,type:'build',label:'Week 2'},
   {num:3,type:'build',label:'Week 3'},{num:4,type:'peak',label:'Week 4'},
   {num:5,type:'peak',label:'Week 5'},{num:6,type:'deload',label:'Week 6'},
@@ -1263,7 +1290,7 @@ const exerciseLibrary = {
 };
 
 // Session data  -  populated from Supabase or auto-generated
-const sessionData = {};
+let sessionData = {};
 
 // Progression suggestions  -  populated from session logs
 const progSuggestions = [];
