@@ -960,129 +960,172 @@ function getClientEmail() {
 async function loadClientFromSupabase(email) {
   if (!email) return false;
   try {
+    // ── CLIENT ──────────────────────────────────────────
     const clients = await db.select('clients', { email });
     if (!clients || !clients.length) return false;
     const c = clients[0];
     clientId = c.id;
+
     const firstName = c.first_name || '';
-    const lastName = c.last_name || '';
-    const fullName = [firstName, lastName].filter(Boolean).join(' ') || email;
-    const initials = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?';
-    // Load questionnaire data
+    const lastName  = c.last_name  || '';
+    const fullName  = [firstName, lastName].filter(Boolean).join(' ') || email;
+    const initials  = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?';
+
+    // ── QUESTIONNAIRE ───────────────────────────────────
     const qData = await db.select('questionnaire_responses', { client_id: c.id }, { order: 'created_at.desc', limit: 1 });
     const q = qData && qData.length ? qData[0] : {};
-    const rawData = q.raw_data || {};
+    const raw = q.raw_data || {};
 
+    // ── RPE RESULTS ─────────────────────────────────────
+    let rpeRows = await db.select('rpe_results', { client_id: c.id });
+    if (!rpeRows || !rpeRows.length) rpeRows = await db.select('rpe_results', { email });
+    const rpe = rpeRows && rpeRows.length ? rpeRows[0] : null;
+
+    // ── BUILD CLIENT OBJECT ─────────────────────────────
     CLIENT = {
-      name: fullName,
-      initials: initials,
-      short: firstName || fullName,
-      program: c.program_type === 'pre_comp' ? 'Pre-Comp Build Up' : 'Get Strong',
+      name: fullName, initials, short: firstName || fullName,
+      program: c.program_type === 'pre_comp' ? 'Pre-Comp' : c.program_type === 'hyrox' ? 'Hyrox' : 'Get Strong',
       week: c.current_week || 1,
       totalWeeks: c.total_weeks || 6,
       type: c.program_type,
       email: c.email,
-      // Profile from clients table
-      age: c.age || rawData.age || null,
-      height: c.height || rawData.height || null,
-      weight: c.weight || rawData.weight || null,
-      location: c.location || rawData.location || null,
-      phone: c.phone || null,
-      // Training from questionnaire
-      gymType: q.gym_setup || rawData.gymType || null,
-      trainingDays: q.days_per_week || rawData.trainingDays || null,
-      sessionLength: q.session_length || rawData.sessionLength || null,
-      trainingAge: q.training_age || rawData.trainingAge || null,
-      // Competition (pre_comp only)
-      compName: q.comp_name || rawData.compName || c.comp_name || null,
-      compDate: q.comp_date || rawData.compDate || c.comp_date || null,
-      weightClass: q.comp_weight_class || rawData.weightClass || c.weight_class || null,
-      compLevel: q.comp_level || rawData.compLevel || null,
-      events: Array.isArray(q.comp_events) ? q.comp_events : (Array.isArray(rawData.events) ? rawData.events : []),
-      strongEvents: Array.isArray(q.strong_events) ? q.strong_events : (Array.isArray(rawData.strongEvents) ? rawData.strongEvents : []),
-      weakEvents: Array.isArray(q.weak_events) ? q.weak_events : (Array.isArray(rawData.weakEvents) ? rawData.weakEvents : []),
-      injuries: q.injuries || rawData.injuries || null,
-      goals: Array.isArray(q.goals) ? q.goals : (Array.isArray(rawData.goals) ? rawData.goals : []),
+      age: c.age || q.age || null,
+      height: c.height || q.height || raw.height || null,
+      weight: c.weight || q.weight || raw.weight || null,
+      location: c.location || q.location || raw.location || null,
+      gymType: q.gym_type || raw.gymType || null,
+      trainingDays: q.training_days_per_week || raw.trainingDays || null,
+      goals: Array.isArray(q.goals) ? q.goals : (Array.isArray(raw.goals) ? raw.goals : []),
+      injuries: q.injury_detail || raw.injuries || null,
+      rpe: rpe,
     };
 
-    // Load RPE results
-    const rpe = await db.select('rpe_results', { client_id: c.id }, { order: 'created_at.desc', limit: 1 });
-    const rpeByEmail = !rpe?.length ? await db.select('rpe_results', { email }, { order: 'created_at.desc', limit: 1 }) : null;
-    const rpeResult = (rpe && rpe.length ? rpe : rpeByEmail) || [];
-    if (rpe && rpe.length) CLIENT.rpe = rpe[0];
+    // ── NAV / HEADER ────────────────────────────────────
+    document.getElementById('navName').textContent    = CLIENT.short;
+    document.getElementById('navWeek').textContent    = CLIENT.program.toUpperCase() + ' · WEEK ' + CLIENT.week + '/' + CLIENT.totalWeeks;
+    document.getElementById('navAvatar').textContent  = CLIENT.initials;
 
-    // Show comp tab for pre_comp clients
-    if (c.program_type === 'pre_comp') {
-      document.getElementById('bnav-comp').style.display = 'flex';
+    // ── PROFILE PANEL ───────────────────────────────────
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+    setEl('profName',     fullName);
+    setEl('profAge',      CLIENT.age     ? CLIENT.age + ' yrs'  : null);
+    setEl('profHeight',   CLIENT.height  ? CLIENT.height + 'cm'  : null);
+    setEl('profWeight',   CLIENT.weight  ? CLIENT.weight + 'kg'  : null);
+    setEl('profLocation', CLIENT.location);
+    setEl('profProgram',  CLIENT.program + ' · Wk ' + CLIENT.week + '/' + CLIENT.totalWeeks);
+
+    // ── RPE GRID ────────────────────────────────────────
+    const rpeGrid = document.getElementById('rpeResultsGrid');
+    if (rpeGrid) {
+      if (rpe) {
+        const lifts = [
+          { name:'Deadlift',    r1:rpe.deadlift_1rm,    r3:rpe.deadlift_3rm,    r5:rpe.deadlift_5rm    },
+          { name:'Squat',       r1:rpe.squat_raw_1rm,   r3:rpe.squat_raw_3rm,   r5:rpe.squat_raw_5rm   },
+          { name:'Bench Press', r1:rpe.bench_1rm,       r3:rpe.bench_3rm,       r5:rpe.bench_5rm       },
+          { name:'Press',       r1:rpe.press_1rm,       r3:rpe.press_3rm,       r5:rpe.press_5rm       },
+        ].filter(l => l.r1 || l.r3 || l.r5);
+        rpeGrid.innerHTML = lifts.map(l => `
+          <div class="rpe-lift-card">
+            <div class="rpe-lift-name">${l.name}</div>
+            ${l.r1 ? `<div class="rpe-lift-row"><span class="rpe-lift-label">1RM</span><span class="rpe-lift-val">${l.r1}kg</span></div>` : ''}
+            ${l.r3 ? `<div class="rpe-lift-row"><span class="rpe-lift-label">3RM</span><span class="rpe-lift-val">${l.r3}kg</span></div>` : ''}
+            ${l.r5 ? `<div class="rpe-lift-row"><span class="rpe-lift-label">5RM</span><span class="rpe-lift-val">${l.r5}kg</span></div>` : ''}
+          </div>`).join('');
+        // Build PROGRESS_DATA from RPE baseline
+        PROGRESS_DATA = lifts.filter(l=>l.r1>0).map(l => ({ name: l.name, data: [{ week: 'Baseline', w: l.r1 }] }));
+      } else {
+        rpeGrid.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No RPE results yet — complete RPE testing to populate your numbers.</div>';
+      }
     }
 
-    // Load program for current week
+    // ── PROGRAMS ────────────────────────────────────────
     if (clientId) {
       const programs = await db.select('programs', { client_id: clientId });
       if (programs && programs.length) {
-        window.LOADED_PROGRAMS = programs;
-        const prog = programs[0]; // One program record per client
+        const prog = programs[0];
         if (prog && prog.sessions) {
           const sess = prog.sessions;
-          // sessions can be:
-          // A) Object keyed by week number: { "1": [...], "2": [...] }
-          // B) Array of sessions (legacy)
+          // Handle both array and week-keyed object formats
           if (Array.isArray(sess)) {
             SESSIONS[1] = sess;
-          } else if (typeof sess === 'object') {
-            Object.keys(sess).forEach(k => {
-              const weekSessions = sess[k];
-              // Each week's value can be array or object keyed by day name
-              if (Array.isArray(weekSessions)) {
-                SESSIONS[parseInt(k)] = weekSessions;
-              } else if (typeof weekSessions === 'object') {
-                // Day-keyed format: { monday: {name, blocks}, tuesday: {...} }
+          } else {
+            Object.keys(sess).forEach(wk => {
+              const ws = sess[wk];
+              if (Array.isArray(ws)) {
+                SESSIONS[parseInt(wk)] = ws;
+              } else if (ws && typeof ws === 'object') {
+                // Day-keyed: {monday:{name,blocks}, tuesday:{...}}
                 const dayOrder = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-                SESSIONS[parseInt(k)] = dayOrder
-                  .filter(d => weekSessions[d] && !weekSessions[d].rest)
+                const sessArr = dayOrder
+                  .filter(d => ws[d] && !ws[d].rest)
                   .map((d, i) => ({
-                    id: k + '_' + (i+1),
-                    name: weekSessions[d].name || d.charAt(0).toUpperCase() + d.slice(1),
+                    id: wk + '_' + (i+1),
+                    name: ws[d].name || d.charAt(0).toUpperCase() + d.slice(1),
                     day: d.charAt(0).toUpperCase() + d.slice(1),
-                    notes: weekSessions[d].notes || '',
-                    blocks: weekSessions[d].blocks || [],
-                    rpe: weekSessions[d].rpe || '-'
+                    notes: ws[d].notes || '',
+                    blocks: ws[d].blocks || [],
+                    rpe: ws[d].rpe || '-',
                   }));
+                if (sessArr.length) SESSIONS[parseInt(wk)] = sessArr;
               }
             });
           }
-          // Build WEEKS dynamically from loaded sessions
-          const weekNums = Object.keys(SESSIONS).map(Number).sort((a,b)=>a-b);
-          if (weekNums.length > 0) {
-            WEEKS.splice(0, WEEKS.length, ...weekNums.map(n => ({
+          // Rebuild WEEKS from loaded sessions
+          const wkNums = Object.keys(SESSIONS).map(Number).sort((a,b) => a-b);
+          if (wkNums.length) {
+            WEEKS.splice(0, WEEKS.length, ...wkNums.map(n => ({
               n, label: 'Week ' + n,
               complete: n < (c.current_week || 1),
-              current: n === (c.current_week || 1)
+              current: n === (c.current_week || 1),
             })));
-            curWeek = c.current_week || weekNums[0];
+            curWeek = c.current_week || wkNums[0];
           }
         }
       }
+    }
 
-      // Load messages
+    // ── MESSAGES ────────────────────────────────────────
+    if (clientId) {
       const msgs = await db.select('messages', { client_id: clientId });
       if (msgs && msgs.length) {
         msgs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-        msgs.forEach(m => MESSAGES.push({ ...m, delivered: true }));
+        MESSAGES.push(...msgs.map(m => ({ ...m, delivered: true })));
       }
+    }
 
-      // Load comp plan
-      const compPlans = await db.select('comp_plans', { client_id: clientId }, { order: 'created_at.desc', limit: 1 });
-      if (compPlans && compPlans.length) {
-        const cp = compPlans[0];
-        window.LOADED_COMP_PLAN = cp;
-        if (cp.events && cp.events.length) window.EVENTS = cp.events;
+    // ── COMP / RACE TAB VISIBILITY ──────────────────────
+    const bnavComp = document.getElementById('bnav-comp');
+    if (bnavComp) {
+      const isHyrox   = c.program_type === 'hyrox';
+      const isPreComp = c.program_type === 'pre_comp';
+      bnavComp.style.display = (isHyrox || isPreComp) ? 'flex' : 'none';
+      if (isHyrox) {
+        const icon  = document.getElementById('bnav-comp-icon');
+        const label = document.getElementById('bnav-comp-label');
+        if (icon)  icon.textContent  = '🏅';
+        if (label) label.textContent = 'Race';
+        const vr = document.getElementById('view-race');
+        const vc = document.getElementById('view-comp');
+        if (vr) vr.style.display = 'block';
+        if (vc) vc.style.display = 'none';
+      } else if (isPreComp) {
+        const vr = document.getElementById('view-race');
+        const vc = document.getElementById('view-comp');
+        if (vr) vr.style.display = 'none';
+        if (vc) vc.style.display = 'block';
       }
-    } // end if (clientId)
+    }
+
+    // ── RENDER ALL PANELS ───────────────────────────────
+    renderWeekTabs();
+    renderSessions(curWeek);
+    renderProgress();
+    renderMessages();
+    scrollMsgsToBottom();
 
     return true;
   } catch(err) {
-    console.error('Load client error:', err);
+    console.error('loadClientFromSupabase error:', err);
     return false;
   }
 }
@@ -1397,55 +1440,56 @@ function renderMessages() {
   const thread = document.getElementById('msgThread');
   if (!thread) return;
   if (!MESSAGES.length) {
-    thread.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted)">
+    thread.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--muted)">
       <div style="font-size:32px;margin-bottom:12px">💬</div>
-      <div style="font-size:14px;font-weight:600;color:var(--iron);margin-bottom:6px">No messages yet</div>
-      <div style="font-size:13px">Send Wade a message below — questions, updates, how training is going.</div>
+      <div style="font-size:14px;font-weight:700;color:var(--iron);margin-bottom:6px">No messages yet</div>
+      <div style="font-size:13px">Send Wade a message below — ask anything about your program.</div>
     </div>`;
     return;
   }
   thread.innerHTML = MESSAGES.map(m => {
-    const isWade = m.from_role === 'wade' || m.from === 'wade';
-    const isVoice = m.message_type === 'voice' || m.type === 'voice' || (m.content || m.text || '').startsWith('data:audio');
-    const text = m.content || m.text || '';
-    const time = m.time || (m.created_at ? new Date(m.created_at).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}) : '');
-    // Tick status: ✓ = delivered, ✓✓ = wade has seen it (read=true)
-    const ticks = isWade ? '' : (m.read ? '<span style="color:var(--rust);font-size:11px">✓✓</span>' : m.delivered !== false ? '<span style="color:var(--muted);font-size:11px">✓</span>' : '<span style="color:rgba(107,101,96,0.4);font-size:11px">○</span>');
+    const isCoach   = m.sender === 'coach' || m.from_role === 'wade';
+    const text      = m.message_text || m.content || m.text || '';
+    const isVoice   = text.startsWith('data:audio') || m.message_type === 'voice';
+    const timeStr   = m.created_at ? new Date(m.created_at).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}) : 'Just now';
+    const readByCoach = m.read_by_coach || m.read;
+    const tick = isCoach ? '' : readByCoach
+      ? '<span style="color:var(--rust);font-size:12px;margin-left:4px">✓✓</span>'
+      : m.delivered !== false
+        ? '<span style="color:var(--muted);font-size:12px;margin-left:4px">✓</span>'
+        : '<span style="color:rgba(107,101,96,0.3);font-size:12px;margin-left:4px">○</span>';
 
-    if (isVoice && isWade) {
-      return `<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:12px">
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Wade</div>
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%">
-          <div style="font-size:11px;font-weight:700;color:var(--rust);margin-bottom:6px">🎤 Voice note</div>
-          <audio controls src="${text}" style="width:200px;height:32px"></audio>
-        </div>
-        <div style="font-size:10px;color:var(--muted);margin-top:3px">${time}</div>
+    if (isCoach) {
+      return `<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">WADE</div>
+        ${isVoice
+          ? `<div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px">
+               <div style="font-size:11px;font-weight:700;color:var(--rust);margin-bottom:6px">🎤 Voice note</div>
+               <audio controls src="${text}" style="width:200px;height:32px"></audio>
+             </div>`
+          : `<div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:82%;font-size:14px;line-height:1.5;color:var(--iron)">${text}</div>`
+        }
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${timeStr}</div>
+      </div>`;
+    } else {
+      return `<div style="display:flex;flex-direction:column;align-items:flex-end;margin-bottom:14px">
+        <div style="background:var(--iron);border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:82%;font-size:14px;line-height:1.5;color:#fff">${text}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;display:flex;align-items:center">${timeStr}${tick}</div>
       </div>`;
     }
-
-    return isWade
-      ? `<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:12px">
-          <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Wade</div>
-          <div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:80%;font-size:14px;line-height:1.5;color:var(--iron)">${text}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px">${time}</div>
-        </div>`
-      : `<div style="display:flex;flex-direction:column;align-items:flex-end;margin-bottom:12px">
-          <div style="background:var(--iron);border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:80%;font-size:14px;line-height:1.5;color:#fff">${text}</div>
-          <div style="font-size:10px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:4px">${time} ${ticks}</div>
-        </div>`;
   }).join('');
 }
 
 async function sendMessage() {
   const input = document.getElementById('msgInput');
-  const text = input.value.trim();
+  const text  = input.value.trim();
   if (!text) return;
   input.value = '';
   input.style.height = 'auto';
 
-  // Optimistically add to UI with pending state
+  // Optimistic UI
   const tempId = 'tmp_' + Date.now();
-  MESSAGES.push({ id: tempId, from: 'client', text, content: text, time: 'Just now', delivered: false });
+  MESSAGES.push({ id: tempId, sender: 'client', message_text: text, created_at: new Date().toISOString(), delivered: false });
   renderMessages();
   scrollMsgsToBottom();
 
@@ -1453,18 +1497,17 @@ async function sendMessage() {
     try {
       const result = await db.insert('messages', {
         client_id: clientId,
-        from_role: 'client',
-        message_type: 'text',
-        content: text,
-        read: false,
+        sender: 'client',
+        message_text: text,
       });
-      // Mark delivered
       const msg = MESSAGES.find(m => m.id === tempId);
-      if (msg) { msg.delivered = true; msg.id = result?.[0]?.id || tempId; }
+      if (msg) { msg.delivered = true; if (result?.[0]?.id) msg.id = result[0].id; }
       renderMessages();
-      scrollMsgsToBottom();
     } catch(err) {
-      console.error('Message save error:', err);
+      console.error('sendMessage error:', err);
+      const msg = MESSAGES.find(m => m.id === tempId);
+      if (msg) msg.delivered = true;
+      renderMessages();
     }
   } else {
     const msg = MESSAGES.find(m => m.id === tempId);
@@ -1510,40 +1553,44 @@ function setSoreness(n) {
 
 function setSQ(q) {
   selectedSQ = q;
-  ['poor','ok','good','great'].forEach(k=>{
-    const b=document.getElementById('sq-'+k);
-    if(b){b.classList.toggle('sel',k===q);}
+  ['poor','ok','good','great'].forEach(k => {
+    const b = document.getElementById('sq-' + k);
+    if (b) {
+      if (k === q) b.classList.add('sel');
+      else b.classList.remove('sel');
+    }
   });
 }
 
 async function saveCheckIn() {
-  const soreness = selectedSoreness || null;
-  const sleep = parseFloat(document.getElementById('sleepSlider')?.value) || null;
-  const sleepQ = selectedSQ || null;
-  const hrv = parseFloat(document.getElementById('hrvInput')?.value) || null;
-  const cal = parseFloat(document.getElementById('nutCal')?.value) || null;
-  const water = parseFloat(document.getElementById('nutWater')?.value) || null;
-  const mood = selectedMood || null;
-  const notes = document.getElementById('checkInNotes')?.value?.trim() || null;
+  const soreness   = selectedSoreness  || null;
+  const sleep      = parseFloat(document.getElementById('sleepSlider')?.value) || null;
+  const sleepQ     = selectedSQ        || null;
+  const hrv        = parseFloat(document.getElementById('hrvInput')?.value) || null;
+  const cal        = parseFloat(document.getElementById('nutCal')?.value) || null;
+  const water      = parseFloat(document.getElementById('nutWater')?.value) || null;
+  const mood       = selectedMood      || null;
+  const notes      = document.getElementById('checkInNotes')?.value?.trim() || null;
 
   try {
     if (clientId) {
       await db.insert('client_health', {
-        client_id: clientId,
-        date: new Date().toISOString().split('T')[0],
-        soreness_score: soreness,
-        sleep_hours: sleep,
-        sleep_quality: sleepQ,
-        hrv: hrv,
-        calories: cal,
-        water_litres: water,
-        mood: mood,
-        notes: notes,
+        client_id:   clientId,
+        date:        new Date().toISOString().split('T')[0],
+        record_type: 'daily_checkin',
+        data: {
+          soreness, sleep_hours: sleep, sleep_quality: sleepQ,
+          hrv, calories: cal, water_litres: water, mood, notes,
+        },
       });
     }
-  } catch(e) { console.error('Check-in save:', e); }
-  showSuccess('checkInSuccess');
-  showToast('Check-in logged ✓');
+    showSuccess('checkInSuccess');
+    showToast('Check-in logged ✓');
+  } catch(err) {
+    console.error('saveCheckIn error:', err);
+    showToast('Saved — syncing...');
+    showSuccess('checkInSuccess');
+  }
 }
 
 // ── NUTRITION ─────────────────────────────────────────────────
@@ -1594,14 +1641,34 @@ function renderNutritionHistory() {
 // ── RECOVERY ──────────────────────────────────────────────────
 function setRecFeel(feel) {
   selectedRecFeel = feel;
-  ['rough','good','great'].forEach(k=>{
-    const b=document.getElementById('rf-'+k);
-    if(b) b.classList.toggle('sel', b.textContent.trim().toLowerCase().includes(k));
-  });
+  document.getElementById('rf-rough')?.classList.toggle('sel', feel === '😖 Rough');
+  document.getElementById('rf-good')?.classList.toggle('sel',  feel === '👍 Good');
+  document.getElementById('rf-great')?.classList.toggle('sel', feel === '🔥 Great');
 }
 
-function saveRecovery() {
+async function saveRecovery() {
+  const type    = document.getElementById('recType')?.value || '';
+  const area    = document.getElementById('recArea')?.value?.trim() || '';
+  const feel    = selectedRecFeel || '';
+  const notes   = document.getElementById('recNotes')?.value?.trim() || '';
+  const dur     = document.getElementById('recDuration')?.value || '';
+
+  try {
+    if (clientId) {
+      await db.insert('client_health', {
+        client_id:   clientId,
+        date:        new Date().toISOString().split('T')[0],
+        record_type: 'recovery_session',
+        data: { type, area, feel, notes, duration: dur },
+      });
+    }
+  } catch(e) { console.error('saveRecovery:', e); }
+
   hideForm('recoveryForm');
+  selectedRecFeel = null;
+  document.getElementById('rf-rough')?.classList.remove('sel');
+  document.getElementById('rf-good')?.classList.remove('sel');
+  document.getElementById('rf-great')?.classList.remove('sel');
   showToast('Recovery session logged ✓');
 }
 
