@@ -347,10 +347,48 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
     </div>
 
     <!-- RPE Results -->
-    <div class="card">
+        <!-- Lift results (Get Strong / Pre-Comp) -->
+    <div class="card" id="liftResultsCard">
       <div class="card-title">RPE Testing Results</div>
       <div class="rpe-grid" id="rpeResultsGrid">
-        <div style="font-size:13px;color:var(--muted);padding:8px 0">No RPE results yet.</div>
+        <div style="font-size:13px;color:var(--muted);padding:8px 0">No RPE results yet — complete your RPE testing to see your numbers here.</div>
+      </div>
+    </div>
+
+    <!-- Hyrox station profile -->
+    <div class="card" id="hyroxProfileCard" style="display:none">
+      <div class="card-title" style="margin-bottom:12px">Hyrox Profile</div>
+
+      <!-- Division + race weights -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Division & weights</div>
+        <div class="profile-grid" id="hyroxDivisionGrid">
+          <div class="profile-item"><div class="profile-label">Division</div><div class="profile-val" id="profDivision">—</div></div>
+          <div class="profile-item"><div class="profile-label">Target time</div><div class="profile-val" id="profTargetTime">—</div></div>
+          <div class="profile-item"><div class="profile-label">Sled push</div><div class="profile-val" id="profSledWeight">—</div></div>
+          <div class="profile-item"><div class="profile-label">Farmers carry</div><div class="profile-val" id="profFarmersWeight">—</div></div>
+          <div class="profile-item"><div class="profile-label">Sandbag lunge</div><div class="profile-val" id="profSandbagWeight">—</div></div>
+          <div class="profile-item"><div class="profile-label">Wall ball</div><div class="profile-val" id="profWallBallWeight">—</div></div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:14px"></div>
+
+      <!-- Running baseline -->
+      <div style="margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Running baseline</div>
+        <div class="profile-grid">
+          <div class="profile-item"><div class="profile-label">1km pace</div><div class="profile-val" id="profKmPace">—</div></div>
+          <div class="profile-item"><div class="profile-label">Run background</div><div class="profile-val" id="profRunBackground">—</div></div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:14px"></div>
+
+      <!-- Station confidence ratings from questionnaire -->
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Station confidence ratings</div>
+        <div id="stationRatingsGrid"></div>
       </div>
     </div>
 
@@ -1153,6 +1191,82 @@ async function loadClientFromSupabase(email) {
     renderMessages();
     scrollMsgsToBottom();
 
+    // Show correct profile card based on program type
+    const liftCard = document.getElementById('liftResultsCard');
+    const hyroxCard = document.getElementById('hyroxProfileCard');
+    if (c.program_type === 'hyrox') {
+      if (liftCard) liftCard.style.display = 'none';
+      if (hyroxCard) hyroxCard.style.display = 'block';
+
+      const raw = q?.raw_data || {};
+      const setP = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+
+      // Division + weights
+      const divMap = { open_male: 'Open Men', open_female: 'Open Women', pro_male: 'Pro Men', pro_female: 'Pro Women', doubles: 'Doubles' };
+      const div = raw.division || q?.raw_data?.division || '';
+      setP('profDivision', divMap[div] || div || '—');
+
+      // Show race date in personal info
+      const raceDateRow = document.getElementById('profRaceDateRow');
+      const raceDateEl = document.getElementById('profRaceDate');
+      if (raceDateRow) raceDateRow.style.display = 'flex';
+      if (raceDateEl && raw.raceDate) {
+        const rd = new Date(raw.raceDate);
+        raceDateEl.textContent = rd.toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'});
+      }
+      setP('profTargetTime', raw.targetTime || '—');
+
+      // Race weights by division
+      const weights = {
+        open_male:   { sled: '152kg', farmers: '2×24kg', sandbag: '20kg', wallball: '6kg / 3.05m' },
+        open_female: { sled: '102kg', farmers: '2×16kg', sandbag: '10kg', wallball: '4kg / 2.75m' },
+        pro_male:    { sled: '202kg', farmers: '2×32kg', sandbag: '30kg', wallball: '9kg / 3.05m' },
+        pro_female:  { sled: '152kg', farmers: '2×24kg', sandbag: '20kg', wallball: '6kg / 2.75m' },
+        doubles:     { sled: '152kg', farmers: '2×24kg', sandbag: '20kg', wallball: '6kg / 3.05m' },
+      };
+      const w = weights[div] || weights['open_male'];
+      setP('profSledWeight', w.sled);
+      setP('profFarmersWeight', w.farmers);
+      setP('profSandbagWeight', w.sandbag);
+      setP('profWallBallWeight', w.wallball);
+
+      // Running
+      const runBgMap = { beginner: 'Beginner', recreational: 'Recreational', regular: 'Regular runner', strong: 'Strong runner' };
+      setP('profKmPace', raw.kmPace || '—');
+      setP('profRunBackground', runBgMap[raw.runBackground] || raw.runBackground || '—');
+
+      // Station confidence ratings
+      const ratingsEl = document.getElementById('stationRatingsGrid');
+      if (ratingsEl) {
+        const ratings = raw.stationRatings || {};
+        const stations = [
+          { key: 'ski_erg',           label: 'Ski Erg'             },
+          { key: 'sled_push',         label: 'Sled Push'           },
+          { key: 'burpee_broad_jump', label: 'Burpee Broad Jump'   },
+          { key: 'rowing',            label: 'Rowing'              },
+          { key: 'farmers_carry',     label: 'Farmers Carry'       },
+          { key: 'sandbag_lunges',    label: 'Sandbag Lunges'      },
+          { key: 'wall_balls',        label: 'Wall Balls'          },
+        ];
+        ratingsEl.innerHTML = stations.map(st => {
+          const val = ratings[st.key] || null;
+          const dots = val ? Array.from({length:5},(_, i) =>
+            '<div style="width:10px;height:10px;border-radius:50%;background:' +
+            (i < val ? (val <= 2 ? '#c03020' : val <= 3 ? '#e08020' : 'var(--green)') : 'var(--border)') +
+            '"></div>'
+          ).join('') : '<span style="color:var(--muted);font-size:12px">Not rated</span>';
+          const label = val ? (val <= 2 ? 'Needs work' : val <= 3 ? 'Developing' : 'Strong') : '';
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">' +
+            '<div style="font-size:13px;font-weight:500">' + st.label + '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px">' +
+              '<div style="display:flex;gap:3px">' + dots + '</div>' +
+              (label ? '<div style="font-size:11px;font-weight:600;color:' + (val<=2?'#c03020':val<=3?'#e08020':'var(--green)') + '">' + label + '</div>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
+
     // Hyrox: show race countdown + program length badge
     if (c.program_type === 'hyrox') {
       const raceDate = q?.raw_data?.raceDate || null;
@@ -1278,6 +1392,82 @@ function switchTab(id, el) {
   if (id === 'messages') {
     renderMessages();
     scrollMsgsToBottom();
+
+    // Show correct profile card based on program type
+    const liftCard = document.getElementById('liftResultsCard');
+    const hyroxCard = document.getElementById('hyroxProfileCard');
+    if (c.program_type === 'hyrox') {
+      if (liftCard) liftCard.style.display = 'none';
+      if (hyroxCard) hyroxCard.style.display = 'block';
+
+      const raw = q?.raw_data || {};
+      const setP = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+
+      // Division + weights
+      const divMap = { open_male: 'Open Men', open_female: 'Open Women', pro_male: 'Pro Men', pro_female: 'Pro Women', doubles: 'Doubles' };
+      const div = raw.division || q?.raw_data?.division || '';
+      setP('profDivision', divMap[div] || div || '—');
+
+      // Show race date in personal info
+      const raceDateRow = document.getElementById('profRaceDateRow');
+      const raceDateEl = document.getElementById('profRaceDate');
+      if (raceDateRow) raceDateRow.style.display = 'flex';
+      if (raceDateEl && raw.raceDate) {
+        const rd = new Date(raw.raceDate);
+        raceDateEl.textContent = rd.toLocaleDateString('en-AU', {day:'numeric',month:'long',year:'numeric'});
+      }
+      setP('profTargetTime', raw.targetTime || '—');
+
+      // Race weights by division
+      const weights = {
+        open_male:   { sled: '152kg', farmers: '2×24kg', sandbag: '20kg', wallball: '6kg / 3.05m' },
+        open_female: { sled: '102kg', farmers: '2×16kg', sandbag: '10kg', wallball: '4kg / 2.75m' },
+        pro_male:    { sled: '202kg', farmers: '2×32kg', sandbag: '30kg', wallball: '9kg / 3.05m' },
+        pro_female:  { sled: '152kg', farmers: '2×24kg', sandbag: '20kg', wallball: '6kg / 2.75m' },
+        doubles:     { sled: '152kg', farmers: '2×24kg', sandbag: '20kg', wallball: '6kg / 3.05m' },
+      };
+      const w = weights[div] || weights['open_male'];
+      setP('profSledWeight', w.sled);
+      setP('profFarmersWeight', w.farmers);
+      setP('profSandbagWeight', w.sandbag);
+      setP('profWallBallWeight', w.wallball);
+
+      // Running
+      const runBgMap = { beginner: 'Beginner', recreational: 'Recreational', regular: 'Regular runner', strong: 'Strong runner' };
+      setP('profKmPace', raw.kmPace || '—');
+      setP('profRunBackground', runBgMap[raw.runBackground] || raw.runBackground || '—');
+
+      // Station confidence ratings
+      const ratingsEl = document.getElementById('stationRatingsGrid');
+      if (ratingsEl) {
+        const ratings = raw.stationRatings || {};
+        const stations = [
+          { key: 'ski_erg',           label: 'Ski Erg'             },
+          { key: 'sled_push',         label: 'Sled Push'           },
+          { key: 'burpee_broad_jump', label: 'Burpee Broad Jump'   },
+          { key: 'rowing',            label: 'Rowing'              },
+          { key: 'farmers_carry',     label: 'Farmers Carry'       },
+          { key: 'sandbag_lunges',    label: 'Sandbag Lunges'      },
+          { key: 'wall_balls',        label: 'Wall Balls'          },
+        ];
+        ratingsEl.innerHTML = stations.map(st => {
+          const val = ratings[st.key] || null;
+          const dots = val ? Array.from({length:5},(_, i) =>
+            '<div style="width:10px;height:10px;border-radius:50%;background:' +
+            (i < val ? (val <= 2 ? '#c03020' : val <= 3 ? '#e08020' : 'var(--green)') : 'var(--border)') +
+            '"></div>'
+          ).join('') : '<span style="color:var(--muted);font-size:12px">Not rated</span>';
+          const label = val ? (val <= 2 ? 'Needs work' : val <= 3 ? 'Developing' : 'Strong') : '';
+          return '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">' +
+            '<div style="font-size:13px;font-weight:500">' + st.label + '</div>' +
+            '<div style="display:flex;align-items:center;gap:8px">' +
+              '<div style="display:flex;gap:3px">' + dots + '</div>' +
+              (label ? '<div style="font-size:11px;font-weight:600;color:' + (val<=2?'#c03020':val<=3?'#e08020':'var(--green)') + '">' + label + '</div>' : '') +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+    }
 
     // Hyrox: show race countdown + program length badge
     if (c.program_type === 'hyrox') {
