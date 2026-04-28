@@ -42,7 +42,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 .bnav-icon{font-size:20px;line-height:1}
 
 /* PANELS */
-.panel{display:none;padding:16px 16px 0}
+.panel{display:none;padding:16px 16px 0;min-height:0}
 .panel.active{display:block}
 .panel-title{font-family:var(--font-d);font-size:28px;letter-spacing:1px;color:var(--iron);margin-bottom:16px}
 
@@ -158,7 +158,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 .rule-text li{margin-left:16px;margin-bottom:4px}
 
 /* MESSAGES */
-.msg-thread{display:flex;flex-direction:column;gap:10px;padding:12px 16px 100px;overflow-y:auto;height:calc(100vh - 180px)}
+.msg-thread{display:flex;flex-direction:column;gap:10px;padding:12px 0 100px;min-height:200px}
 .msg-bubble{max-width:82%;border-radius:12px;padding:10px 13px;font-size:14px;line-height:1.6}
 .msg-from-wade{align-self:flex-start;background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px}
 .msg-from-client{align-self:flex-end;background:var(--iron);color:var(--white);border-radius:12px 4px 12px 12px}
@@ -375,6 +375,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
           <span>Supplements</span><span class="collapsible-arrow">›</span>
         </div>
         <div class="collapsible-body" id="suppBody">
+          <div id="suppList" style="margin-bottom:8px"></div>
           <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add supplement</button>
           <div id="suppForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
             <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Magnesium"></div>
@@ -392,6 +393,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
         </div>
         <div class="collapsible-body" id="practBody">
           <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share notes from your physio, chiro, or GP with Wade.</div>
+          <div id="practList" style="margin-bottom:8px"></div>
           <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add note</button>
           <div id="practForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
             <div class="form-group"><label class="form-label">Type</label>
@@ -452,6 +454,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
       </div>
       <button class="btn-iron" onclick="saveCheckIn()">Log check-in</button>
       <div class="success-msg" id="checkInSuccess">✓ Check-in logged!</div>
+      <div id="checkInHistory" style="margin-top:14px"></div>
     </div>
 
     <!-- Nutrition -->
@@ -651,9 +654,8 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
       </div>
     </div>
 
-  <div class="panel" id="panel-messages">
-    <div class="panel-title">Messages</div>
-    <div class="msg-thread" id="msgThread"></div>
+  <div class="panel" id="panel-messages" style="padding:0">
+    <div class="msg-thread" id="msgThread" style="padding:16px 16px 120px;min-height:calc(100vh - 180px)"></div>
   </div>
 
 </div><!-- end scroll area -->
@@ -1535,34 +1537,45 @@ function setSQ(q) {
 }
 
 async function saveCheckIn() {
-  const soreness   = selectedSoreness  || null;
-  const sleep      = parseFloat(document.getElementById('sleepSlider')?.value) || null;
-  const sleepQ     = selectedSQ        || null;
-  const hrv        = parseFloat(document.getElementById('hrvInput')?.value) || null;
-  const cal        = parseFloat(document.getElementById('nutCal')?.value) || null;
-  const water      = parseFloat(document.getElementById('nutWater')?.value) || null;
-  const mood       = selectedMood      || null;
-  const notes      = document.getElementById('checkInNotes')?.value?.trim() || null;
+  const soreness = selectedSoreness || null;
+  const sleep    = parseFloat(document.getElementById('sleepSlider')?.value) || null;
+  const sleepQ   = selectedSQ || null;
+  const hrv      = parseFloat(document.getElementById('hrvInput')?.value) || null;
+  const cal      = parseFloat(document.getElementById('nutCal')?.value) || null;
+  const water    = parseFloat(document.getElementById('nutWater')?.value) || null;
+  const mood     = selectedMood || null;
+  const notes    = document.getElementById('checkInNotes')?.value?.trim() || null;
+
+  // Add to history list immediately
+  const history = document.getElementById('checkInHistory');
+  if (history) {
+    const today = new Date().toLocaleDateString('en-AU', {weekday:'short',day:'numeric',month:'short'});
+    const parts = [];
+    if (soreness) parts.push('Soreness: ' + soreness + '/10');
+    if (sleep) parts.push('Sleep: ' + sleep + 'hrs' + (sleepQ ? ' (' + sleepQ + ')' : ''));
+    if (hrv) parts.push('HRV: ' + hrv + 'ms');
+    if (mood) parts.push('Mood: ' + mood);
+    if (notes) parts.push(notes);
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+    item.innerHTML = '<strong style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">' + today + '</strong><br>' + (parts.length ? parts.join(' · ') : 'Logged');
+    history.insertBefore(item, history.firstChild);
+  }
 
   try {
     if (clientId) {
       await db.insert('client_health', {
-        client_id:   clientId,
-        date:        new Date().toISOString().split('T')[0],
+        client_id: clientId,
+        date: new Date().toISOString().split('T')[0],
         record_type: 'daily_checkin',
-        data: {
-          soreness, sleep_hours: sleep, sleep_quality: sleepQ,
-          hrv, calories: cal, water_litres: water, mood, notes,
-        },
+        data: { soreness, sleep_hours: sleep, sleep_quality: sleepQ, hrv, calories: cal, water_litres: water, mood, notes },
       });
     }
-    showSuccess('checkInSuccess');
-    showToast('Check-in logged ✓');
-  } catch(err) {
-    console.error('saveCheckIn error:', err);
-    showToast('Saved — syncing...');
-    showSuccess('checkInSuccess');
-  }
+  } catch(e) { console.error('saveCheckIn:', e); }
+
+  const successEl = document.getElementById('checkInSuccess');
+  if (successEl) { successEl.style.display = 'block'; setTimeout(() => successEl.style.display = 'none', 2000); }
+  showToast('Check-in logged ✓');
 }
 
 // ── NUTRITION ─────────────────────────────────────────────────
