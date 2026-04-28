@@ -567,6 +567,7 @@ let dragSrcBlock = null;
 let progPanelOpen = true;
 let currentClientId = null;
 let currentClientEmail = null;
+let clientSnapshot = null;
 
 // Load client from URL param
 async function loadClientForBuilder() {
@@ -580,6 +581,7 @@ async function loadClientForBuilder() {
     if (!clients || !clients.length) { showToast('Client not found'); return; }
     const c = clients[0];
     currentClientId = c.id;
+    clientSnapshot = c; // store full client object for publish/save
 
     // Update UI
     const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || email;
