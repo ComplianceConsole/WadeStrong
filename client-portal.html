@@ -5,9 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Wade Strong — Client Portal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3WQRC6JDFR"></script>
+
 <style>
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --rust:#B85A30;--rust-d:#8C4122;--rust-l:#FAECE7;
@@ -241,23 +245,181 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
   .bnav-icon{font-size:22px}
   .msg-input-area{max-width:800px;left:50%;transform:translateX(-50%);border-radius:0}
 }
+
 </style>
 <script src="supabase-config.js"></script>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-3WQRC6JDFR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-3WQRC6JDFR');
-</script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav class="nav">
-  
+  <a href="index.html" class="nav-logo">WADE<span class="nav-logo-dot">.</span>STRONG</a>
+  <div class="nav-client">
+    <div class="nav-client-info">
+      <div class="nav-client-name" id="navName">Loading...</div>
+      <div class="nav-client-week" id="navWeek">GET STRONG · WEEK 1/6</div>
     </div>
+    <div class="nav-avatar" id="navAvatar" onclick="triggerPhotoUpload()" title="Tap to change photo" style="cursor:pointer">?</div>
+    <input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+  </div>
+</nav>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area" id="scrollArea">
+
+  <!-- ══ PROGRAM PANEL ══ -->
+  <div class="panel active" id="panel-program">
+    <div class="panel-title">My Program</div>
+    <!-- Week tabs -->
+    <div class="week-tabs" id="weekTabs"></div>
+    <!-- Sessions -->
+    <div id="sessionList"></div>
+  </div>
+
+  <!-- ══ PROGRESS PANEL ══ -->
+  <div class="panel" id="panel-progress">
+    <div class="panel-title">Progress</div>
+    <div id="progressCharts"></div>
+  </div>
+
+  <!-- ══ PROFILE PANEL ══ -->
+  <div class="panel" id="panel-profile">
+    <div class="panel-title">My Profile</div>
+
+    <!-- Personal info -->
+    <div class="card">
+      <div class="card-title">Personal info</div>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="profile-label">Name</div><div class="profile-val" id="profName">—</div></div>
+        <div class="profile-item"><div class="profile-label">Age</div><div class="profile-val" id="profAge">—</div></div>
+        <div class="profile-item"><div class="profile-label">Height</div><div class="profile-val" id="profHeight">—</div></div>
+        <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val" id="profWeight">—</div></div>
+        <div class="profile-item"><div class="profile-label">Location</div><div class="profile-val" id="profLocation">—</div></div>
+        <div class="profile-item"><div class="profile-label">Program</div><div class="profile-val" id="profProgram">—</div></div>
+        <div class="profile-item"><div class="profile-label">Gym</div><div class="profile-val" id="profGym">—</div></div>
+        <div class="profile-item"><div class="profile-label">Training</div><div class="profile-val" id="profDays">—</div></div>
+      </div>
+    </div>
+
+    <!-- RPE Results -->
+    <div class="card">
+      <div class="card-title">RPE Testing Results</div>
+      <div class="rpe-grid" id="rpeResultsGrid">
+        <div style="font-size:13px;color:var(--muted);padding:8px 0">No RPE results yet.</div>
+      </div>
+    </div>
+
+    <!-- Body Measurements -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:12px">Body measurements</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Weight (kg)</div>
+        <input id="measWeight" type="number" step="0.1" placeholder="e.g. 85.5" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Body fat %</div>
+        <input id="measBodyFat" type="number" step="0.1" placeholder="e.g. 18.5" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Waist (cm)</div>
+        <input id="measWaist" type="number" step="0.5" placeholder="e.g. 85" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Chest (cm)</div>
+        <input id="measChest" type="number" step="0.5" placeholder="e.g. 100" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+      </div>
+      <button onclick="saveMeasurements()" style="width:100%;padding:11px;background:var(--iron);color:#fff;border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer">Save measurements</button>
+    </div>
+
+    <!-- Progress Photos -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:8px">Progress photos</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Upload front, side and back. Wade can see these in the CRM.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div onclick="document.getElementById('photoFront').click()" style="aspect-ratio:3/4;border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);text-align:center;padding:8px" id="photoFrontPreview"><div>📸<br>Front</div></div>
+        <div onclick="document.getElementById('photoSide').click()" style="aspect-ratio:3/4;border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);text-align:center;padding:8px" id="photoSidePreview"><div>📸<br>Side</div></div>
+        <div onclick="document.getElementById('photoBack').click()" style="aspect-ratio:3/4;border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);text-align:center;padding:8px" id="photoBackPreview"><div>📸<br>Back</div></div>
+      </div>
+      <input type="file" id="photoFront" accept="image/*" style="display:none" onchange="previewPhoto('front',this)">
+      <input type="file" id="photoSide" accept="image/*" style="display:none" onchange="previewPhoto('side',this)">
+      <input type="file" id="photoBack" accept="image/*" style="display:none" onchange="previewPhoto('back',this)">
+      <button onclick="savePhotos()" style="width:100%;padding:11px;background:var(--iron);color:#fff;border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer">Send photos to Wade</button>
+    </div>
+
+    <!-- Health & Wellbeing -->
+    <div class="card" id="healthCard">
+      <div class="card-title">Health & Wellbeing</div>
+      <!-- Goals -->
+      <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleCollapse('goalsBody',this)">
+          <span>Training Goals</span><span class="collapsible-arrow">›</span>
+        </div>
+        <div class="collapsible-body" id="goalsBody">
+          <div id="goalsList" style="font-size:14px;color:var(--muted)">—</div>
+        </div>
+      </div>
+      <!-- Injuries -->
+      <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleCollapse('injuryBody',this)">
+          <span>Injuries & Limitations</span><span class="collapsible-arrow">›</span>
+        </div>
+        <div class="collapsible-body" id="injuryBody">
+          <div id="injuriesList" style="font-size:14px;color:var(--muted)">—</div>
+          <div style="margin-top:10px">
+            <button class="btn-sm btn-sm-iron" onclick="showForm('injuryForm')">+ Log new injury</button>
+          </div>
+          <div id="injuryForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+            <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="injArea" placeholder="e.g. Left knee"></div>
+            <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="injDesc" placeholder="What happened?"></textarea></div>
+            <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveInjury()">Log</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('injuryForm')">Cancel</button></div>
+          </div>
+        </div>
+      </div>
+      <!-- Supplements -->
+      <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleCollapse('suppBody',this)">
+          <span>Supplements</span><span class="collapsible-arrow">›</span>
+        </div>
+        <div class="collapsible-body" id="suppBody">
+          <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add supplement</button>
+          <div id="suppForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+            <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Magnesium"></div>
+            <div class="form-group"><label class="form-label">Dose</label><input class="form-input" id="suppDose" placeholder="e.g. 5g"></div>
+            <div class="form-group"><label class="form-label">Timing</label><input class="form-input" id="suppTiming" placeholder="e.g. Post-workout, Before bed"></div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="suppNotes" placeholder="Any notes..."></textarea></div>
+            <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveSupp()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('suppForm')">Cancel</button></div>
+          </div>
+        </div>
+      </div>
+      <!-- Practitioner notes -->
+      <div class="collapsible">
+        <div class="collapsible-header" onclick="toggleCollapse('practBody',this)">
+          <span>Practitioner Notes</span><span class="collapsible-arrow">›</span>
+        </div>
+        <div class="collapsible-body" id="practBody">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share notes from your physio, chiro, or GP with Wade.</div>
+          <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add note</button>
+          <div id="practForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+            <div class="form-group"><label class="form-label">Type</label>
+              <select class="form-select" id="practType"><option>Physio note</option><option>Chiro note</option><option>GP clearance</option><option>Imaging result</option><option>Other</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">Practitioner name (optional)</label><input class="form-input" id="practFrom" placeholder="e.g. Dr Smith"></div>
+            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="practNotes" placeholder="Key points from the appointment..."></textarea></div>
+            <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Send to Wade</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comp card (pre-comp only) -->
+    <div class="card" id="profCompCard" style="display:none">
+      <div class="card-title">Competition</div>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="profile-label">Competition</div><div class="profile-val" id="profCompName">—</div></div>
+        <div class="profile-item"><div class="profile-label">Date</div><div class="profile-val" id="profCompDate">—</div></div>
+        <div class="profile-item"><div class="profile-label">Weight class</div><div class="profile-val" id="profWeightClass">—</div></div>
+        <div class="profile-item"><div class="profile-label">Level</div><div class="profile-val" id="profCompLevel">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RECOVERY PANEL ══ -->
+  <div class="panel" id="panel-recovery">
+    <div class="panel-title">Recovery</div>
 
     <!-- Daily check-in -->
     <div class="card">
@@ -265,13 +427,13 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
       <div style="margin-bottom:12px">
         <div class="form-label">Overall soreness</div>
         <div style="display:flex;gap:5px" id="sorenessRow">
-          ${Array.from({length:10},(_,i)=>`<button onclick="setSoreness(${i+1})" id="sor-${i+1}" style="flex:1;height:30px;border-radius:4px;border:1px solid var(--border);background:var(--chalk);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 0.15s">${i+1}</button>`).join('')}
+          <!-- populated by JS -->
         </div>
       </div>
       <div style="margin-bottom:12px">
         <div class="form-label">Sleep last night <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
         <div class="slider-wrap">
-          <input type="range" min="3" max="12" step="0.5" value="7.5" oninput="document.getElementById('sleepVal').textContent=this.value" style="flex:1;accent-color:var(--rust)">
+          <input type="range" id="sleepSlider" min="3" max="12" step="0.5" value="7.5" oninput="document.getElementById('sleepVal').textContent=this.value" style="flex:1;accent-color:var(--rust)">
           <div class="slider-val"><span id="sleepVal">7.5</span><div style="font-size:10px;color:var(--muted)">hrs</div></div>
         </div>
         <div style="display:flex;gap:6px;margin-top:8px">
@@ -345,7 +507,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
     </div>
   </div>
 
-  <!-- ══ COMP DAY PANEL ══ -->
   <div class="panel" id="panel-comp">
 
     <!-- ─ RACE DAY (Hyrox) view ─ -->
@@ -516,7 +677,21 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 
 <div class="toast" id="toast"></div>
 
+
+</body>
+</html>
+
+
 <script>
+
+
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3WQRC6JDFR');
+
+
 // ── STRATEGY DATA ─────────────────────────────────────────────
 
 const HYROX_STRATEGIES = [
@@ -1626,6 +1801,7 @@ async function saveMeasurements() {
     }
   } catch(e) { console.error('saveMeasurements:', e); }
 }
+
 
 </script>
 </body>
