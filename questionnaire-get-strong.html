@@ -123,6 +123,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   .scale-row{flex-wrap:wrap}
   .scale-btn span{width:38px;height:38px}
 }
+
+.waiver-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border:1.5px solid var(--border);border-radius:6px;background:var(--white);margin-bottom:2px}
+.waiver-item input[type=checkbox]{width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px;cursor:pointer}
+.waiver-item span{font-size:13px;line-height:1.6;color:var(--iron)}
 </style>
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -641,32 +645,32 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <div class="hint" style="margin-bottom:16px">You must tick all boxes to proceed.</div>
 
       <div class="choices" style="gap:10px">
-        <label class="choice" style="align-items:flex-start;gap:12px">
+        <div class="waiver-item">
           <input type="checkbox" id="waiver1" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
           <span style="font-size:13px;line-height:1.6"><strong>Voluntary participation.</strong> I confirm that my participation in the Wade Strong coaching program is entirely voluntary. I understand that physical training involves inherent risks including but not limited to muscular strain, injury, and cardiovascular stress.</span>
         </label>
 
-        <label class="choice" style="align-items:flex-start;gap:12px">
+        <div class="waiver-item">
           <input type="checkbox" id="waiver2" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
           <span style="font-size:13px;line-height:1.6"><strong>Medical fitness.</strong> I confirm that I am in suitable physical condition to undertake the program I am applying for. I have disclosed all relevant medical conditions, injuries and medications above. I will notify Wade immediately if my medical status changes.</span>
         </label>
 
-        <label class="choice" style="align-items:flex-start;gap:12px">
+        <div class="waiver-item">
           <input type="checkbox" id="waiver3" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
           <span style="font-size:13px;line-height:1.6"><strong>Assumption of risk.</strong> I acknowledge and accept the risks associated with physical training. I agree to exercise within my limits and to stop immediately if I experience pain, dizziness, shortness of breath or any unusual symptoms. I will seek medical attention when appropriate.</span>
         </label>
 
-        <label class="choice" style="align-items:flex-start;gap:12px">
+        <div class="waiver-item">
           <input type="checkbox" id="waiver4" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
           <span style="font-size:13px;line-height:1.6"><strong>Release of liability.</strong> To the fullest extent permitted by law, I release Wade Blackburn and Wade Strong from any liability for injury, loss or damage arising from my participation in the program, except where caused by gross negligence or wilful misconduct.</span>
         </label>
 
-        <label class="choice" style="align-items:flex-start;gap:12px">
+        <div class="waiver-item">
           <input type="checkbox" id="waiver5" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
           <span style="font-size:13px;line-height:1.6"><strong>Program modifications.</strong> I understand that the program provided is a coaching guide and not a substitute for medical advice. I accept responsibility for modifying or skipping exercises as needed based on how I feel on a given day.</span>
         </label>
 
-        <label class="choice" style="align-items:flex-start;gap:12px">
+        <div class="waiver-item">
           <input type="checkbox" id="waiver6" style="width:18px;height:18px;accent-color:var(--rust);flex-shrink:0;margin-top:2px">
           <span style="font-size:13px;line-height:1.6"><strong>Privacy.</strong> I consent to Wade Strong storing and using my personal and health information for the purpose of delivering my coaching program. This information will not be shared with third parties without my consent.</span>
         </label>
