@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wade Strong — Hyrox Effort Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3WQRC6JDFR"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-3WQRC6JDFR');</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--rust:#B85A30;--rust-d:#8C4122;--rust-l:#FAECE7;--iron:#1a1a1a;--chalk:#f5f2ee;--white:#fff;--muted:#6b6560;--border:rgba(0,0,0,0.09);--font-d:'Bebas Neue',sans-serif;--font-b:'Instrument Sans',sans-serif}
+html,body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);min-height:100vh}
+.header{background:var(--iron);padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--font-d);font-size:20px;letter-spacing:2px;color:#f5f0e0}
+.logo span{color:var(--rust)}
+.badge{background:var(--rust);color:#fff;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:100px}
+.container{max-width:640px;margin:0 auto;padding:28px 20px 80px}
+.page-title{font-family:var(--font-d);font-size:28px;letter-spacing:1px;margin-bottom:4px}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:20px;line-height:1.6}
+.info-box{background:var(--rust-l);border:1px solid rgba(184,90,48,0.15);border-radius:8px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#5a2810;line-height:1.6}
+.deadline-box{background:#fef3e0;border:1px solid rgba(224,128,32,0.2);border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:#5a3800}
+.field{margin-bottom:18px}
+.label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:block}
+.input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:15px;color:var(--iron);background:var(--white);outline:none}
+.input:focus{border-color:var(--rust)}
+.section-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rust);margin:24px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.station-card{background:var(--white);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.station-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.station-num{width:30px;height:30px;border-radius:50%;background:var(--iron);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.station-name{font-size:15px;font-weight:700}
+.station-desc{font-size:12px;color:var(--muted)}
+.effort-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.effort-scale{display:flex;gap:3px}
+.effort-btn{flex:1;padding:10px 2px;border:1.5px solid var(--border);border-radius:5px;background:var(--white);font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;text-align:center;color:var(--muted);transition:all 0.1s}
+.effort-btn:hover{border-color:var(--rust);color:var(--rust)}
+.effort-btn.sel-1,.effort-btn.sel-2{background:#e8f4e8;color:#2d6a2d;border-color:#a8d5b0}
+.effort-btn.sel-3,.effort-btn.sel-4{background:#f8f0d8;color:#7a5010;border-color:#e0c888}
+.effort-btn.sel-5,.effort-btn.sel-6{background:#fce8d8;color:#8c3020;border-color:#f0b888}
+.effort-btn.sel-7,.effort-btn.sel-8{background:#fce0d0;color:#8c2010;border-color:#f0a880}
+.effort-btn.sel-9,.effort-btn.sel-10{background:var(--iron);color:#fff;border-color:var(--iron)}
+.effort-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:3px}
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.mini-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.mini-input{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:5px;font-family:var(--font-b);font-size:14px;text-align:center;outline:none;background:var(--white)}
+.mini-input:focus{border-color:var(--rust)}
+textarea.input{min-height:70px;resize:vertical}
+.btn-submit{background:var(--rust);color:#fff;border:none;padding:16px;border-radius:6px;font-family:var(--font-b);font-size:16px;font-weight:600;cursor:pointer;width:100%;margin-top:24px}
+.btn-submit:hover{background:var(--rust-d)}
+.success{display:none;text-align:center;padding:48px 20px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-family:var(--font-d);font-size:32px;letter-spacing:1px;margin-bottom:10px}
+.success-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto}
+</style>
+<script src="supabase-config.js"></script>
+</head>
+<body>
+<div class="header">
+  <div class="logo">WADE<span>.</span>STRONG</div>
+  <div class="badge">Hyrox Assessment</div>
+</div>
+
+<div class="container">
+  <div id="formContent">
+    <div class="page-title">Station Effort Assessment</div>
+    <div class="page-sub">Rate your maximum sustainable effort at each station. This tells Wade exactly where to focus your training.</div>
+
+    <div class="deadline-box">⏰ <strong>Complete within 7 days</strong> — Wade needs these results to build your program. Each rating takes 30 seconds.</div>
+    <div class="info-box"><strong>How to rate:</strong> 1–3 = Easy/comfortable. 4–6 = Moderate effort. 7–8 = Hard, near limit. 9–10 = Maximum, could not do more.</div>
+
+    <div class="field">
+      <div class="label">Your email</div>
+      <input class="input" type="email" id="email" placeholder="your@email.com">
+    </div>
+
+    <div class="section-title">Running</div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-type" style="background:#e8f0fa;color:#1a56c4;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:100px">Running</div>
+      </div>
+      <div class="effort-label">1km run at race pace — effort level (1–10)</div>
+      <div class="effort-scale" id="run_effort">
+        <button class="effort-btn" onclick="setE('run_effort',1,this)">1</button><button class="effort-btn" onclick="setE('run_effort',2,this)">2</button><button class="effort-btn" onclick="setE('run_effort',3,this)">3</button><button class="effort-btn" onclick="setE('run_effort',4,this)">4</button><button class="effort-btn" onclick="setE('run_effort',5,this)">5</button><button class="effort-btn" onclick="setE('run_effort',6,this)">6</button><button class="effort-btn" onclick="setE('run_effort',7,this)">7</button><button class="effort-btn" onclick="setE('run_effort',8,this)">8</button><button class="effort-btn" onclick="setE('run_effort',9,this)">9</button><button class="effort-btn" onclick="setE('run_effort',10,this)">10</button>
+      </div>
+      <div class="effort-labels"><span>Easy jog</span><span>Max effort</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">1km pace (min/km)</div><input class="mini-input" id="run_pace" type="text" placeholder="e.g. 5:30"></div>
+        <div><div class="mini-label">Comfortable distance</div><input class="mini-input" id="run_dist" type="text" placeholder="e.g. 5km easy"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Stations</div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">1</div>
+        <div><div class="station-name">Ski Erg</div><div class="station-desc">1000m</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="ski_effort"><button class="effort-btn" onclick="setE('ski_effort',1,this)">1</button><button class="effort-btn" onclick="setE('ski_effort',2,this)">2</button><button class="effort-btn" onclick="setE('ski_effort',3,this)">3</button><button class="effort-btn" onclick="setE('ski_effort',4,this)">4</button><button class="effort-btn" onclick="setE('ski_effort',5,this)">5</button><button class="effort-btn" onclick="setE('ski_effort',6,this)">6</button><button class="effort-btn" onclick="setE('ski_effort',7,this)">7</button><button class="effort-btn" onclick="setE('ski_effort',8,this)">8</button><button class="effort-btn" onclick="setE('ski_effort',9,this)">9</button><button class="effort-btn" onclick="setE('ski_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="ski_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Damper setting</div><input class="mini-input" id="ski_extra" type="text" placeholder="e.g. 5"></div>
+      </div>
+    </div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">2</div>
+        <div><div class="station-name">Sled Push</div><div class="station-desc">50m (4×12.5m)</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="sled_push_effort"><button class="effort-btn" onclick="setE('sled_push_effort',1,this)">1</button><button class="effort-btn" onclick="setE('sled_push_effort',2,this)">2</button><button class="effort-btn" onclick="setE('sled_push_effort',3,this)">3</button><button class="effort-btn" onclick="setE('sled_push_effort',4,this)">4</button><button class="effort-btn" onclick="setE('sled_push_effort',5,this)">5</button><button class="effort-btn" onclick="setE('sled_push_effort',6,this)">6</button><button class="effort-btn" onclick="setE('sled_push_effort',7,this)">7</button><button class="effort-btn" onclick="setE('sled_push_effort',8,this)">8</button><button class="effort-btn" onclick="setE('sled_push_effort',9,this)">9</button><button class="effort-btn" onclick="setE('sled_push_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="sled_push_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Weight used (kg)</div><input class="mini-input" id="sled_push_extra" type="text" placeholder="e.g. 100"></div>
+      </div>
+    </div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">3</div>
+        <div><div class="station-name">Burpee Broad Jump</div><div class="station-desc">80m</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="burpee_effort"><button class="effort-btn" onclick="setE('burpee_effort',1,this)">1</button><button class="effort-btn" onclick="setE('burpee_effort',2,this)">2</button><button class="effort-btn" onclick="setE('burpee_effort',3,this)">3</button><button class="effort-btn" onclick="setE('burpee_effort',4,this)">4</button><button class="effort-btn" onclick="setE('burpee_effort',5,this)">5</button><button class="effort-btn" onclick="setE('burpee_effort',6,this)">6</button><button class="effort-btn" onclick="setE('burpee_effort',7,this)">7</button><button class="effort-btn" onclick="setE('burpee_effort',8,this)">8</button><button class="effort-btn" onclick="setE('burpee_effort',9,this)">9</button><button class="effort-btn" onclick="setE('burpee_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="burpee_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Time (mm:ss)</div><input class="mini-input" id="burpee_extra" type="text" placeholder="e.g. 5:30"></div>
+      </div>
+    </div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">4</div>
+        <div><div class="station-name">Rowing</div><div class="station-desc">1000m</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="row_effort"><button class="effort-btn" onclick="setE('row_effort',1,this)">1</button><button class="effort-btn" onclick="setE('row_effort',2,this)">2</button><button class="effort-btn" onclick="setE('row_effort',3,this)">3</button><button class="effort-btn" onclick="setE('row_effort',4,this)">4</button><button class="effort-btn" onclick="setE('row_effort',5,this)">5</button><button class="effort-btn" onclick="setE('row_effort',6,this)">6</button><button class="effort-btn" onclick="setE('row_effort',7,this)">7</button><button class="effort-btn" onclick="setE('row_effort',8,this)">8</button><button class="effort-btn" onclick="setE('row_effort',9,this)">9</button><button class="effort-btn" onclick="setE('row_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="row_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Average split (/500m)</div><input class="mini-input" id="row_extra" type="text" placeholder="e.g. 2:10"></div>
+      </div>
+    </div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">5</div>
+        <div><div class="station-name">Farmers Carry</div><div class="station-desc">200m</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="farmers_effort"><button class="effort-btn" onclick="setE('farmers_effort',1,this)">1</button><button class="effort-btn" onclick="setE('farmers_effort',2,this)">2</button><button class="effort-btn" onclick="setE('farmers_effort',3,this)">3</button><button class="effort-btn" onclick="setE('farmers_effort',4,this)">4</button><button class="effort-btn" onclick="setE('farmers_effort',5,this)">5</button><button class="effort-btn" onclick="setE('farmers_effort',6,this)">6</button><button class="effort-btn" onclick="setE('farmers_effort',7,this)">7</button><button class="effort-btn" onclick="setE('farmers_effort',8,this)">8</button><button class="effort-btn" onclick="setE('farmers_effort',9,this)">9</button><button class="effort-btn" onclick="setE('farmers_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="farmers_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Weight per hand (kg)</div><input class="mini-input" id="farmers_extra" type="text" placeholder="e.g. 20"></div>
+      </div>
+    </div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">6</div>
+        <div><div class="station-name">Sandbag Lunges</div><div class="station-desc">100m</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="lunges_effort"><button class="effort-btn" onclick="setE('lunges_effort',1,this)">1</button><button class="effort-btn" onclick="setE('lunges_effort',2,this)">2</button><button class="effort-btn" onclick="setE('lunges_effort',3,this)">3</button><button class="effort-btn" onclick="setE('lunges_effort',4,this)">4</button><button class="effort-btn" onclick="setE('lunges_effort',5,this)">5</button><button class="effort-btn" onclick="setE('lunges_effort',6,this)">6</button><button class="effort-btn" onclick="setE('lunges_effort',7,this)">7</button><button class="effort-btn" onclick="setE('lunges_effort',8,this)">8</button><button class="effort-btn" onclick="setE('lunges_effort',9,this)">9</button><button class="effort-btn" onclick="setE('lunges_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="lunges_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Sandbag weight (kg)</div><input class="mini-input" id="lunges_extra" type="text" placeholder="e.g. 15"></div>
+      </div>
+    </div>
+    <div class="station-card">
+      <div class="station-header">
+        <div class="station-num">7</div>
+        <div><div class="station-name">Wall Balls</div><div class="station-desc">100 reps</div></div>
+      </div>
+      <div class="effort-label">Effort at max sustainable pace (1–10)</div>
+      <div class="effort-scale" id="wallballs_effort"><button class="effort-btn" onclick="setE('wallballs_effort',1,this)">1</button><button class="effort-btn" onclick="setE('wallballs_effort',2,this)">2</button><button class="effort-btn" onclick="setE('wallballs_effort',3,this)">3</button><button class="effort-btn" onclick="setE('wallballs_effort',4,this)">4</button><button class="effort-btn" onclick="setE('wallballs_effort',5,this)">5</button><button class="effort-btn" onclick="setE('wallballs_effort',6,this)">6</button><button class="effort-btn" onclick="setE('wallballs_effort',7,this)">7</button><button class="effort-btn" onclick="setE('wallballs_effort',8,this)">8</button><button class="effort-btn" onclick="setE('wallballs_effort',9,this)">9</button><button class="effort-btn" onclick="setE('wallballs_effort',10,this)">10</button></div>
+      <div class="effort-labels"><span>Very easy</span><span>Absolute max</span></div>
+      <div class="time-row">
+        <div><div class="mini-label">Time / result</div><input class="mini-input" id="wallballs_time" type="text" placeholder="e.g. 4:30"></div>
+        <div><div class="mini-label">Ball weight (kg)</div><input class="mini-input" id="wallballs_extra" type="text" placeholder="e.g. 6"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Overall notes</div>
+    <div class="field">
+      <div class="label">What felt hardest? What do you want to improve most?</div>
+      <textarea class="input" id="notes" placeholder="e.g. Wall balls destroyed me, farmers carry grip failed at 150m, running felt ok but pace dropped after sled..."></textarea>
+    </div>
+
+    <button class="btn-submit" onclick="submitForm()">Send results to Wade →</button>
+  </div>
+
+  <div class="success" id="successScreen">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Results sent.</div>
+    <div class="success-sub">Wade has your effort data. He'll use this to calibrate your program weights and identify where you'll gain the most time.</div>
+  </div>
+</div>
+
+<script>
+const efforts = {};
+function setE(id, val, btn) {
+  efforts[id] = val;
+  document.getElementById(id).querySelectorAll('.effort-btn').forEach(b => b.className = 'effort-btn');
+  btn.classList.add('sel-' + val);
+}
+
+async function submitForm() {
+  const email = document.getElementById('email')?.value?.trim();
+  if (!email) { alert('Please enter your email'); return; }
+  
+  const g = id => document.getElementById(id)?.value?.trim() || null;
+  
+  const data = {
+    email,
+    run: { effort: efforts['run_effort'], pace: g('run_pace'), comfortable_dist: g('run_dist') },
+    ski_erg: { effort: efforts['ski_effort'], time: g('ski_time'), setting: g('ski_extra') },
+    sled_push: { effort: efforts['sled_push_effort'], time: g('sled_push_time'), weight: g('sled_push_extra') },
+    burpee: { effort: efforts['burpee_effort'], time: g('burpee_time') },
+    rowing: { effort: efforts['row_effort'], time: g('row_time'), split: g('row_extra') },
+    farmers_carry: { effort: efforts['farmers_effort'], time: g('farmers_time'), weight: g('farmers_extra') },
+    sandbag_lunges: { effort: efforts['lunges_effort'], time: g('lunges_time'), weight: g('lunges_extra') },
+    wall_balls: { effort: efforts['wallballs_effort'], time: g('wallballs_time'), weight: g('wallballs_extra') },
+    notes: g('notes'),
+    submitted_at: new Date().toISOString(),
+  };
+
+  // Identify weak stations
+  const stationKeys = ['ski_erg','sled_push','burpee','rowing','farmers_carry','sandbag_lunges','wall_balls'];
+  const weakStations = stationKeys.filter(k => (efforts[k+'_effort'] || efforts[k.replace('_','_')+'_effort']) >= 7).map(k => k.replace(/_/g,' '));
+
+  // Save to Supabase
+  try {
+    if (typeof db !== 'undefined') {
+      // Find client
+      const clients = await db.select('clients', { email });
+      const clientId = clients?.[0]?.id;
+      if (clientId) {
+        await db.insert('rpe_results', {
+          client_id: clientId,
+          email,
+          raw_data: data,
+          notes: data.notes,
+        });
+        await db.insert('client_health', {
+          client_id: clientId,
+          date: new Date().toISOString().split('T')[0],
+          record_type: 'hyrox_effort_assessment',
+          data,
+        });
+      }
+    }
+  } catch(e) { console.error('Save error:', e); }
+
+  // Slack
+  try {
+    await fetch('https://wade-slack-notifications.nameless-wind-f1be.workers.dev', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'hyrox_rpe_submitted', data: { email, weakStations: weakStations.join(', ') || 'none flagged', runPace: data.run.pace } })
+    });
+  } catch(e) {}
+
+  document.getElementById('formContent').style.display = 'none';
+  document.getElementById('successScreen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
