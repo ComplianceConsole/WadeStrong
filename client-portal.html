@@ -246,6 +246,2229 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
   .msg-input-area{max-width:800px;left:50%;transform:translateX(-50%);border-radius:0}
 }
 
+.prog-len-btn{padding:8px 14px;border:1.5px solid var(--border);border-radius:6px;background:var(--white);font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 0.15s}
+.prog-len-btn:hover,.prog-len-btn-active{background:var(--iron);color:#fff;border-color:var(--iron)}
+
+</style>
+<script src="supabase-config.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-logo">WADE<span class="nav-logo-dot">.</span>STRONG</a>
+  <div class="nav-client">
+    <div class="nav-client-info">
+      <div class="nav-client-name" id="navName">Loading...</div>
+      <div class="nav-client-week" id="navWeek">GET STRONG · WEEK 1/6</div>
+    </div>
+    <div class="nav-avatar" id="navAvatar" onclick="triggerPhotoUpload()" title="Tap to change photo" style="cursor:pointer">?</div>
+    <input type="file" id="profilePhotoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)">
+  </div>
+</nav>
+
+<!-- SCROLL AREA -->
+<div class="scroll-area" id="scrollArea">
+
+  <!-- ══ PROGRAM PANEL ══ -->
+  <div class="panel active" id="panel-program">
+    <div class="panel-title">My Program</div>
+    <!-- Week tabs -->
+    <div class="week-tabs" id="weekTabs"></div>
+    <!-- Race countdown (Hyrox only) -->
+    <div id="raceCountdown" style="display:none;margin-bottom:12px"></div>
+    <!-- Sessions -->
+    <div id="sessionList"></div>
+  </div>
+
+  <!-- ══ PROGRESS PANEL ══ -->
+  <div class="panel" id="panel-progress">
+    <div class="panel-title">Progress</div>
+
+    <!-- Hyrox progress view -->
+    <div id="hyroxProgress" style="display:none">
+
+      <!-- Log a RoxSim button -->
+      <a href="hyrox-session-log.html" style="display:block;background:var(--rust);color:#fff;text-align:center;padding:12px;border-radius:6px;font-weight:600;font-size:14px;text-decoration:none;margin-bottom:16px">+ Log a RoxSim session</a>
+
+      <!-- PBs row -->
+      <div id="hyroxPBs" style="margin-bottom:16px"></div>
+
+      <!-- RoxSim finish time chart -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:4px">RoxSim finish time</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Total simulation time across sessions</div>
+        <div id="roxSimChart" style="min-height:80px"></div>
+      </div>
+
+      <!-- Running pace chart -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:4px">Running pace</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Average km pace per session</div>
+        <div id="runPaceChart" style="min-height:80px"></div>
+      </div>
+
+      <!-- Station times -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title" style="margin-bottom:12px">Station times</div>
+        <div id="stationTimesGrid"></div>
+      </div>
+
+      <!-- Session log table -->
+      <div class="card">
+        <div class="card-title" style="margin-bottom:12px">Session history</div>
+        <div id="sessionLogTable"></div>
+      </div>
+    </div>
+
+    <!-- Get Strong / Pre-Comp progress view -->
+    <div id="standardProgress">
+      <div id="progressCharts"></div>
+    </div>
+  </div>
+
+  <!-- ══ PROFILE PANEL ══ -->
+  <div class="panel" id="panel-profile">
+    <div class="panel-title">My Profile</div>
+
+    <!-- Personal info -->
+    <div class="card">
+      <div class="card-title">Personal info</div>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="profile-label">Name</div><div class="profile-val" id="profName">—</div></div>
+        <div class="profile-item"><div class="profile-label">Age</div><div class="profile-val" id="profAge">—</div></div>
+        <div class="profile-item"><div class="profile-label">Height</div><div class="profile-val" id="profHeight">—</div></div>
+        <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val" id="profWeight">—</div></div>
+        <div class="profile-item"><div class="profile-label">Location</div><div class="profile-val" id="profLocation">—</div></div>
+        <div class="profile-item"><div class="profile-label">Program</div><div class="profile-val" id="profProgram">—</div></div>
+        <div class="profile-item"><div class="profile-label">Gym</div><div class="profile-val" id="profGym">—</div></div>
+        <div class="profile-item"><div class="profile-label">Training</div><div class="profile-val" id="profDays">—</div></div>
+      </div>
+    </div>
+
+    <!-- RPE Results -->
+    <div class="card">
+      <div class="card-title">RPE Testing Results</div>
+      <div class="rpe-grid" id="rpeResultsGrid">
+        <div style="font-size:13px;color:var(--muted);padding:8px 0">No RPE results yet.</div>
+      </div>
+    </div>
+
+    <!-- Body Measurements -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:12px">Body measurements</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Weight (kg)</div>
+        <input id="measWeight" type="number" step="0.1" placeholder="e.g. 85.5" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Body fat %</div>
+        <input id="measBodyFat" type="number" step="0.1" placeholder="e.g. 18.5" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Waist (cm)</div>
+        <input id="measWaist" type="number" step="0.5" placeholder="e.g. 85" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+        <div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Chest (cm)</div>
+        <input id="measChest" type="number" step="0.5" placeholder="e.g. 100" style="width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;outline:none"></div>
+      </div>
+      <button onclick="saveMeasurements()" style="width:100%;padding:11px;background:var(--iron);color:#fff;border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer">Save measurements</button>
+    </div>
+
+    <!-- Progress Photos -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title" style="margin-bottom:8px">Progress photos</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Upload front, side and back. Wade can see these in the CRM.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+        <div onclick="document.getElementById('photoFront').click()" style="aspect-ratio:3/4;border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);text-align:center;padding:8px" id="photoFrontPreview"><div>📸<br>Front</div></div>
+        <div onclick="document.getElementById('photoSide').click()" style="aspect-ratio:3/4;border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);text-align:center;padding:8px" id="photoSidePreview"><div>📸<br>Side</div></div>
+        <div onclick="document.getElementById('photoBack').click()" style="aspect-ratio:3/4;border:2px dashed var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--muted);text-align:center;padding:8px" id="photoBackPreview"><div>📸<br>Back</div></div>
+      </div>
+      <input type="file" id="photoFront" accept="image/*" style="display:none" onchange="previewPhoto('front',this)">
+      <input type="file" id="photoSide" accept="image/*" style="display:none" onchange="previewPhoto('side',this)">
+      <input type="file" id="photoBack" accept="image/*" style="display:none" onchange="previewPhoto('back',this)">
+      <button onclick="savePhotos()" style="width:100%;padding:11px;background:var(--iron);color:#fff;border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer">Save photos</button>
+    </div>
+
+    <!-- Health & Wellbeing -->
+        <div class="card" id="healthCard">
+      <div class="card-title">Health & Wellbeing</div>
+
+      <!-- Goals -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Training Goals</div>
+        <div id="goalsList" style="font-size:14px;color:var(--iron);line-height:1.6">—</div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:16px"></div>
+
+      <!-- Injuries -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Injuries & Limitations</div>
+        <div id="injuriesList" style="font-size:14px;color:var(--iron);line-height:1.6;margin-bottom:10px">—</div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('injuryForm')">+ Log new injury</button>
+        <div id="injuryForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+          <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="injArea" placeholder="e.g. Left knee"></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="injDesc" placeholder="What happened?"></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveInjury()">Log</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('injuryForm')">Cancel</button></div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:16px"></div>
+
+      <!-- Supplements -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Supplements</div>
+        <div id="suppList" style="margin-bottom:10px"></div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add supplement</button>
+        <div id="suppForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+          <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Magnesium"></div>
+          <div class="form-group"><label class="form-label">Dose</label><input class="form-input" id="suppDose" placeholder="e.g. 5g"></div>
+          <div class="form-group"><label class="form-label">Timing</label><input class="form-input" id="suppTiming" placeholder="e.g. Post-workout, Before bed"></div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="suppNotes" placeholder="Any notes..."></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveSupp()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('suppForm')">Cancel</button></div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:16px"></div>
+
+      <!-- Practitioner Notes -->
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Practitioner Notes</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share notes from your physio, chiro, or GP with Wade.</div>
+        <div id="practList" style="margin-bottom:10px"></div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add note</button>
+        <div id="practForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+          <div class="form-group"><label class="form-label">Type</label>
+            <select class="form-select" id="practType"><option>Physio note</option><option>Chiro note</option><option>GP clearance</option><option>Imaging result</option><option>Other</option></select>
+          </div>
+          <div class="form-group"><label class="form-label">Practitioner name (optional)</label><input class="form-input" id="practFrom" placeholder="e.g. Dr Smith"></div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="practNotes" placeholder="Key points from the appointment..."></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comp card (pre-comp only) -->
+    <div class="card" id="profCompCard" style="display:none">
+      <div class="card-title">Competition</div>
+      <div class="profile-grid">
+        <div class="profile-item"><div class="profile-label">Competition</div><div class="profile-val" id="profCompName">—</div></div>
+        <div class="profile-item"><div class="profile-label">Date</div><div class="profile-val" id="profCompDate">—</div></div>
+        <div class="profile-item"><div class="profile-label">Weight class</div><div class="profile-val" id="profWeightClass">—</div></div>
+        <div class="profile-item"><div class="profile-label">Level</div><div class="profile-val" id="profCompLevel">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ RECOVERY PANEL ══ -->
+  <div class="panel" id="panel-recovery">
+    <div class="panel-title">Recovery</div>
+
+    <!-- Daily check-in -->
+    <div class="card">
+      <div class="card-title">Daily Check-in <span class="card-title-sub">Optional — helps Wade understand your body</span></div>
+      <div style="margin-bottom:12px">
+        <div class="form-label">Overall soreness</div>
+        <div style="display:flex;gap:5px" id="sorenessRow">
+          <!-- populated by JS -->
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div class="form-label">Sleep last night <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+        <div class="slider-wrap">
+          <input type="range" id="sleepSlider" min="3" max="12" step="0.5" value="7.5" oninput="document.getElementById('sleepVal').textContent=this.value" style="flex:1;accent-color:var(--rust)">
+          <div class="slider-val"><span id="sleepVal">7.5</span><div style="font-size:10px;color:var(--muted)">hrs</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="stress-btn" onclick="setSQ('poor')" id="sq-poor">😴 Poor</button>
+          <button class="stress-btn" onclick="setSQ('ok')" id="sq-ok">😐 OK</button>
+          <button class="stress-btn" onclick="setSQ('good')" id="sq-good">😊 Good</button>
+          <button class="stress-btn" onclick="setSQ('great')" id="sq-great">🔥 Great</button>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div class="form-label">HRV <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional — Whoop, Garmin etc)</span></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" id="hrvInput" placeholder="e.g. 68" min="0" max="200" class="form-input" style="width:100px;text-align:center;font-size:16px;font-weight:600">
+          <span style="font-size:13px;color:var(--muted)">ms</span>
+        </div>
+      </div>
+      <button class="btn-iron" onclick="saveCheckIn()">Log check-in</button>
+      <div class="success-msg" id="checkInSuccess">✓ Check-in logged!</div>
+      <div id="checkInHistory" style="margin-top:14px"></div>
+    </div>
+
+    <!-- Nutrition -->
+    <div class="card">
+      <div class="card-title">Nutrition — Today <span class="card-title-sub">Optional — log what you can, skip what you can't</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div><label class="form-label">Calories</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="nutCal" placeholder="0" class="form-input" style="font-size:16px;font-weight:600"><span style="font-size:12px;color:var(--muted)">kcal</span></div></div>
+        <div><label class="form-label">Water</label><div style="display:flex;align-items:center;gap:6px"><input type="number" id="nutWater" placeholder="0" step="0.1" class="form-input" style="font-size:16px;font-weight:600"><span style="font-size:12px;color:var(--muted)">L</span></div></div>
+      </div>
+      <div class="form-label">Macros <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></div>
+      <div class="macro-grid" style="margin-top:6px;margin-bottom:10px">
+        <div class="macro-item"><label style="font-size:11px;color:#2c7a4b;font-weight:600">Protein</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="nutP" class="macro-input" placeholder="0" oninput="updateMacroBar()" style="color:#2c7a4b"><span style="font-size:11px;color:var(--muted)">g</span></div></div>
+        <div class="macro-item"><label style="font-size:11px;color:#7a5010;font-weight:600">Carbs</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="nutC" class="macro-input" placeholder="0" oninput="updateMacroBar()" style="color:#7a5010"><span style="font-size:11px;color:var(--muted)">g</span></div></div>
+        <div class="macro-item"><label style="font-size:11px;color:#8c3020;font-weight:600">Fats</label><div style="display:flex;align-items:center;gap:4px"><input type="number" id="nutF" class="macro-input" placeholder="0" oninput="updateMacroBar()" style="color:#8c3020"><span style="font-size:11px;color:var(--muted)">g</span></div></div>
+      </div>
+      <div id="macroBarWrap" style="display:none">
+        <div class="macro-bar"><div class="macro-bar-p" id="mbP"></div><div class="macro-bar-c" id="mbC"></div><div class="macro-bar-f" id="mbF"></div></div>
+        <div class="macro-legend"><span style="color:#2c7a4b">● Protein</span><span style="color:#7a5010">● Carbs</span><span style="color:#8c3020">● Fats</span></div>
+      </div>
+      <button class="btn-rust" onclick="saveNutrition()" style="margin-top:12px">Log nutrition</button>
+      <div class="success-msg" id="nutritionSuccess">✓ Nutrition logged!</div>
+      <div id="nutritionHistory" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Recovery log -->
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px">
+        <div><div class="card-title" style="margin-bottom:2px">Recovery Log</div><div style="font-size:12px;color:var(--muted)">Optional — body work, therapy, recovery sessions</div></div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('recoveryForm')">+ Add</button>
+      </div>
+      <div id="recoveryList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No recovery sessions logged yet.</div></div>
+      <div id="recoveryForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
+        <div class="form-group"><label class="form-label">Treatment type</label>
+          <select class="form-select" id="recType"><option>Massage</option><option>Cupping</option><option>Dry Needling</option><option>Ice Bath</option><option>Hot/Cold Contrast</option><option>Sauna</option><option>Foam Rolling</option><option>Stretching / Mobility</option><option>Physio</option><option>Chiro</option><option>Compression Therapy</option><option>Other</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="recArea" placeholder="e.g. Lower back, Full body"></div>
+        <div class="form-group"><label class="form-label">How did it feel?</label>
+          <div style="display:flex;gap:8px">
+            <button class="stress-btn" onclick="setRecFeel('😖 Rough')" id="rf-rough">😖 Rough</button>
+            <button class="stress-btn" onclick="setRecFeel('👍 Good')" id="rf-good">👍 Good</button>
+            <button class="stress-btn" onclick="setRecFeel('🔥 Great')" id="rf-great">🔥 Great</button>
+          </div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><textarea class="form-textarea" id="recNotes" placeholder="Anything worth noting..."></textarea></div>
+        <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveRecovery()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('recoveryForm')">Cancel</button></div>
+      </div>
+    </div>
+
+    <!-- Check-in history -->
+    <div class="card">
+      <div class="card-title">Check-in History</div>
+      <div id="checkInHistory"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No check-ins yet — log your first one above!</div></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-comp">
+
+    <!-- ─ RACE DAY (Hyrox) view ─ -->
+    <div id="view-race" style="display:none">
+      <div class="panel-title">Race Day</div>
+
+      <!-- Race header -->
+      <div class="comp-header">
+        <div class="comp-bg">RACE</div>
+        <div class="comp-label">Your Race</div>
+        <div class="comp-name" id="race-name">—</div>
+        <div class="comp-meta">
+          <div class="comp-meta-item"><div class="comp-meta-label">Date</div><div class="comp-meta-val" id="race-date">—</div></div>
+          <div class="comp-meta-item"><div class="comp-meta-label">Location</div><div class="comp-meta-val" id="race-location">—</div></div>
+          <div class="comp-meta-item"><div class="comp-meta-label">Division</div><div class="comp-meta-val" id="race-division">—</div></div>
+          <div class="comp-meta-item"><div class="comp-meta-label">Target time</div><div class="comp-meta-val" id="race-target">—</div></div>
+        </div>
+      </div>
+
+      <!-- Gear checklist -->
+      <div class="card">
+        <div class="card-title">Race day gear checklist</div>
+        <div id="raceGearChecklist"></div>
+      </div>
+
+      <!-- Fuelling -->
+      <div class="card">
+        <div class="card-title">Fuelling plan</div>
+        <div class="rule-card rule-card-green">
+          <div class="rule-title">🍌 Race morning (3–4 hrs before)</div>
+          <div class="rule-text">High-carb, low-fibre, low-fat breakfast. Oats, banana, white toast + jam. No new foods on race day. Coffee if that's your normal — not if it isn't.</div>
+        </div>
+        <div class="rule-card rule-card-blue">
+          <div class="rule-title">💧 Hydration</div>
+          <div class="rule-text">500ml water on waking. Sip consistently until 30 min before race start. Electrolytes during warm-up. No chugging — you don't want a full stomach on the sled push.</div>
+        </div>
+        <div class="rule-card rule-card-rust">
+          <div class="rule-title">⚡ During the race</div>
+          <div class="rule-text">For most athletes under 90 min — water only is fine. If you're targeting 90+ min, a gel at station 4 (Rowing) can help. Practice this in your RoxSim first, never try it for the first time on race day.</div>
+        </div>
+      </div>
+
+      <!-- Warm up -->
+      <div class="card">
+        <div class="card-title">Warm up plan</div>
+        <div class="rule-card rule-card-rust">
+          <div class="rule-title">⏱ 30–40 min before wave start</div>
+          <div class="rule-text">Easy 5 min jog → dynamic stretching 5 min → 200m Ski Erg easy → 10 air squats + 5 burpees → done. Keep it minimal. You are not warming up for a strength session — save the legs.</div>
+        </div>
+      </div>
+
+      <!-- Race rules -->
+      <div class="card">
+        <div class="card-title">Rules & counting</div>
+        <div class="rule-card rule-card-blue">
+          <div class="rule-title">📊 Lap counting</div>
+          <div class="rule-text">Most venues use a lap counter lanyard or chip system — confirm at registration. For Wall Balls, a judge counts your reps. If you lose count, ask your judge — they are required to help. Do not guess.</div>
+        </div>
+        <div class="rule-card rule-card-rust">
+          <div class="rule-title">🏃 The running course</div>
+          <div class="rule-text">Each 1km loop is clearly marked. Stay left, pass right. Do not stop at the station entrance until you cross the timing mat — your run time keeps ticking until then.</div>
+        </div>
+        <div class="rule-card rule-card-green">
+          <div class="rule-title">❌ No-reps & penalties</div>
+          <div class="rule-text">Each missed rep = 15 sec time penalty. Wall Balls height, Burpee broad jump distance and Lunge knee-to-floor are the most commonly penalised. When in doubt, go a little deeper.</div>
+        </div>
+      </div>
+
+      <!-- ─ STRATEGY SECTION ─ -->
+      <div style="margin-top:8px">
+        <div class="panel-title" style="font-size:18px;margin-bottom:4px">Race Strategy</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">One strategy focus per week. Read it before your RoxSim and practice it deliberately. Small refinements = big time gains.</p>
+
+        <!-- This week's pick -->
+        <div id="strategyThisWeek" style="margin-bottom:20px"></div>
+
+        <!-- All strategy cards -->
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">All strategy topics</div>
+        <div id="strategyAllCards"></div>
+      </div>
+    </div>
+
+    <!-- ─ COMP DAY (Pre-Comp / Strongman) view ─ -->
+    <div id="view-comp" style="display:none">
+      <div class="panel-title">Comp Day</div>
+
+      <!-- Competition details -->
+      <div class="comp-header">
+        <div class="comp-bg">COMP</div>
+        <div class="comp-label">Competition</div>
+        <div class="comp-name">Strongman Corporation<br>Arnold's Pro/Am</div>
+        <div class="comp-meta">
+          <div class="comp-meta-item"><div class="comp-meta-label">Date</div><div class="comp-meta-val">15 June 2025</div></div>
+          <div class="comp-meta-item"><div class="comp-meta-label">Location</div><div class="comp-meta-val">Ohio, USA</div></div>
+          <div class="comp-meta-item"><div class="comp-meta-label">Weight class</div><div class="comp-meta-val">Under 90kg</div></div>
+          <div class="comp-meta-item"><div class="comp-meta-label">Federation</div><div class="comp-meta-val">Strongman Corp</div></div>
+        </div>
+      </div>
+
+      <!-- Weight cut -->
+      <div class="card">
+        <div class="card-title">Weight Cut Plan</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.7">Current: <strong style="color:var(--iron)">91.5kg</strong> · Target: <strong style="color:var(--iron)">89.9kg</strong><br>Water cut only in final 24hrs. No food restriction. Rehydrate immediately after weigh-in with electrolytes + carbs.</p>
+      </div>
+
+      <!-- Warm up -->
+      <div class="card">
+        <div class="card-title">Warm Up Plan</div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.7">Arrive 90 min before first event. General movement 10 min → event-specific warm ups 20 min → final heavy single 15 min before start. Keep it minimal — save energy for the platform.</p>
+      </div>
+
+      <!-- Events -->
+      <div class="card">
+        <div class="card-title">Events & Attempt Selection</div>
+        <div id="eventsList"></div>
+      </div>
+
+      <!-- Competition strategy -->
+      <div class="card">
+        <div class="card-title">Competition Tactics</div>
+        <div class="rule-card rule-card-rust">
+          <div class="rule-title">🎯 Order of competition</div>
+          <div class="rule-text">Athletes compete in <strong>reverse placing order</strong> — last place goes first, leader goes last. If you're leading after an event, you compete last in the next one and can watch everyone lift first. Use it.</div>
+        </div>
+        <div class="rule-card rule-card-blue">
+          <div class="rule-title">📊 Attempt selection</div>
+          <div class="rule-text"><ul><li>Declare your next attempt immediately after each lift</li><li>Openers must be 95%+ certainty — a missed opener costs points AND confidence</li><li>Wade may adjust your thirds based on what others lift</li></ul></div>
+        </div>
+        <div class="rule-card rule-card-green">
+          <div class="rule-title">🏅 Points & placing</div>
+          <div class="rule-text">Consistency beats heroics. A 2nd, 2nd, 2nd beats a 1st, 1st, bomb-out. Wade programs all events — not just your strongest.</div>
+        </div>
+      </div>
+
+      <!-- ─ COMP STRATEGY SECTION ─ -->
+      <div style="margin-top:8px">
+        <div class="panel-title" style="font-size:18px;margin-bottom:4px">Comp Strategy</div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">One strategy focus per week. Wade assigns the topic — read it, then apply it deliberately in training.</p>
+        <div id="compStrategyThisWeek" style="margin-bottom:20px"></div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">All topics</div>
+        <div id="compStrategyAllCards"></div>
+      </div>
+    </div>
+
+  <div class="panel" id="panel-messages" style="padding:0">
+    <div class="msg-thread" id="msgThread" style="padding:16px 16px 120px;min-height:calc(100vh - 180px)"></div>
+  </div>
+
+</div><!-- end scroll area -->
+
+<!-- MESSAGE INPUT (visible in messages tab) -->
+<div class="msg-input-area" id="msgInputArea">
+  <button class="voice-btn" id="voiceBtn" onclick="toggleVoice()" title="Record voice note">🎤</button>
+  <textarea class="msg-textarea" id="msgInput" placeholder="Message Wade..." rows="1" oninput="autoResize(this)"></textarea>
+  <button class="msg-send" onclick="sendMessage()">➤</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnav-item active" onclick="switchTab('program',this)"><div class="bnav-icon">📋</div>Program</button>
+  <button class="bnav-item" onclick="switchTab('progress',this)"><div class="bnav-icon">📈</div>Progress</button>
+  <button class="bnav-item" onclick="switchTab('profile',this)"><div class="bnav-icon">👤</div>Profile</button>
+  <button class="bnav-item" onclick="switchTab('recovery',this)"><div class="bnav-icon">🔄</div>Recovery</button>
+  <button class="bnav-item" onclick="switchTab('comp',this)" id="bnav-comp" style="display:none"><div class="bnav-icon" id="bnav-comp-icon">🏆</div><span id="bnav-comp-label">Comp</span></button>
+  <button class="bnav-item" onclick="switchTab('messages',this)"><div class="bnav-icon">💬</div>Messages</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+</body>
+</html>
+
+
+<script>
+
+
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-3WQRC6JDFR');
+
+
+// ── STRATEGY DATA ─────────────────────────────────────────────
+
+const HYROX_STRATEGIES = [
+  {
+    id: 'ski_erg_technique',
+    icon: '⛷️',
+    week: 1,
+    title: 'Ski Erg — max output technique',
+    sub: "Drive from the whole body, not just the arms",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">The Ski Erg feels like an arm exercise — it isn't. The athletes who are fast on it use a full-body hip hinge to generate power, not just a shoulder pull.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">The movement</div><div class="rule-text">Stand tall → reach overhead → hinge at the hips, drive your arms down and through, finishing with hands near your hips and a slight knee bend. Think of it as a standing crunch with a pull.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Damper setting</div><div class="rule-text">Most athletes do best between 4–6. Higher isn't better — it just slows your stroke rate. Test what lets you hold a fast, consistent rhythm.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">In your RoxSim, do 3 × 10 strokes focusing only on the hip hinge. Feel the lat engagement. Then settle into race pace and hold it.</div></div>`
+  },
+  {
+    id: 'sled_push_pacing',
+    icon: '🛷',
+    week: 2,
+    title: "Sled Push — don't blow your legs",
+    sub: "The biggest rookie mistake in Hyrox",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">The Sled Push is Station 2 — your legs are still fresh and it's tempting to go hard. Resist it. Athletes who sprint the sled are cooked by the Burpee Broad Jump and never recover.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">The form</div><div class="rule-text">Low body position, hands on the handles with arms straight, drive through the heel. Shorter, faster steps beat long strides. Keep hips low — if your hips rise, you've lost power.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">The pacing rule</div><div class="rule-text">You should finish the sled push feeling like you could do it again. If you're gasping, you went too hard. Aim for 85% effort — controlled and powerful, not frantic.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">After your RoxSim sled push, immediately run 400m. Notice how your legs feel. If they're dead, back off the sled intensity next session.</div></div>`
+  },
+  {
+    id: 'burpee_broad_jump',
+    icon: '🦘',
+    week: 3,
+    title: 'Burpee Broad Jump — keep moving',
+    sub: "The mental station — pacing over speed",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">80m of burpee broad jumps sounds brutal. It is. The key is to set a pace you can hold from rep 1 to the end — not to sprint and stop.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">Technique</div><div class="rule-text">Jump as far forward as possible with each rep — horizontal distance is the goal. Land softly, hands down, kick feet back, chest touches the floor, jump up and forward. No resting with hands on knees.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Mental strategy</div><div class="rule-text">Break the 80m into four 20m sections in your head. Set a pace you can hold all the way through. Slowing down in the last 20m is fine — stopping is where you lose time.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">Do 40m of burpee broad jumps immediately after a hard run. Practice jumping as far as possible each rep — distance efficiency means fewer total reps.</div></div>`
+  },
+  {
+    id: 'rowing_splits',
+    icon: '🚣',
+    week: 4,
+    title: 'Rowing — pacing your 1000m',
+    sub: "Negative splits win the erg",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">You've run 4km and done 3 stations before you hit the rower. The temptation is to smash it — don't. A controlled start lets you build into it and finish strong.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">Target split</div><div class="rule-text">Know your goal split before race day. Practice at that exact pace in every RoxSim. The screen should show your /500m split — lock onto it and don't deviate in the first 200m.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">The technique reminder</div><div class="rule-text">Legs → lean back → arms. Recover in reverse: arms away → lean forward → legs. Under fatigue, athletes collapse to all-arms rowing. Focus: drive through the legs first.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">Row 1000m at exactly your target race split. Not faster. Consistency is the skill — anyone can sprint 250m.</div></div>`
+  },
+  {
+    id: 'farmers_carry_grip',
+    icon: '💼',
+    week: 5,
+    title: 'Farmers Carry — grip & turns',
+    sub: "Where grip fails, races fall apart",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">200m with heavy kettlebells sounds manageable. After 5km of running it's a different story. Grip endurance is the primary limiter for most athletes.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">Grip strategy</div><div class="rule-text">If you set down, set down deliberately — don't drop them. Shake out for 5 seconds, re-grip, go. Setting down once and recovering beats grinding to a halt with failing grip. Aim to minimise total set-downs.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">The turns</div><div class="rule-text">At each 100m turn, you stop momentarily. Use this to re-grip, adjust posture, take one deep breath. Don't rush the turn — it costs you 3 seconds but saves 10 on the next leg.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">Do 200m at race weight in your RoxSim. Count how many times you set down. Target: one fewer set-down each week until you're unbroken.</div></div>`
+  },
+  {
+    id: 'wall_balls_sets',
+    icon: '🏀',
+    week: 6,
+    title: 'Wall Balls — 100 reps at the end',
+    sub: "The make-or-break final station",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">Wall Balls closes the race. You're 8km into running, you've done 6 stations, and now you need 100 reps. Most athletes blow up here because they go too fast early.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">The set strategy</div><div class="rule-text">A proven approach: 25-20-15-10-10-10-10. Start with a comfortable first set, then manage the rest. If you can do 50 unbroken, great — but breaking early and maintaining rhythm beats going unbroken and hitting a wall at rep 60.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Target height</div><div class="rule-text">Men: 3.05m. Women: 2.75m. Practice to this exact height — not close to it. A no-rep here costs 15 seconds. Throw it to the top of the target, not just above it.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">After a hard run, do 100 wall balls. Don't stop the clock when you rest — your total time is your race time. Build the mental toughness to keep moving even when your legs are shot.</div></div>`
+  },
+  {
+    id: 'activewear_shoes',
+    icon: '👟',
+    week: 1,
+    title: 'Activewear & shoe choices',
+    sub: 'What to wear and why it matters',
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">Hyrox is a hybrid event — you need footwear that handles running efficiently AND the functional stations. This is not the day for your maximum cushion marathon shoe.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">Best shoe choice</div><div class="rule-text">A versatile training shoe with moderate cushion and a grippy outsole. Nike Metcon, Reebok Nano, or NOBULL Trainer are popular. HYROX has an official shoe partnership with PUMA — the Deviate Nitro is purpose-built for the event. Avoid pure running shoes — they're slippery on the sled and unstable for carries.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Clothing</div><div class="rule-text">Tight-fitting shorts or compression shorts for the sled push — loose shorts catch on the handles. A breathable top. Gloves are allowed and can help with farmers carry grip. No headphones during the race at most venues — check your event rules.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Race day tip</div><div class="rule-text">Wear exactly what you've trained in. Race day is not the day to break in new shoes or try a new top. Comfort and familiarity matter more than looking good.</div></div>`
+  },
+  {
+    id: 'fuelling_sims',
+    icon: '🍌',
+    week: 2,
+    title: 'Fuelling for RoxSims & race day',
+    sub: 'What to eat and when',
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">A RoxSim is 60–90 minutes of high-intensity work. What you eat beforehand directly affects your performance. Use your sim sessions to test your race day nutrition plan.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">Before a RoxSim (2–3 hrs)</div><div class="rule-text">A solid carb-based meal: oats, rice, pasta, or bread with a protein source. Give it 2–3 hours to settle. Avoid anything high in fat or fibre — you don't want digestive issues mid-burpee.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Pre-session snack (30–60 min)</div><div class="rule-text">Banana, white rice cake, or a small amount of honey. Fast-digesting carbs only. Stay away from protein bars and heavy food.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">During the RoxSim</div><div class="rule-text">Water only for most athletes. If your sim goes over 75 minutes, try a gel at the midpoint (after the Rowing station). Never try a gel in the race that you haven't tested in training.</div></div>`
+  },
+  {
+    id: 'partner_transitions',
+    icon: '🤝',
+    week: 3,
+    title: 'Partner transitions (Doubles)',
+    sub: "How to hand off efficiently",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">In Doubles, you run together but split the station reps however you choose. A good handoff strategy and pre-agreed split plan can save 2–3 minutes over the course of a race.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">How to split the reps</div><div class="rule-text">Play to your strengths. If one partner is stronger on upper body, they take more Ski Erg reps. If one has better endurance, they take more Wall Balls late. Pre-agree the split for every station before the race — don't negotiate mid-station.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">The physical handoff</div><div class="rule-text">For Farmers Carry and Sled Push, there is no mid-station handoff — one partner completes a full leg before swapping. For Wall Balls and Rowing, you can swap at any rep. Have a clear signal (tap on shoulder) so there's no confusion.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Practice this week</div><div class="rule-text">Do a full RoxSim with your partner and practice the handoff at every station. Timing the transition cleanly is a skill — it takes practice to make it seamless on race day.</div></div>`
+  },
+  {
+    id: 'counting_laps',
+    icon: '🔢',
+    week: 4,
+    title: 'Keeping count — laps & reps',
+    sub: "Don't let confusion cost you time",
+    content: `<p style="font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:12px">Mid-race, your brain is not functioning at full capacity. Have a system for counting before you start — not when you're 7km in.</p>
+    <div class="rule-card rule-card-rust"><div class="rule-title">Running laps</div><div class="rule-text">Most venues use a timing chip that tracks laps automatically — but confirm this at registration. If you're manually tracking, use your watch lap function at each station entrance. Your judge or lap counter will alert you to your final lap.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Station reps (Wall Balls)</div><div class="rule-text">Your judge counts for you and must correct you if you're wrong. If you lose count, look at your judge and ask — they will tell you. Do not guess. A 15 second penalty per missed rep adds up fast.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Sled push legs</div><div class="rule-text">It's 4 × 12.5m. Count legs out loud: "one, two, three, four." Under fatigue athletes sometimes stop after 3. Your judge will stop you finishing if you short the distance — trust the process.</div></div>`
+  },
+];
+
+const COMP_STRATEGIES = [
+  {
+    id: 'attempt_selection',
+    icon: '🎯',
+    week: 1,
+    title: 'Attempt selection strategy',
+    sub: "The opener is everything",
+    content: `<div class="rule-card rule-card-rust"><div class="rule-title">The opener rule</div><div class="rule-text">Your opener must be something you can lift on your worst day, after a bad warm-up, with cold hands. It's not a statement — it's the foundation. A missed opener costs points, confidence, and momentum.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Second attempts</div><div class="rule-text">Seconds are your working weight — what you're capable of on a good day. Wade will advise based on your training numbers. Don't chase what others are lifting.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Third attempts</div><div class="rule-text">Thirds depend on the competitive situation. If you need to chase points, go for it. If the placing is secure, take a safe third that locks in the result. Wade may adjust this live based on what others lift.</div></div>`
+  },
+  {
+    id: 'event_order',
+    icon: '📋',
+    week: 2,
+    title: 'Understanding event order',
+    sub: "Competing last has advantages",
+    content: `<div class="rule-card rule-card-rust"><div class="rule-title">Reverse order rule</div><div class="rule-text">Athletes compete in reverse placing order — last place goes first, current leader goes last. This means if you're winning, you get to watch every other competitor before you lift.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">How to use it</div><div class="rule-text">If you're going last, know exactly what you need to lift before you approach the bar. Wade will calculate your required attempts based on what's already been lifted.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Consistency beats heroics</div><div class="rule-text">A 2nd, 2nd, 2nd beats a 1st, 1st, bomb-out. The athlete who goes 9 for 9 on attempts almost always finishes ahead of the one swinging for records.</div></div>`
+  },
+  {
+    id: 'warm_up_plan',
+    icon: '🔥',
+    week: 3,
+    title: 'Competition warm-up strategy',
+    sub: "Save energy for the platform",
+    content: `<div class="rule-card rule-card-rust"><div class="rule-title">Arrive early</div><div class="rule-text">Aim to arrive 90 minutes before your first event. Use the first 30 minutes to register, walk the venue, find the warm-up area, and get your head right.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Warm-up structure</div><div class="rule-text">General movement 10 min → event-specific warm-ups 20 min → final heavy single or heavy set 15 min before start. Keep it minimal. Your training has prepared you — the warm-up is activation, not extra training.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">The final lift</div><div class="rule-text">Your last warm-up set should feel heavy but fast. If it feels slow, lower the weight. You are priming the nervous system, not testing your max.</div></div>`
+  },
+  {
+    id: 'recovery_between_events',
+    icon: '🧊',
+    week: 4,
+    title: 'Recovery between events',
+    sub: "What to do in the gaps",
+    content: `<div class="rule-card rule-card-rust"><div class="rule-title">Immediately after an event</div><div class="rule-text">Walk — don't sit down immediately. Keep blood moving. Get calories and fluids in within 15 minutes. Simple carbs + electrolytes first, protein within 30 minutes.</div></div>
+    <div class="rule-card rule-card-blue"><div class="rule-title">Between events</div><div class="rule-text">Stay warm, stay loose. Light movement between events keeps the nervous system primed. Avoid sitting in cold or air-conditioned areas — muscle temperature drops faster than you expect.</div></div>
+    <div class="rule-card rule-card-green"><div class="rule-title">Mental reset</div><div class="rule-text">After a good event — stay level. After a bad event — let it go. Each event is independent. The athlete who can reset mentally between events consistently outperforms their talent level.</div></div>`
+  },
+];
+
+function getWeekNumber() {
+  return (CLIENT && CLIENT.week) ? parseInt(CLIENT.week) : 1;
+}
+
+function renderStrategyPanel() {
+  const week = getWeekNumber();
+
+  // ─ Hyrox strategy ─
+  const thisWeekEl = document.getElementById('strategyThisWeek');
+  const allCardsEl = document.getElementById('strategyAllCards');
+  if (!thisWeekEl || !allCardsEl) return;
+
+  // Find this week's assigned strategy (cycle through by week)
+  const weekStrategy = HYROX_STRATEGIES[(week - 1) % HYROX_STRATEGIES.length];
+
+  thisWeekEl.innerHTML = `
+    <div style="background:var(--iron);border-radius:8px;padding:20px;margin-bottom:4px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:12px;right:14px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--rust);text-transform:uppercase">Week ${week} Focus</div>
+      <div style="font-size:28px;margin-bottom:10px">${weekStrategy.icon}</div>
+      <div style="font-family:var(--font-d);font-size:22px;color:#fff;letter-spacing:1px;margin-bottom:6px">${weekStrategy.title}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px">${weekStrategy.sub}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6">Read this before your RoxSim this week. Tap to open the full strategy below.</div>
+    </div>`;
+
+  // All strategy cards as expandable items
+  allCardsEl.innerHTML = HYROX_STRATEGIES.map((s, i) => `
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden">
+      <div onclick="toggleStrategy('hstrat-${i}')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
+        <div style="font-size:20px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--chalk);border-radius:6px;flex-shrink:0">${s.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:2px">${s.title}</div>
+          <div style="font-size:11px;color:var(--muted)">${s.sub}</div>
+        </div>
+        ${s === weekStrategy ? '<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rust);flex-shrink:0">This week</div>' : ''}
+        <div id="hstrat-${i}-arrow" style="color:var(--muted);font-size:18px;transition:transform 0.2s;flex-shrink:0">›</div>
+      </div>
+      <div id="hstrat-${i}" style="display:none;padding:0 16px 16px">${s.content}</div>
+    </div>`).join('');
+
+  // ─ Comp strategy ─
+  const compThisWeekEl = document.getElementById('compStrategyThisWeek');
+  const compAllCardsEl = document.getElementById('compStrategyAllCards');
+  if (!compThisWeekEl || !compAllCardsEl) return;
+
+  const compWeekStrategy = COMP_STRATEGIES[(week - 1) % COMP_STRATEGIES.length];
+
+  compThisWeekEl.innerHTML = `
+    <div style="background:var(--iron);border-radius:8px;padding:20px;margin-bottom:4px;position:relative;overflow:hidden">
+      <div style="position:absolute;top:12px;right:14px;font-size:9px;font-weight:700;letter-spacing:2px;color:var(--rust);text-transform:uppercase">Week ${week} Focus</div>
+      <div style="font-size:28px;margin-bottom:10px">${compWeekStrategy.icon}</div>
+      <div style="font-family:var(--font-d);font-size:22px;color:#fff;letter-spacing:1px;margin-bottom:6px">${compWeekStrategy.title}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px">${compWeekStrategy.sub}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6">Apply this deliberately in training this week. Tap to read the full breakdown.</div>
+    </div>`;
+
+  compAllCardsEl.innerHTML = COMP_STRATEGIES.map((s, i) => `
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden">
+      <div onclick="toggleStrategy('cstrat-${i}')" style="display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer">
+        <div style="font-size:20px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--chalk);border-radius:6px;flex-shrink:0">${s.icon}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;margin-bottom:2px">${s.title}</div>
+          <div style="font-size:11px;color:var(--muted)">${s.sub}</div>
+        </div>
+        ${s === compWeekStrategy ? '<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--rust);flex-shrink:0">This week</div>' : ''}
+        <div id="cstrat-${i}-arrow" style="color:var(--muted);font-size:18px;transition:transform 0.2s;flex-shrink:0">›</div>
+      </div>
+      <div id="cstrat-${i}" style="display:none;padding:0 16px 16px">${s.content}</div>
+    </div>`).join('');
+}
+
+function toggleStrategy(id) {
+  const el = document.getElementById(id);
+  const arrow = document.getElementById(id + '-arrow');
+  if (!el) return;
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+// ── DATA ──────────────────────────────────────────────────────
+let CLIENT = { name:'Loading...', initials:'..', short:'...', program:'', week:1, totalWeeks:6 };
+let clientId = null;
+
+// Get email from URL param or session
+function getClientEmail() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('email') || sessionStorage.getItem('ws_email') || null;
+}
+
+async function loadClientFromSupabase(email) {
+  if (!email) return false;
+  try {
+    // ── CLIENT ──────────────────────────────────────────
+    const clients = await db.select('clients', { email });
+    if (!clients || !clients.length) return false;
+    const c = clients[0];
+    clientId = c.id;
+
+    const firstName = c.first_name || '';
+    const lastName  = c.last_name  || '';
+    const fullName  = [firstName, lastName].filter(Boolean).join(' ') || email;
+    const initials  = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || '?';
+
+    // ── QUESTIONNAIRE ───────────────────────────────────
+    const qData = await db.select('questionnaire_responses', { client_id: c.id }, { order: 'created_at.desc', limit: 1 });
+    const q = qData && qData.length ? qData[0] : {};
+    const raw = q.raw_data || {};
+
+    // ── RPE RESULTS ─────────────────────────────────────
+    let rpeRows = await db.select('rpe_results', { client_id: c.id });
+    if (!rpeRows || !rpeRows.length) rpeRows = await db.select('rpe_results', { email });
+    const rpe = rpeRows && rpeRows.length ? rpeRows[0] : null;
+
+    // ── BUILD CLIENT OBJECT ─────────────────────────────
+    CLIENT = {
+      name: fullName, initials, short: firstName || fullName,
+      program: c.program_type === 'pre_comp' ? 'Pre-Comp' : c.program_type === 'hyrox' ? 'Hyrox' : 'Get Strong',
+      week: c.current_week || 1,
+      totalWeeks: c.total_weeks || 6,
+      type: c.program_type,
+      email: c.email,
+      age: c.age || q.age || null,
+      height: c.height || q.height || raw.height || null,
+      weight: c.weight || q.weight || raw.weight || null,
+      location: c.location || q.location || raw.location || null,
+      gymType: q.gym_type || raw.gymType || null,
+      trainingDays: q.training_days_per_week || raw.trainingDays || null,
+      goals: Array.isArray(q.goals) ? q.goals : (Array.isArray(raw.goals) ? raw.goals : []),
+      injuries: q.injury_detail || raw.injuries || null,
+      rpe: rpe,
+    };
+
+    // ── NAV / HEADER ────────────────────────────────────
+    document.getElementById('navName').textContent    = CLIENT.short;
+    document.getElementById('navWeek').textContent    = CLIENT.program.toUpperCase() + ' · WEEK ' + CLIENT.week + '/' + CLIENT.totalWeeks;
+    document.getElementById('navAvatar').textContent  = CLIENT.initials;
+
+    // ── PROFILE PANEL ───────────────────────────────────
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+    setEl('profName',     fullName);
+    setEl('profAge',      CLIENT.age     ? CLIENT.age + ' yrs'  : null);
+    setEl('profHeight',   CLIENT.height  ? CLIENT.height + 'cm'  : null);
+    setEl('profWeight',   CLIENT.weight  ? CLIENT.weight + 'kg'  : null);
+    setEl('profLocation', CLIENT.location);
+    setEl('profProgram',  CLIENT.program + ' · Wk ' + CLIENT.week + '/' + CLIENT.totalWeeks);
+
+    // ── RPE GRID ────────────────────────────────────────
+    const rpeGrid = document.getElementById('rpeResultsGrid');
+    if (rpeGrid) {
+      if (rpe) {
+        const lifts = [
+          { name:'Deadlift',    r1:rpe.deadlift_1rm,    r3:rpe.deadlift_3rm,    r5:rpe.deadlift_5rm    },
+          { name:'Squat',       r1:rpe.squat_raw_1rm,   r3:rpe.squat_raw_3rm,   r5:rpe.squat_raw_5rm   },
+          { name:'Bench Press', r1:rpe.bench_1rm,       r3:rpe.bench_3rm,       r5:rpe.bench_5rm       },
+          { name:'Press',       r1:rpe.press_1rm,       r3:rpe.press_3rm,       r5:rpe.press_5rm       },
+        ].filter(l => l.r1 || l.r3 || l.r5);
+        rpeGrid.innerHTML = lifts.map(l => `
+          <div class="rpe-lift-card">
+            <div class="rpe-lift-name">${l.name}</div>
+            ${l.r1 ? `<div class="rpe-lift-row"><span class="rpe-lift-label">1RM</span><span class="rpe-lift-val">${l.r1}kg</span></div>` : ''}
+            ${l.r3 ? `<div class="rpe-lift-row"><span class="rpe-lift-label">3RM</span><span class="rpe-lift-val">${l.r3}kg</span></div>` : ''}
+            ${l.r5 ? `<div class="rpe-lift-row"><span class="rpe-lift-label">5RM</span><span class="rpe-lift-val">${l.r5}kg</span></div>` : ''}
+          </div>`).join('');
+        // Build PROGRESS_DATA from RPE baseline
+        PROGRESS_DATA = lifts.filter(l=>l.r1>0).map(l => ({ name: l.name, data: [{ week: 'Baseline', w: l.r1 }] }));
+      } else {
+        rpeGrid.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0">No RPE results yet — complete RPE testing to populate your numbers.</div>';
+      }
+    }
+
+    // ── PROGRAMS ────────────────────────────────────────
+    if (clientId) {
+      const programs = await db.select('programs', { client_id: clientId });
+      if (programs && programs.length) {
+        const prog = programs[0];
+        if (prog && prog.sessions) {
+          const sess = prog.sessions;
+          // Handle both array and week-keyed object formats
+          if (Array.isArray(sess)) {
+            SESSIONS[1] = sess;
+          } else {
+            Object.keys(sess).forEach(wk => {
+              const ws = sess[wk];
+              if (Array.isArray(ws)) {
+                SESSIONS[parseInt(wk)] = ws;
+              } else if (ws && typeof ws === 'object') {
+                // Day-keyed: {monday:{name,blocks}, tuesday:{...}}
+                const dayOrder = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+                const sessArr = dayOrder
+                  .filter(d => ws[d] && !ws[d].rest)
+                  .map((d, i) => ({
+                    id: wk + '_' + (i+1),
+                    name: ws[d].name || d.charAt(0).toUpperCase() + d.slice(1),
+                    day: d.charAt(0).toUpperCase() + d.slice(1),
+                    notes: ws[d].notes || '',
+                    blocks: ws[d].blocks || [],
+                    rpe: ws[d].rpe || '-',
+                  }));
+                if (sessArr.length) SESSIONS[parseInt(wk)] = sessArr;
+              }
+            });
+          }
+          // Rebuild WEEKS from loaded sessions
+          const wkNums = Object.keys(SESSIONS).map(Number).sort((a,b) => a-b);
+          if (wkNums.length) {
+            WEEKS.splice(0, WEEKS.length, ...wkNums.map(n => ({
+              n, label: 'Week ' + n,
+              complete: n < (c.current_week || 1),
+              current: n === (c.current_week || 1),
+            })));
+            curWeek = c.current_week || wkNums[0];
+          }
+        }
+      }
+    }
+
+    // ── MESSAGES ────────────────────────────────────────
+    if (clientId) {
+      const msgs = await db.select('messages', { client_id: clientId });
+      if (msgs && msgs.length) {
+        msgs.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+        MESSAGES.push(...msgs.map(m => ({ ...m, delivered: true })));
+      }
+    }
+
+    // ── COMP / RACE TAB VISIBILITY ──────────────────────
+    const bnavComp = document.getElementById('bnav-comp');
+    if (bnavComp) {
+      const isHyrox   = c.program_type === 'hyrox';
+      const isPreComp = c.program_type === 'pre_comp';
+      bnavComp.style.display = (isHyrox || isPreComp) ? 'flex' : 'none';
+      if (isHyrox) {
+        const icon  = document.getElementById('bnav-comp-icon');
+        const label = document.getElementById('bnav-comp-label');
+        if (icon)  icon.textContent  = '🏅';
+        if (label) label.textContent = 'Race';
+        const vr = document.getElementById('view-race');
+        const vc = document.getElementById('view-comp');
+        if (vr) vr.style.display = 'block';
+        if (vc) vc.style.display = 'none';
+      } else if (isPreComp) {
+        const vr = document.getElementById('view-race');
+        const vc = document.getElementById('view-comp');
+        if (vr) vr.style.display = 'none';
+        if (vc) vc.style.display = 'block';
+      }
+    }
+
+    // ── RENDER ALL PANELS ───────────────────────────────
+    renderWeekTabs();
+    renderSessions(curWeek);
+    // Show correct progress view
+    if (c.program_type === 'hyrox') {
+      const hyroxDiv = document.getElementById('hyroxProgress');
+      const standardDiv = document.getElementById('standardProgress');
+      if (hyroxDiv) hyroxDiv.style.display = 'block';
+      if (standardDiv) standardDiv.style.display = 'none';
+      renderHyroxProgress();
+    } else {
+      renderProgress();
+    }
+    renderMessages();
+    scrollMsgsToBottom();
+
+    // Hyrox: show race countdown + program length badge
+    if (c.program_type === 'hyrox') {
+      const raceDate = q?.raw_data?.raceDate || null;
+      const programWeeks = c.total_weeks || 8;
+      renderRaceCountdown(raceDate, programWeeks);
+      const badge = document.getElementById('programLengthBadge');
+      if (badge) {
+        badge.style.display = 'inline-block';
+        badge.textContent = programWeeks + ' WEEKS ▾';
+        // Highlight active length button
+        document.querySelectorAll('.prog-len-btn').forEach(b => {
+          b.classList.toggle('prog-len-btn-active', b.textContent.includes(programWeeks));
+        });
+      }
+    }
+
+    return true;
+  } catch(err) {
+    console.error('loadClientFromSupabase error:', err);
+    return false;
+  }
+}
+
+let WEEKS = [];
+
+let SESSIONS = {};
+
+const EVENTS = [
+  {order:1,name:'Log Press',strategy:"Stay tight, big breath before the dip. Drive through the heels. Don't re-dip unless you have to.",opener:'100kg',second:'110kg',third:'117.5kg'},
+  {order:2,name:'Deadlift for Reps',strategy:"Hook grip all the way. Aim for 8+ reps. Drop after 6 if grip goes — don't grind.",opener:'200kg',second:null,third:null,reps:'8+ reps'},
+  {order:3,name:'Farmers Carry',strategy:"60m in two runs. Fast first 30m, don't stop at the turn. Lock wrists from the start.",opener:'110kg/hand',second:null,third:null},
+  {order:4,name:'Atlas Stones',strategy:"Lap the stone properly every time. Don't rush — position beats speed on every stone.",opener:'100kg',second:'120kg',third:'140kg'},
+  {order:5,name:'Yoke Walk',strategy:"Short steps, fast feet. Eyes forward. If it starts to drift — short steps, don't fight it.",opener:'300kg',second:null,third:null},
+];
+
+let PROGRESS_DATA = [];
+
+let MESSAGES = [];
+
+let curWeek = 5;
+let openSessions = new Set();
+let doneSessions = new Set();
+let rpeSelections = {};
+let selectedSoreness = null;
+let selectedSQ = null;
+let selectedMood = null;
+let selectedStress = null;
+let selectedMotiv = null;
+let selectedRecFeel = null;
+let compNotes = [];
+let nutritionHistory = [];
+
+// ── INIT ──────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
+  const email = getClientEmail();
+  if (email) {
+    document.getElementById('navName').textContent = 'Loading...';
+    await loadClientFromSupabase(email);
+  }
+
+  // Update UI with loaded/default data
+  document.getElementById('navName').textContent = CLIENT.short;
+  document.getElementById('navAvatar').textContent = CLIENT.initials;
+  const weekLabel = CLIENT.type === 'pre_comp' ? 'PRE-COMP' : 'GET STRONG';
+  document.getElementById('navWeek').textContent = `${weekLabel} · WEEK ${CLIENT.week}/${CLIENT.totalWeeks}`;
+  document.getElementById('profName').textContent = CLIENT.name || '—';
+  const _s = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+  _s('profAge',    CLIENT.age ? CLIENT.age + ' yrs' : null);
+  _s('profHeight', CLIENT.height ? CLIENT.height + 'cm' : null);
+  _s('profWeight', CLIENT.weight ? CLIENT.weight + 'kg' : null);
+  _s('profLocation', CLIENT.location);
+  _s('profProgram', (CLIENT.program || '') + (CLIENT.week ? ' · Wk ' + CLIENT.week + '/' + (CLIENT.totalWeeks||6) : ''));
+  _s('profGym', CLIENT.gymType === 'commercial' ? '🏋️ Commercial gym' : CLIENT.gymType === 'home' ? '🏠 Home gym' : CLIENT.gymType === 'strongman' ? '🪨 Strongman gym' : CLIENT.gymType);
+  _s('profDays', CLIENT.trainingDays ? CLIENT.trainingDays + ' days/week' : null);
+  _s('profSession', CLIENT.sessionLength ? CLIENT.sessionLength + ' min' : null);
+  _s('profTrainingAge', CLIENT.trainingAge);
+
+  // Nav name
+  const navNameEl = document.getElementById('navName');
+  if (navNameEl) navNameEl.textContent = CLIENT.short || CLIENT.name || '—';
+
+  // Comp card - show for pre-comp only, hide for others
+  const compCard = document.getElementById('profCompCard');
+  if (compCard) compCard.style.display = CLIENT.type === 'pre_comp' ? 'block' : 'none';
+  _s('profCompName', CLIENT.compName);
+  _s('profCompDate', CLIENT.compDate);
+  _s('profWeightClass', CLIENT.weightClass);
+  _s('profCompLevel', CLIENT.compLevel);
+
+  // Comp/Race nav tab
+  const bnavComp = document.getElementById('bnav-comp');
+  if (bnavComp) {
+    if (CLIENT.type === 'hyrox') {
+      bnavComp.style.display = 'flex';
+      const icon = document.getElementById('bnav-comp-icon');
+      const label = document.getElementById('bnav-comp-label');
+      if (icon) icon.textContent = '🏅';
+      if (label) label.textContent = 'Race';
+    } else if (CLIENT.type === 'pre_comp') {
+      bnavComp.style.display = 'flex';
+    } else {
+      bnavComp.style.display = 'none';
+    }
+  }
+
+  renderWeekTabs();
+  renderSessions(curWeek);
+  renderProgress();
+  renderEvents();
+  renderMessages();
+  scrollMsgsToBottom();
+});
+
+// ── TAB SWITCHING ─────────────────────────────────────────────
+function switchTab(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+id)?.classList.add('active');
+  el?.classList.add('active');
+  if (id !== 'messages') document.getElementById('scrollArea').scrollTop = 0;
+  const msgInput = document.getElementById('msgInputArea');
+  if (msgInput) msgInput.classList.toggle('visible', id === 'messages');
+  if (id === 'messages') {
+    renderMessages();
+    scrollMsgsToBottom();
+
+    // Hyrox: show race countdown + program length badge
+    if (c.program_type === 'hyrox') {
+      const raceDate = q?.raw_data?.raceDate || null;
+      const programWeeks = c.total_weeks || 8;
+      renderRaceCountdown(raceDate, programWeeks);
+      const badge = document.getElementById('programLengthBadge');
+      if (badge) {
+        badge.style.display = 'inline-block';
+        badge.textContent = programWeeks + ' WEEKS ▾';
+        // Highlight active length button
+        document.querySelectorAll('.prog-len-btn').forEach(b => {
+          b.classList.toggle('prog-len-btn-active', b.textContent.includes(programWeeks));
+        });
+      }
+    }
+  }
+}
+
+// ── WEEK TABS ─────────────────────────────────────────────────
+function renderWeekTabs() {
+  const container = document.getElementById('weekTabs');
+  if (!container) return;
+  if (!WEEKS || !WEEKS.length) {
+    container.innerHTML = '';
+    return;
+  }
+  container.innerHTML = WEEKS.map(w => `
+    <button class="week-tab${w.current?' active':''}${w.complete?' done':''}" onclick="switchWeek(${w.n})">
+      ${w.label}${w.complete?' ✓':''}
+    </button>`).join('');
+}
+
+function selectWeek(n, el) {
+  curWeek = n;
+  document.querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderSessions(n);
+}
+
+// ── SESSIONS ──────────────────────────────────────────────────
+function renderSessions(week) {
+  const container = document.getElementById('sessionList');
+  const sessions = SESSIONS[week] || [];
+  if (!sessions.length) {
+    container.innerHTML = '<div class="card" style="text-align:center;padding:32px;color:var(--muted)">Program for this week coming soon.</div>';
+    return;
+  }
+  container.innerHTML = sessions.map(s => {
+    const done = doneSessions.has(s.id);
+    return `
+    <div class="session-card">
+      <div class="session-head" onclick="toggleSession('${s.id}')">
+        <div>
+          <div class="session-name">${s.name}</div>
+          <div class="session-meta">${s.day} · Target RPE ${s.rpe && s.rpe !== "undefined" ? s.rpe : "-"}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="session-badge ${done?'badge-done':'badge-today'}">${done?'✓ Done':'Today'}</span>
+          <span style="color:var(--muted);font-size:14px" id="arrow-${s.id}">▼</span>
+        </div>
+      </div>
+      <div class="session-body" id="body-${s.id}">
+        ${s.blocks.map(b => renderBlock(b, s.id)).join('')}
+        ${!done ? renderRPELogger(s) : '<div style="text-align:center;padding:14px;color:var(--green);font-weight:600;font-size:14px">✓ Session logged — Wade has your feedback</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBlock(b, sid) {
+  const isWarmup = (b.type === 'warmup') || (b.name || '').toLowerCase().includes('warm');
+  const coachingNote = b.coachingNote || (isWarmup ? 'Spend 5–10 minutes total. Keep movements controlled, not bouncy. Gradually increase range of motion — don\'t force a cold muscle into a deep stretch right away.' : '');
+  return `
+  <div style="margin-bottom:14px">
+    ${coachingNote ? `<div style="background:#fef3d8;border:1px solid rgba(122,80,16,0.15);border-radius:6px;padding:9px 12px;margin-bottom:8px;display:flex;gap:8px;align-items:flex-start"><div style="font-size:14px;flex-shrink:0">🌡️</div><div style="font-size:12px;color:#7a5010;line-height:1.6">${coachingNote}</div></div>` : ''}
+    <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px">
+      ${b.name} <span style="font-weight:400;color:rgba(107,101,96,0.6)">· Rest ${b.rest}s</span>
+    </div>
+    <table class="ex-table">
+      <thead><tr>
+        <th>Exercise</th><th style="text-align:center">Sets</th>
+        <th style="text-align:center">Reps</th><th style="text-align:center">Wt</th>
+        <th style="text-align:center">RPE</th><th style="text-align:center">📹</th>
+        <th style="text-align:center">✓</th>
+      </tr></thead>
+      <tbody>
+        ${b.exercises.map((e,i) => {
+          const uid = `${sid}_${b.name}_${i}`.replace(/\s/g,'_');
+          return `<tr>
+            <td><div class="ex-name">${e.name}</div>${e.notes?`<div class="ex-detail">${e.notes}</div>`:''}</td>
+            <td class="ex-metric">${e.sets}</td>
+            <td class="ex-metric">${e.reps}</td>
+            <td class="ex-metric">${e.weight>0?e.weight+'kg':'BW'}</td>
+            <td class="ex-metric"><span class="rpe-pill r${Math.floor(e.rpe)}">${e.rpe}</span></td>
+            <td style="text-align:center">
+              <label class="clip-btn" title="Upload clip for ${e.name}">
+                <input type="file" accept="video/*,image/*" style="display:none" onchange="handleClip(this,'${e.name}','${uid}')">📹
+              </label>
+              <div id="clip_${uid}" style="font-size:9px;color:var(--green);display:none">✓</div>
+            </td>
+            <td style="text-align:center"><input type="checkbox" class="ex-check" id="chk_${uid}"></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function renderRPELogger(s) {
+  return ''; // RPE feedback not required for training sessions
+}
+
+function toggleSession(id) {
+  const body = document.getElementById('body-'+id);
+  const arrow = document.getElementById('arrow-'+id);
+  const open = body.classList.toggle('open');
+  if(arrow) arrow.textContent = open ? '▲' : '▼';
+}
+
+function selectRPE(sid, exName, rpe, el) {
+  const key = `${sid}_${exName}`;
+  rpeSelections[key] = rpe;
+  // Clear other buttons for this exercise
+  [6,6.5,7,7.5,8,8.5,9,9.5,10].forEach(r => {
+    const btn = document.getElementById(`rpe_${sid}_${exName.replace(/\s/g,'_')}_${r}`);
+    if(btn) btn.classList.toggle('sel', r === rpe);
+  });
+}
+
+async function logSession(sid) {
+  doneSessions.add(sid);
+  renderSessions(curWeek);
+  showToast('Session logged — Wade has been notified ✓');
+
+  // Save to Supabase
+  if (clientId) {
+    try {
+      await db.insert('session_logs', {
+        client_id: clientId,
+        week_number: curWeek,
+        session_id: sid,
+        session_name: SESSIONS[curWeek]?.find(s=>s.id===sid)?.name || sid,
+        completed_at: new Date().toISOString(),
+        rpe_selections: rpeSelections,
+      });
+    } catch(err) { console.error('Session log save error:', err); }
+  }
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────
+function renderProgress() {
+  const container = document.getElementById('progressCharts');
+  if (!container) return;
+  if (!PROGRESS_DATA || !PROGRESS_DATA.length) {
+    container.innerHTML = `<div class="card" style="text-align:center;padding:32px 20px">
+      <div style="font-size:28px;margin-bottom:10px">📊</div>
+      <div style="font-size:15px;font-weight:700;color:var(--iron);margin-bottom:8px">Progress tracking starts here</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7">Complete sessions and log your lifts to see your progress charts here. Your RPE testing numbers will set the baseline.</div>
+    </div>`;
+    return;
+  }
+  container.innerHTML = PROGRESS_DATA.map(lift => {
+    if (!lift.data || !lift.data.length) return '';
+    const latest = lift.data[lift.data.length-1].w;
+    const first = lift.data[0].w;
+    const gain = latest - first;
+    const min = Math.min(...lift.data.map(d=>d.w)) - 5;
+    const max = Math.max(...lift.data.map(d=>d.w));
+    const range = max - min || 1;
+    const bars = lift.data.map(d => {
+      const h = Math.round(((d.w - min) / range) * 60) + 10;
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1">
+        <div style="font-size:10px;font-weight:700;color:var(--iron)">${d.w}</div>
+        <div style="width:100%;height:${h}px;background:var(--rust);border-radius:3px 3px 0 0;min-height:8px"></div>
+        <div style="font-size:9px;color:var(--muted)">${d.week}</div>
+      </div>`;
+    }).join('');
+    return `<div class="card" style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:700">${lift.name}</div>
+        <div style="font-size:13px;color:${gain>=0?'var(--green)':'#c03020'};font-weight:600">${gain>=0?'+':''}${gain}kg</div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:flex-end;height:90px">${bars}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── EVENTS ────────────────────────────────────────────────────
+function renderEvents() {
+  const container = document.getElementById('eventsList');
+  container.innerHTML = EVENTS.map(ev => `
+    <div class="event-card">
+      <div class="event-head">
+        <div class="event-num">${ev.order}</div>
+        <div class="event-name">${ev.name}</div>
+      </div>
+      <div class="event-body">
+        <div class="event-strategy">"${ev.strategy}"</div>
+        <div class="attempt-row">
+          ${ev.opener?`<div class="attempt-card"><div class="attempt-label">Opener</div><div class="attempt-val">${ev.opener}</div></div>`:''}
+          ${ev.second?`<div class="attempt-card"><div class="attempt-label">Second</div><div class="attempt-val">${ev.second}</div></div>`:''}
+          ${ev.third?`<div class="attempt-card third"><div class="attempt-label">Third</div><div class="attempt-val">${ev.third}</div></div>`:''}
+          ${ev.reps?`<div class="attempt-card"><div class="attempt-label">Target</div><div class="attempt-val">${ev.reps}</div></div>`:''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── MESSAGES ──────────────────────────────────────────────────
+function renderMessages() {
+  const thread = document.getElementById('msgThread');
+  if (!thread) return;
+  if (!MESSAGES.length) {
+    thread.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--muted)">
+      <div style="font-size:32px;margin-bottom:12px">💬</div>
+      <div style="font-size:14px;font-weight:700;color:var(--iron);margin-bottom:6px">No messages yet</div>
+      <div style="font-size:13px">Send Wade a message below — ask anything about your program.</div>
+    </div>`;
+    return;
+  }
+  thread.innerHTML = MESSAGES.map(m => {
+    const isCoach   = m.sender === 'coach' || m.from_role === 'wade';
+    const text      = m.message_text || m.content || m.text || '';
+    const isVoice   = text.startsWith('data:audio') || m.message_type === 'voice';
+    const timeStr   = m.created_at ? new Date(m.created_at).toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}) : 'Just now';
+    const readByCoach = m.read_by_coach || m.read;
+    const tick = isCoach ? '' : readByCoach
+      ? '<span style="color:var(--rust);font-size:12px;margin-left:4px">✓✓</span>'
+      : m.delivered !== false
+        ? '<span style="color:var(--muted);font-size:12px;margin-left:4px">✓</span>'
+        : '<span style="color:rgba(107,101,96,0.3);font-size:12px;margin-left:4px">○</span>';
+
+    if (isCoach) {
+      return `<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:14px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">WADE</div>
+        ${isVoice
+          ? `<div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px">
+               <div style="font-size:11px;font-weight:700;color:var(--rust);margin-bottom:6px">🎤 Voice note</div>
+               <audio controls src="${text}" style="width:200px;height:32px"></audio>
+             </div>`
+          : `<div style="background:var(--white);border:1px solid var(--border);border-radius:12px 12px 12px 2px;padding:10px 14px;max-width:82%;font-size:14px;line-height:1.5;color:var(--iron)">${text}</div>`
+        }
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">${timeStr}</div>
+      </div>`;
+    } else {
+      return `<div style="display:flex;flex-direction:column;align-items:flex-end;margin-bottom:14px">
+        <div style="background:var(--iron);border-radius:12px 12px 2px 12px;padding:10px 14px;max-width:82%;font-size:14px;line-height:1.5;color:#fff">${text}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;display:flex;align-items:center">${timeStr}${tick}</div>
+      </div>`;
+    }
+  }).join('');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Optimistic UI
+  const tempId = 'tmp_' + Date.now();
+  MESSAGES.push({ id: tempId, sender: 'client', message_text: text, created_at: new Date().toISOString(), delivered: false });
+  renderMessages();
+  scrollMsgsToBottom();
+
+  if (clientId) {
+    try {
+      const result = await db.insert('messages', {
+        client_id: clientId,
+        sender: 'client',
+        message_text: text,
+      });
+      const msg = MESSAGES.find(m => m.id === tempId);
+      if (msg) { msg.delivered = true; if (result?.[0]?.id) msg.id = result[0].id; }
+      renderMessages();
+    } catch(err) {
+      console.error('sendMessage error:', err);
+      const msg = MESSAGES.find(m => m.id === tempId);
+      if (msg) msg.delivered = true;
+      renderMessages();
+    }
+  } else {
+    const msg = MESSAGES.find(m => m.id === tempId);
+    if (msg) msg.delivered = true;
+    renderMessages();
+  }
+}
+
+function scrollMsgsToBottom() {
+  const t = document.getElementById('msgThread');
+  if (t) setTimeout(() => { t.scrollTop = t.scrollHeight; }, 50);
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── COMP NOTES ────────────────────────────────────────────────
+function sendCompNote() {
+  const text = document.getElementById('compNoteInput').value.trim();
+  if (!text) return;
+  compNotes.unshift({text, date: new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short'})});
+  document.getElementById('compNoteInput').value = '';
+  renderCompNotes();
+  MESSAGES.push({from:'client',text:'🏆 Comp question: '+text,time:'Just now'});
+  showToast('Question sent to Wade ✓ — check messages for reply');
+}
+
+function renderCompNotes() {
+  const el = document.getElementById('compNotesList');
+  el.innerHTML = compNotes.map(n=>`<div class="log-item" style="border-left:3px solid var(--border)"><div class="log-item-body">${n.text}</div><div class="log-item-date" style="margin-top:4px">${n.date}</div></div>`).join('');
+}
+
+// ── SORENESS ──────────────────────────────────────────────────
+function setSoreness(n) {
+  selectedSoreness = n;
+  for(let i=1;i<=10;i++){
+    const btn = document.getElementById('sor-'+i);
+    if(btn){btn.style.background=i<=n?'var(--rust)':'var(--chalk)';btn.style.color=i<=n?'var(--white)':'var(--muted)';btn.style.borderColor=i<=n?'var(--rust)':'var(--border)';}
+  }
+}
+
+function setSQ(q) {
+  selectedSQ = q;
+  ['poor','ok','good','great'].forEach(k => {
+    const b = document.getElementById('sq-' + k);
+    if (b) {
+      if (k === q) b.classList.add('sel');
+      else b.classList.remove('sel');
+    }
+  });
+}
+
+async function saveCheckIn() {
+  const soreness = selectedSoreness || null;
+  const sleep    = parseFloat(document.getElementById('sleepSlider')?.value) || null;
+  const sleepQ   = selectedSQ || null;
+  const hrv      = parseFloat(document.getElementById('hrvInput')?.value) || null;
+  const cal      = parseFloat(document.getElementById('nutCal')?.value) || null;
+  const water    = parseFloat(document.getElementById('nutWater')?.value) || null;
+  const mood     = selectedMood || null;
+  const notes    = document.getElementById('checkInNotes')?.value?.trim() || null;
+
+  // Add to history list immediately
+  const history = document.getElementById('checkInHistory');
+  if (history) {
+    const today = new Date().toLocaleDateString('en-AU', {weekday:'short',day:'numeric',month:'short'});
+    const parts = [];
+    if (soreness) parts.push('Soreness: ' + soreness + '/10');
+    if (sleep) parts.push('Sleep: ' + sleep + 'hrs' + (sleepQ ? ' (' + sleepQ + ')' : ''));
+    if (hrv) parts.push('HRV: ' + hrv + 'ms');
+    if (mood) parts.push('Mood: ' + mood);
+    if (notes) parts.push(notes);
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+    item.innerHTML = '<strong style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">' + today + '</strong><br>' + (parts.length ? parts.join(' · ') : 'Logged');
+    history.insertBefore(item, history.firstChild);
+  }
+
+  try {
+    if (clientId) {
+      await db.insert('client_health', {
+        client_id: clientId,
+        date: new Date().toISOString().split('T')[0],
+        record_type: 'daily_checkin',
+        data: { soreness, sleep_hours: sleep, sleep_quality: sleepQ, hrv, calories: cal, water_litres: water, mood, notes },
+      });
+    }
+  } catch(e) { console.error('saveCheckIn:', e); }
+
+  const successEl = document.getElementById('checkInSuccess');
+  if (successEl) { successEl.style.display = 'block'; setTimeout(() => successEl.style.display = 'none', 2000); }
+  showToast('Check-in logged ✓');
+}
+
+// ── NUTRITION ─────────────────────────────────────────────────
+function updateMacroBar() {
+  const p=parseFloat(document.getElementById('nutP').value)||0;
+  const c=parseFloat(document.getElementById('nutC').value)||0;
+  const f=parseFloat(document.getElementById('nutF').value)||0;
+  const t=p+c+f;
+  if(t>0){
+    document.getElementById('macroBarWrap').style.display='block';
+    document.getElementById('mbP').style.width=(p/t*100)+'%';
+    document.getElementById('mbC').style.width=(c/t*100)+'%';
+    document.getElementById('mbF').style.width=(f/t*100)+'%';
+  }
+}
+
+function saveNutrition() {
+  const cal=document.getElementById('nutCal').value;
+  const water=document.getElementById('nutWater').value;
+  if(!cal&&!water){showToast('Enter at least calories or water');return;}
+  nutritionHistory.unshift({
+    date:new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short'}),
+    cal,water,
+    p:document.getElementById('nutP').value,
+    c:document.getElementById('nutC').value,
+    f:document.getElementById('nutF').value
+  });
+  renderNutritionHistory();
+  showSuccess('nutritionSuccess');
+  showToast('Nutrition logged ✓');
+}
+
+function renderNutritionHistory() {
+  const el=document.getElementById('nutritionHistory');
+  if(!nutritionHistory.length)return;
+  el.innerHTML='<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Recent</div>'+
+    nutritionHistory.slice(0,3).map(n=>`
+    <div style="padding:8px 0;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+      <span style="font-size:11px;color:var(--muted);min-width:60px">${n.date}</span>
+      ${n.cal?`<span class="tag-pill" style="font-weight:600">${n.cal}kcal</span>`:''}
+      ${n.water?`<span class="tag-pill">💧${n.water}L</span>`:''}
+      ${n.p?`<span class="tag-pill" style="color:#2c7a4b">P:${n.p}g</span>`:''}
+      ${n.c?`<span class="tag-pill" style="color:#7a5010">C:${n.c}g</span>`:''}
+      ${n.f?`<span class="tag-pill" style="color:#8c3020">F:${n.f}g</span>`:''}
+    </div>`).join('');
+}
+
+// ── RECOVERY ──────────────────────────────────────────────────
+function setRecFeel(feel) {
+  selectedRecFeel = feel;
+  document.getElementById('rf-rough')?.classList.toggle('sel', feel === '😖 Rough');
+  document.getElementById('rf-good')?.classList.toggle('sel',  feel === '👍 Good');
+  document.getElementById('rf-great')?.classList.toggle('sel', feel === '🔥 Great');
+}
+
+async function saveRecovery() {
+  const type    = document.getElementById('recType')?.value || '';
+  const area    = document.getElementById('recArea')?.value?.trim() || '';
+  const feel    = selectedRecFeel || '';
+  const notes   = document.getElementById('recNotes')?.value?.trim() || '';
+  const dur     = document.getElementById('recDuration')?.value || '';
+
+  try {
+    if (clientId) {
+      await db.insert('client_health', {
+        client_id:   clientId,
+        date:        new Date().toISOString().split('T')[0],
+        record_type: 'recovery_session',
+        data: { type, area, feel, notes, duration: dur },
+      });
+    }
+  } catch(e) { console.error('saveRecovery:', e); }
+
+  hideForm('recoveryForm');
+  selectedRecFeel = null;
+  document.getElementById('rf-rough')?.classList.remove('sel');
+  document.getElementById('rf-good')?.classList.remove('sel');
+  document.getElementById('rf-great')?.classList.remove('sel');
+  showToast('Recovery session logged ✓');
+}
+
+// ── MENTAL ────────────────────────────────────────────────────
+function setMood(emoji,key){selectedMood={emoji,key};document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));document.getElementById('mood-'+key).classList.add('sel');}
+function setStress(l){selectedStress=l;document.querySelectorAll('.stress-btn').forEach(b=>b.classList.toggle('sel',b.id==='stress-'+l.replace(' ','')));}
+function setMotiv(l){selectedMotiv=l;document.querySelectorAll('.motiv-btn').forEach(b=>b.classList.toggle('sel',b.id==='motiv-'+l));}
+function saveMental(){hideForm('mentalForm');showToast('Entry saved ✓');}
+
+// ── INJURY / SUPPS / PRACT ────────────────────────────────────
+function saveInjury() {
+  const area  = document.getElementById('injArea')?.value?.trim() || '';
+  const desc  = document.getElementById('injDesc')?.value?.trim() || '';
+  if (!area) { showToast('Enter a body area'); return; }
+
+  const list = document.getElementById('injuriesList');
+  if (list) {
+    if (list.textContent.trim() === '—') list.innerHTML = '';
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+    item.innerHTML = '<strong>' + area + '</strong>' + (desc ? '<br><span style="color:var(--muted)">' + desc + '</span>' : '');
+    list.appendChild(item);
+  }
+
+  if (clientId) {
+    db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'injury', data: { area, desc } }).catch(e => console.error('saveInjury:', e));
+  }
+
+  ['injArea','injDesc'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  hideForm('injuryForm');
+  showToast('Injury logged ✓');
+}
+async function saveSupp() {
+  const name   = document.getElementById('suppName')?.value?.trim() || '';
+  const dose   = document.getElementById('suppDose')?.value?.trim() || '';
+  const timing = document.getElementById('suppTiming')?.value?.trim() || '';
+  const notes  = document.getElementById('suppNotes')?.value?.trim() || '';
+  try {
+    if (clientId) await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'supplement', data: { name, dose, timing, notes } });
+  } catch(e) { console.error('saveSupp:', e); }
+  hideForm('suppForm');
+  showToast('Supplement saved ✓');
+}
+async function savePract() {
+  const noteType = document.getElementById('practType')?.value?.trim() || 'Practitioner note';
+  const notes    = document.getElementById('practNotes')?.value?.trim() || '';
+  const from     = document.getElementById('practFrom')?.value?.trim() || '';
+  if (!notes) { hideForm('practForm'); return; }
+  try {
+    if (clientId) {
+      // Save as message so Wade sees it in admin CRM
+      await db.insert('messages', { client_id: clientId, sender: 'client', message_text: '📋 ' + noteType + (from?' (from '+from+')':'') + ': ' + notes });
+      // Also log to client_health
+      await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'practitioner_note', data: { type: noteType, from, notes } });
+    }
+  } catch(e) { console.error('savePract:', e); }
+  hideForm('practForm');
+  showToast('Note sent to Wade ✓');
+}
+
+// ── CLIP UPLOAD ───────────────────────────────────────────────
+function handleClip(input, exName, uid) {
+  const f=input.files[0];if(!f)return;
+  const el=document.getElementById('clip_'+uid);
+  if(el)el.style.display='block';
+  showToast(`Clip for "${exName}" sent to Wade ✓`);
+}
+
+// ── VOICE NOTE ────────────────────────────────────────────────
+let mediaRecorder=null,audioChunks=[],isRecording=false,recInterval=null,recSecs=0;
+async function toggleVoice(){isRecording?stopVoice():startVoice();}
+async function startVoice(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream);audioChunks=[];recSecs=0;
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=()=>{const blob=new Blob(audioChunks,{type:'audio/webm'});stream.getTracks().forEach(t=>t.stop());sendVoiceNote(blob,recSecs);};
+    mediaRecorder.start();isRecording=true;
+    const btn=document.getElementById('voiceBtn');btn.style.background='#fce8e8';btn.style.border='1px solid #c03020';btn.textContent='⏹';
+    recInterval=setInterval(()=>{recSecs++;if(recSecs>=120)stopVoice();},1000);
+  }catch(e){showToast('Mic access denied');}
+}
+function stopVoice(){if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();isRecording=false;clearInterval(recInterval);const btn=document.getElementById('voiceBtn');btn.style.background='var(--white)';btn.style.border='1px solid var(--border)';btn.textContent='🎤';}
+function sendVoiceNote(blob,secs){
+  const m=Math.floor(secs/60),s=secs%60;
+  const url=URL.createObjectURL(blob);
+  MESSAGES.push({from:'client',text:`<audio controls src="${url}" style="width:180px;height:32px"></audio>`,time:'Just now'});
+  renderMessages();showToast('Voice note sent ✓');
+}
+
+// ── COLLAPSIBLE ───────────────────────────────────────────────
+function toggleCollapse(id, header) {
+  const body=document.getElementById(id);
+  const arrow=header.querySelector('.collapsible-arrow');
+  body.classList.toggle('open');
+  if(arrow)arrow.classList.toggle('open',body.classList.contains('open'));
+}
+
+// ── FORMS ─────────────────────────────────────────────────────
+function showForm(id){document.getElementById(id).style.display='block';}
+function hideForm(id){document.getElementById(id).style.display='none';}
+function showSuccess(id){const el=document.getElementById(id);el.style.display='block';setTimeout(()=>el.style.display='none',3000);}
+
+// ── TOAST ─────────────────────────────────────────────────────
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ── SORENESS ROW (template literal issue fix) ─────────────────
+document.getElementById('sorenessRow').innerHTML = Array.from({length:10},(_,i)=>`<button onclick="setSoreness(${i+1})" id="sor-${i+1}" style="flex:1;height:30px;border-radius:4px;border:1px solid var(--border);background:var(--chalk);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 0.15s">${i+1}</button>`).join('');
+
+// ── PROFILE PHOTO ──────────────────────────────────────────────
+function triggerPhotoUpload() {
+  document.getElementById('profilePhotoInput')?.click();
+}
+
+async function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    const avatar = document.getElementById('navAvatar');
+    if (avatar) {
+      avatar.style.backgroundImage = 'url(' + dataUrl + ')';
+      avatar.style.backgroundSize = 'cover';
+      avatar.style.backgroundPosition = 'center';
+      avatar.textContent = '';
+    }
+  };
+  reader.readAsDataURL(file);
+  showToast('Profile photo updated ✓');
+}
+
+// ── PROGRESS PHOTOS ────────────────────────────────────────────
+const photoFiles = {};
+
+function previewPhoto(side, input) {
+  const file = input.files[0];
+  if (!file) return;
+  photoFiles[side] = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const el = document.getElementById('photo' + side.charAt(0).toUpperCase() + side.slice(1) + 'Preview');
+    if (el) {
+      el.style.backgroundImage = 'url(' + e.target.result + ')';
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.innerHTML = '';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function savePhotos() {
+  if (!Object.keys(photoFiles).length) { showToast('Select at least one photo'); return; }
+  const toBase64 = f => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+  const data = {};
+  for (const [side, file] of Object.entries(photoFiles)) {
+    data[side] = await toBase64(file);
+  }
+  try {
+    if (clientId) {
+      await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'progress_photos', data });
+      showToast('Photos sent to Wade ✓');
+    }
+  } catch(e) { console.error('savePhotos:', e); showToast('Photos saved locally'); }
+}
+
+// ── BODY MEASUREMENTS ──────────────────────────────────────────
+async function saveMeasurements() {
+  const weight  = document.getElementById('measWeight')?.value;
+  const bodyFat = document.getElementById('measBodyFat')?.value;
+  const waist   = document.getElementById('measWaist')?.value;
+  const chest   = document.getElementById('measChest')?.value;
+  if (!weight && !waist) { showToast('Enter at least one measurement'); return; }
+  try {
+    if (clientId) {
+      await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'body_measurements', data: { weight, body_fat_pct: bodyFat, waist_cm: waist, chest_cm: chest } });
+      showToast('Measurements saved ✓');
+    }
+  } catch(e) { console.error('saveMeasurements:', e); }
+}
+
+
+
+// ── PROGRAM LENGTH + RACE COUNTDOWN ──────────────────────────
+function showProgramLengthOptions() {
+  const el = document.getElementById('programLengthOptions');
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function setProgramLength(weeks) {
+  // Update active button
+  document.querySelectorAll('.prog-len-btn').forEach(b => {
+    b.classList.toggle('prog-len-btn-active', b.textContent.includes(weeks));
+  });
+  const badge = document.getElementById('programLengthBadge');
+  if (badge) badge.textContent = weeks + ' WEEKS ▾';
+
+  // Notify Wade via message
+  if (clientId) {
+    try {
+      await db.insert('messages', {
+        client_id: clientId,
+        sender: 'client',
+        message_text: '⚙️ Program length update request: ' + weeks + ' weeks (race date adjustment)',
+      });
+    } catch(e) { console.error('setProgramLength:', e); }
+  }
+
+  document.getElementById('programLengthOptions').style.display = 'none';
+  showToast('Request sent to Wade — ' + weeks + '-week program ✓');
+}
+
+function renderRaceCountdown(raceDate, programWeeks) {
+  const countdown = document.getElementById('raceCountdown');
+  if (!countdown || !raceDate) return;
+  const race = new Date(raceDate);
+  const today = new Date();
+  const daysToRace = Math.ceil((race - today) / (1000 * 60 * 60 * 24));
+  const weeksToRace = Math.ceil(daysToRace / 7);
+  if (daysToRace <= 0) return;
+
+  const raceName = CLIENT?.raceName || 'Race day';
+  countdown.style.display = 'block';
+  const tightLabel = weeksToRace <= programWeeks ? '⚠️ Tight timeline' : 'On track 🏅';
+  const tightColor = weeksToRace <= programWeeks ? '#ff9966' : 'var(--rust)';
+  const raceDateStr = race.toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'});
+  countdown.innerHTML =
+    '<div style="background:var(--iron);border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between">' +
+      '<div>' +
+        '<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px">Race countdown</div>' +
+        '<div style="font-family:var(--font-d);font-size:22px;color:#fff;letter-spacing:1px">' + daysToRace + ' days to go</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px">' + raceDateStr + '</div>' +
+      '</div>' +
+      '<div style="text-align:right">' +
+        '<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.5);margin-bottom:2px">Program</div>' +
+        '<div style="font-family:var(--font-d);font-size:22px;color:' + tightColor + '">' + programWeeks + ' weeks</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px">' + tightLabel + '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+
+// ── HYROX PROGRESS ───────────────────────────────────────────
+
+function timeToSeconds(t) {
+  if (!t) return null;
+  const parts = t.toString().replace(/[^0-9:]/g,'').split(':');
+  if (parts.length === 2) return parseInt(parts[0]) * 60 + parseFloat(parts[1]);
+  if (parts.length === 3) return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+  return parseFloat(t) || null;
+}
+
+function secondsToTime(s) {
+  if (!s) return '—';
+  const h = Math.floor(s/3600);
+  const m = Math.floor((s%3600)/60);
+  const sec = Math.round(s%60);
+  if (h > 0) return h + ':' + String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  return m + ':' + String(sec).padStart(2,'0');
+}
+
+function renderMiniBarChart(container, data, label, formatter, color) {
+  // data = [{label, value}] where value is seconds or number
+  if (!data || !data.length) {
+    container.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px">No data yet — log a RoxSim session to start tracking</div>';
+    return;
+  }
+  const values = data.map(d => d.value).filter(v => v != null && v > 0);
+  if (!values.length) { container.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:12px">No data yet</div>'; return; }
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const latest = values[values.length-1];
+  const first = values[0];
+  const improved = latest < first; // lower is better for times
+
+  container.innerHTML = '<div style="display:flex;gap:6px;align-items:flex-end;height:80px">' +
+    data.map(d => {
+      const v = d.value;
+      if (!v) return '<div style="flex:1"></div>';
+      const h = Math.round(((v - min) / range) * 56) + 16;
+      const isLatest = d === data[data.length-1];
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">' +
+        '<div style="font-size:9px;font-weight:600;color:' + (isLatest?'var(--iron)':'var(--muted)') + '">' + (formatter ? formatter(v) : v) + '</div>' +
+        '<div style="width:100%;height:' + h + 'px;background:' + (isLatest?'var(--iron)':color||'var(--rust)') + ';border-radius:3px 3px 0 0;opacity:' + (isLatest?'1':'0.5') + '"></div>' +
+        '<div style="font-size:9px;color:var(--muted);white-space:nowrap">' + d.label + '</div>' +
+      '</div>';
+    }).join('') +
+  '</div>' +
+  (values.length > 1 ? '<div style="font-size:12px;margin-top:8px;color:' + (improved?'var(--green)':'#c03020') + ';font-weight:600">' +
+    (improved ? '↓ ' : '↑ ') + 'Latest: ' + (formatter ? formatter(latest) : latest) +
+    ' · Best: ' + (formatter ? formatter(min) : min) +
+  '</div>' : '');
+}
+
+async function renderHyroxProgress() {
+  if (!clientId) return;
+
+  // Load session logs
+  try {
+    const logs = await db.select('client_health', { client_id: clientId });
+    const roxSims = (logs || [])
+      .filter(l => l.record_type === 'hyrox_session_logged' || l.record_type === 'roxsim' || (l.record_type === 'recovery_session' && l.data?.sessionType === 'baby_hyrox'))
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    // Also check session_logs table
+    const sessionLogs = await db.select('session_logs', { client_id: clientId }) || [];
+    const hyroxSessionLogs = sessionLogs.filter(l =>
+      l.session_type === 'baby_hyrox' || l.session_type === 'roxsim' || l.session_type === 'full_hyrox_race'
+    ).sort((a,b) => new Date(a.session_date||a.created_at) - new Date(b.session_date||b.created_at));
+
+    const allSessions = [...roxSims.map(l => l.data), ...hyroxSessionLogs.map(l => l.raw_data)].filter(Boolean);
+
+    const sessionLabels = allSessions.map((s, i) => 'S' + (i+1));
+
+    // PBs
+    const pbContainer = document.getElementById('hyroxPBs');
+    const stations = [
+      {key:'ski_erg', label:'Ski Erg'},
+      {key:'sled_push', label:'Sled Push'},
+      {key:'burpee_broad_jump', label:'Burpee BJ'},
+      {key:'rowing', label:'Rowing'},
+      {key:'farmers_carry', label:'Farmers'},
+      {key:'sandbag_lunges', label:'Lunges'},
+      {key:'wall_balls', label:'Wall Balls'},
+    ];
+
+    if (pbContainer && allSessions.length) {
+      const pbs = {};
+      allSessions.forEach(s => {
+        // Running
+        if (s.runPace || s.run?.pace) {
+          const pace = s.runPace || s.run?.pace;
+          if (!pbs.run || pace < pbs.run) pbs.run = pace;
+        }
+        // Total time
+        if (s.totalTime) {
+          const secs = timeToSeconds(s.totalTime);
+          if (secs && (!pbs.total || secs < pbs.total)) pbs.total = secs;
+        }
+        // Stations
+        stations.forEach(st => {
+          const stData = s.stations?.[st.key] || s[st.key];
+          if (stData?.time) {
+            const secs = timeToSeconds(stData.time);
+            if (secs && (!pbs[st.key] || secs < pbs[st.key])) pbs[st.key] = secs;
+          }
+        });
+      });
+
+      const pbCards = [
+        pbs.total ? {label:'Best total', val: secondsToTime(pbs.total), icon:'🏅'} : null,
+        pbs.run   ? {label:'Best km pace', val: pbs.run, icon:'🏃'} : null,
+        ...stations.filter(s => pbs[s.key]).map(s => ({label:'Best ' + s.label, val: secondsToTime(pbs[s.key]), icon:'⏱'})),
+      ].filter(Boolean).slice(0, 6);
+
+      if (pbCards.length) {
+        pbContainer.innerHTML =
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:4px">' +
+          pbCards.map(pb =>
+            '<div style="background:var(--iron);border-radius:8px;padding:12px 10px;text-align:center">' +
+              '<div style="font-size:18px;margin-bottom:4px">' + pb.icon + '</div>' +
+              '<div style="font-family:var(--font-d);font-size:20px;color:var(--rust);letter-spacing:1px">' + pb.val + '</div>' +
+              '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:3px">' + pb.label + '</div>' +
+            '</div>'
+          ).join('') +
+          '</div>';
+      }
+    }
+
+    // RoxSim finish times
+    const roxSimData = allSessions.map((s, i) => ({
+      label: sessionLabels[i],
+      value: timeToSeconds(s.totalTime)
+    })).filter(d => d.value);
+
+    const roxSimEl = document.getElementById('roxSimChart');
+    if (roxSimEl) renderMiniBarChart(roxSimEl, roxSimData, 'Finish time', secondsToTime, 'var(--rust)');
+
+    // Running pace
+    const paceData = allSessions.map((s, i) => ({
+      label: sessionLabels[i],
+      value: timeToSeconds(s.runPace || s.run?.pace)
+    })).filter(d => d.value);
+
+    const paceEl = document.getElementById('runPaceChart');
+    if (paceEl) renderMiniBarChart(paceEl, paceData, 'Run pace', secondsToTime, '#1a56c4');
+
+    // Station times grid
+    const stEl = document.getElementById('stationTimesGrid');
+    if (stEl && allSessions.length) {
+      stEl.innerHTML = stations.map(st => {
+        const stData = allSessions.map((s, i) => ({
+          label: sessionLabels[i],
+          value: timeToSeconds(s.stations?.[st.key]?.time || s[st.key]?.time)
+        })).filter(d => d.value);
+
+        const bestSecs = stData.length ? Math.min(...stData.map(d=>d.value)) : null;
+        const latestSecs = stData.length ? stData[stData.length-1].value : null;
+        const improved = bestSecs && latestSecs && latestSecs <= bestSecs;
+
+        return '<div style="padding:12px 0;border-bottom:1px solid var(--border)">' +
+          '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">' +
+            '<div style="font-size:13px;font-weight:700">' + st.label + '</div>' +
+            '<div style="display:flex;gap:12px">' +
+              (latestSecs ? '<div style="font-size:12px;color:var(--muted)">Latest: <strong style="color:var(--iron)">' + secondsToTime(latestSecs) + '</strong></div>' : '') +
+              (bestSecs ? '<div style="font-size:12px;color:var(--muted)">Best: <strong style="color:var(--rust)">' + secondsToTime(bestSecs) + '</strong></div>' : '') +
+            '</div>' +
+          '</div>' +
+          (stData.length > 1 ? '<div style="display:flex;gap:4px;align-items:flex-end;height:40px">' +
+            stData.map(d => {
+              const maxV = Math.max(...stData.map(x=>x.value));
+              const minV = Math.min(...stData.map(x=>x.value));
+              const range = maxV - minV || 1;
+              const h = Math.round(((d.value - minV) / range) * 24) + 8;
+              const isBest = d.value === minV;
+              return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px">' +
+                '<div style="width:100%;height:' + h + 'px;background:' + (isBest?'var(--rust)':'var(--border)') + ';border-radius:2px 2px 0 0"></div>' +
+                '<div style="font-size:8px;color:var(--muted)">' + d.label + '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' : '<div style="font-size:12px;color:var(--muted)">Log more sessions to see trends</div>') +
+        '</div>';
+      }).join('');
+    } else if (stEl) {
+      stEl.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:16px">Log your first RoxSim to start tracking station times</div>';
+    }
+
+    // Session log table
+    const tableEl = document.getElementById('sessionLogTable');
+    if (tableEl && allSessions.length) {
+      tableEl.innerHTML =
+        '<div style="overflow-x:auto">' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12px">' +
+        '<thead><tr>' +
+        '<th style="text-align:left;padding:6px 4px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Session</th>' +
+        '<th style="padding:6px 4px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Total</th>' +
+        '<th style="padding:6px 4px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Pace</th>' +
+        '<th style="padding:6px 4px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)">Feeling</th>' +
+        '</tr></thead><tbody>' +
+        allSessions.map((s, i) => {
+          const date = s.sessionDate ? new Date(s.sessionDate).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : 'S'+(i+1);
+          return '<tr>' +
+            '<td style="padding:8px 4px;border-bottom:1px solid rgba(0,0,0,0.04)">' + date + '</td>' +
+            '<td style="padding:8px 4px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.04);font-weight:600">' + (s.totalTime || '—') + '</td>' +
+            '<td style="padding:8px 4px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.04)">' + (s.runPace || s.run?.pace || '—') + '</td>' +
+            '<td style="padding:8px 4px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.04)">' + (s.overallFeeling || '—') + '</td>' +
+          '</tr>';
+        }).join('') +
+        '</tbody></table></div>';
+    } else if (tableEl) {
+      tableEl.innerHTML = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:12px">No sessions logged yet</div>';
+    }
+
+  } catch(e) {
+    console.error('renderHyroxProgress:', e);
+  }
+}
+
+// ── LOAD HEALTH HISTORY ──────────────────────────────────────
+async function loadHealthHistory() {
+  if (!clientId) return;
+  try {
+    const records = await db.select('client_health', { client_id: clientId });
+    if (!records || !records.length) return;
+
+    records.sort((a,b) => new Date(a.created_at||a.date) - new Date(b.created_at||b.date));
+
+    records.forEach(r => {
+      const d = r.data || {};
+      const dateStr = r.date ? new Date(r.date).toLocaleDateString('en-AU', {day:'numeric',month:'short'}) : '';
+
+      if (r.record_type === 'injury') {
+        const list = document.getElementById('injuriesList');
+        if (list) {
+          if (list.textContent.trim() === '—') list.innerHTML = '';
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+          item.innerHTML = '<strong>' + (d.area||'Injury') + '</strong>' + (dateStr?' <span style="color:var(--muted);font-weight:400">· '+dateStr+'</span>':'') + (d.desc?'<br><span style="color:var(--muted)">'+d.desc+'</span>':'');
+          list.appendChild(item);
+        }
+      }
+
+      if (r.record_type === 'supplement') {
+        const list = document.getElementById('suppList');
+        if (list) {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+          item.innerHTML = '<strong>' + (d.name||'Supplement') + '</strong>' + (d.dose?' · '+d.dose:'') + (d.timing?' · '+d.timing:'') + (dateStr?' <span style="color:var(--muted);font-weight:400">· '+dateStr+'</span>':'') + (d.notes?'<br><span style="color:var(--muted)">'+d.notes+'</span>':'');
+          list.appendChild(item);
+        }
+      }
+
+      if (r.record_type === 'practitioner_note') {
+        const list = document.getElementById('practList');
+        if (list) {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--iron)';
+          item.innerHTML = '<strong>' + (d.type||'Note') + '</strong>' + (d.from?' · '+d.from:'') + (dateStr?' <span style="color:var(--muted);font-weight:400">· '+dateStr+'</span>':'') + (d.notes?'<br><span style="color:var(--muted)">'+d.notes+'</span>':'');
+          list.appendChild(item);
+        }
+      }
+
+      if (r.record_type === 'daily_checkin') {
+        const history = document.getElementById('checkInHistory');
+        if (history) {
+          const parts = [];
+          if (d.soreness) parts.push('Soreness ' + d.soreness + '/10');
+          if (d.sleep_hours) parts.push('Sleep ' + d.sleep_hours + 'hrs' + (d.sleep_quality?' ('+d.sleep_quality+')':''));
+          if (d.hrv) parts.push('HRV ' + d.hrv + 'ms');
+          if (d.mood) parts.push('Mood: ' + d.mood);
+          if (parts.length) {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+            item.innerHTML = (dateStr?'<strong style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">'+dateStr+'</strong><br>':'') + parts.join(' · ');
+            history.insertBefore(item, history.firstChild);
+          }
+        }
+      }
+    });
+  } catch(e) { console.error('loadHealthHistory:', e); }
+}
+</script>
+</body>
+</html>
+/* BOTTOM NAV */
+.bnav{height:var(--bnav-h);background:var(--white);border-top:1px solid var(--border);display:flex;align-items:stretch;position:fixed;bottom:0;left:0;right:0;z-index:50}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:transparent;font-family:var(--font-b);font-size:10px;font-weight:600;color:var(--muted);letter-spacing:0.3px;transition:color 0.15s;-webkit-tap-highlight-color:transparent}
+.bnav-item.active{color:var(--rust)}
+.bnav-icon{font-size:20px;line-height:1}
+
+/* PANELS */
+.panel{display:none;padding:16px 16px 0;min-height:0}
+.panel.active{display:block}
+.panel-title{font-family:var(--font-d);font-size:28px;letter-spacing:1px;color:var(--iron);margin-bottom:16px}
+
+/* CARDS */
+.card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px}
+.card-title{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.card-title-sub{font-size:11px;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0;margin-top:2px}
+
+/* PROGRAM PANEL */
+.week-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none}
+.week-tabs::-webkit-scrollbar{display:none}
+.week-tab{flex-shrink:0;padding:6px 14px;border-radius:100px;border:1px solid var(--border);background:var(--white);font-family:var(--font-b);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s}
+.week-tab.active{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.week-tab.done{background:var(--chalk);color:var(--muted)}
+
+.session-card{background:var(--white);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.session-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid var(--border)}
+.session-name{font-family:var(--font-d);font-size:18px;letter-spacing:0.5px}
+.session-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.session-badge{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:100px;text-transform:uppercase}
+.badge-todo{background:var(--chalk);color:var(--muted);border:1px solid var(--border)}
+.badge-done{background:var(--green-bg);color:var(--green)}
+.badge-today{background:var(--rust-l);color:var(--rust-d)}
+
+.session-body{padding:14px 16px;display:none}
+.session-body.open{display:block}
+
+.ex-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:13px}
+.ex-table th{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:4px 6px;text-align:left;border-bottom:1px solid var(--border)}
+.ex-table td{padding:9px 6px;border-bottom:1px solid rgba(0,0,0,0.04);vertical-align:middle}
+.ex-table tr:last-child td{border-bottom:none}
+.ex-name{font-weight:500}
+.ex-detail{font-size:11px;color:var(--muted);margin-top:2px}
+.ex-metric{text-align:center;color:var(--muted)}
+.rpe-pill{display:inline-flex;align-items:center;justify-content:center;width:26px;height:20px;border-radius:3px;font-size:11px;font-weight:700}
+.r6{background:#e8f4e8;color:#2d6a2d}.r7{background:#f0f4e0;color:#4a6020}
+.r8{background:#f8f0d8;color:#7a5010}.r9{background:#fce8d8;color:#8c3020}
+.r10{background:var(--iron);color:var(--white)}
+.clip-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.ex-check{width:18px;height:18px;accent-color:var(--rust);cursor:pointer}
+
+/* LOG SESSION */
+.log-section{background:var(--chalk);border-radius:8px;padding:14px;margin-top:12px}
+.log-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.rpe-log-row{margin-bottom:12px}
+.rpe-log-name{font-size:13px;font-weight:600;margin-bottom:6px}
+.rpe-pills{display:flex;gap:5px;flex-wrap:wrap}
+.rpe-pill-sm{width:32px;height:28px;border-radius:4px;border:1px solid var(--border);background:var(--white);font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--muted);transition:all 0.15s}
+.rpe-pill-sm.sel{background:var(--iron);color:var(--white);border-color:var(--iron)}
+.log-btn{width:100%;padding:12px;background:var(--iron);color:var(--white);border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;margin-top:12px;transition:background 0.2s}
+.log-btn:hover{background:var(--rust)}
+
+/* PROGRESS PANEL */
+.progress-chart{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+.progress-lift-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.progress-latest{font-family:var(--font-d);font-size:30px;letter-spacing:1px;color:var(--iron)}
+.progress-gain{font-size:12px;font-weight:600;color:var(--green);margin-top:2px}
+
+/* PROFILE PANEL */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px}
+.profile-item{}
+.profile-label{font-size:11px;color:var(--muted);margin-bottom:2px}
+.profile-val{font-size:15px;font-weight:600}
+
+.rpe-results{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rpe-lift-card{background:var(--chalk);border-radius:6px;padding:10px}
+.rpe-lift-name{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.rpe-lift-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+.rpe-lift-label{color:var(--muted)}
+.rpe-lift-val{font-weight:600}
+
+.tag-pill{display:inline-block;padding:4px 12px;border-radius:100px;font-size:12px;font-weight:600;border:1px solid var(--border);color:var(--muted);margin:3px 3px 3px 0;background:var(--chalk)}
+.tag-active{background:#fce8e8;color:#c03020;border-color:#f0c0c0}
+.tag-monitoring{background:#fef3e0;color:#e08020;border-color:#fdd090}
+.tag-resolved{background:var(--green-bg);color:var(--green);border-color:#b0ddc0}
+
+/* RECOVERY */
+.mood-row{display:flex;gap:8px;margin-bottom:12px}
+.mood-btn{flex:1;padding:10px 4px;border-radius:8px;border:1px solid var(--border);background:var(--chalk);cursor:pointer;font-size:22px;text-align:center;transition:all 0.15s}
+.mood-btn.sel{background:var(--iron);border-color:var(--iron);transform:scale(1.08)}
+.stress-row,.motiv-row{display:flex;gap:6px;margin-bottom:12px}
+.stress-btn,.motiv-btn{flex:1;padding:8px 4px;border-radius:5px;border:1px solid var(--border);background:var(--chalk);font-family:var(--font-b);font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 0.15s;text-align:center}
+.stress-btn.sel,.motiv-btn.sel{background:var(--iron);color:var(--white);border-color:var(--iron)}
+
+/* COMP */
+.comp-header{background:var(--iron);border-radius:10px;padding:20px;margin-bottom:12px;position:relative;overflow:hidden}
+.comp-bg{position:absolute;right:-10px;bottom:-15px;font-family:var(--font-d);font-size:90px;color:rgba(255,255,255,0.04);line-height:1;pointer-events:none}
+.comp-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rust);margin-bottom:8px;position:relative;z-index:1}
+.comp-name{font-family:var(--font-d);font-size:22px;color:var(--white);letter-spacing:1px;margin-bottom:10px;position:relative;z-index:1;line-height:1.2}
+.comp-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;position:relative;z-index:1}
+.comp-meta-item{}
+.comp-meta-label{font-size:10px;color:rgba(255,255,255,0.4)}
+.comp-meta-val{font-size:13px;font-weight:600;color:var(--white)}
+
+.event-card{border:1px solid var(--border);border-radius:8px;margin-bottom:10px;overflow:hidden}
+.event-head{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--chalk);border-bottom:1px solid var(--border)}
+.event-num{width:24px;height:24px;border-radius:50%;background:var(--iron);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.event-name{font-size:14px;font-weight:700}
+.event-body{padding:12px 14px}
+.event-strategy{font-size:13px;color:var(--muted);font-style:italic;line-height:1.6;margin-bottom:10px}
+.attempt-row{display:flex;gap:8px}
+.attempt-card{flex:1;background:var(--chalk);border-radius:6px;padding:8px;text-align:center}
+.attempt-card.third{background:var(--rust);}.attempt-card.third .attempt-label{color:rgba(255,255,255,0.6)}.attempt-card.third .attempt-val{color:var(--white)}
+.attempt-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+.attempt-val{font-size:15px;font-weight:700;margin-top:2px}
+
+.rule-card{border-radius:6px;padding:12px;margin-bottom:8px}
+.rule-card-blue{background:#f0f4ff;border-left:3px solid #4488cc}
+.rule-card-rust{background:var(--rust-l);border-left:3px solid var(--rust)}
+.rule-card-green{background:var(--green-bg);border-left:3px solid var(--green)}
+.rule-title{font-size:13px;font-weight:700;margin-bottom:6px}
+.rule-text{font-size:13px;color:var(--muted);line-height:1.7}
+.rule-text li{margin-left:16px;margin-bottom:4px}
+
+/* MESSAGES */
+.msg-thread{display:flex;flex-direction:column;gap:10px;padding:12px 0 100px;min-height:200px}
+.msg-bubble{max-width:82%;border-radius:12px;padding:10px 13px;font-size:14px;line-height:1.6}
+.msg-from-wade{align-self:flex-start;background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px}
+.msg-from-client{align-self:flex-end;background:var(--iron);color:var(--white);border-radius:12px 4px 12px 12px}
+.msg-sender{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rust);margin-bottom:4px}
+.msg-time{font-size:11px;color:var(--muted);margin-top:4px}
+.msg-from-client .msg-time{color:rgba(255,255,255,0.4)}
+
+.msg-input-area{position:fixed;bottom:var(--bnav-h);left:0;right:0;background:var(--white);border-top:1px solid var(--border);padding:10px 14px;display:none}
+.msg-input-area.visible{display:flex;align-items:flex-end;gap:8px}
+.msg-textarea{flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:20px;font-family:var(--font-b);font-size:14px;outline:none;resize:none;max-height:100px;background:var(--chalk);line-height:1.5}
+.msg-textarea:focus{border-color:var(--rust);background:var(--white)}
+.msg-send{width:36px;height:36px;border-radius:50%;background:var(--rust);border:none;color:var(--white);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.voice-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--white);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+
+/* FORMS */
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;transition:border-color 0.15s}
+.form-input:focus{border-color:var(--rust);background:var(--white)}
+.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;-webkit-appearance:none}
+.form-textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:14px;color:var(--iron);background:var(--chalk);outline:none;resize:vertical;min-height:70px}
+.btn-rust{width:100%;padding:12px;background:var(--rust);color:var(--white);border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s}
+.btn-rust:hover{background:var(--rust-d)}
+.btn-iron{width:100%;padding:12px;background:var(--iron);color:var(--white);border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer}
+.btn-ghost{width:100%;padding:10px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:6px;font-family:var(--font-b);font-size:13px;cursor:pointer}
+.btn-sm{padding:6px 14px;border-radius:4px;border:none;font-family:var(--font-b);font-size:12px;font-weight:600;cursor:pointer}
+.btn-sm-iron{background:var(--iron);color:var(--white)}
+.btn-sm-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+
+.success-msg{padding:10px 12px;background:var(--green-bg);border:1px solid rgba(44,122,75,0.2);border-radius:6px;font-size:13px;color:var(--green);font-weight:600;text-align:center;margin-top:10px;display:none}
+.warning-msg{padding:10px 12px;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;font-size:12px;color:#856404;line-height:1.5;margin-bottom:10px}
+
+/* LOG ITEMS */
+.log-item{padding:12px;background:var(--chalk);border-radius:6px;margin-bottom:8px}
+.log-item-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.log-item-title{font-size:13px;font-weight:600}
+.log-item-date{font-size:11px;color:var(--muted)}
+.log-item-body{font-size:13px;color:var(--muted);line-height:1.5}
+.log-item-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.log-tag{font-size:11px;background:var(--white);padding:2px 8px;border-radius:4px;font-weight:500}
+.del-btn{cursor:pointer;color:var(--muted);font-size:16px;line-height:1;flex-shrink:0;margin-left:8px}
+
+/* SLEEP SLIDER */
+.slider-wrap{display:flex;align-items:center;gap:10px}
+.slider-wrap input[type=range]{flex:1;accent-color:var(--rust)}
+.slider-val{font-family:var(--font-d);font-size:24px;min-width:48px;text-align:center}
+
+/* NUTRITION */
+.macro-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.macro-item label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.macro-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:5px;font-family:var(--font-b);font-size:15px;font-weight:600;text-align:center;background:var(--chalk);outline:none;-moz-appearance:textfield}
+.macro-input::-webkit-inner-spin-button{-webkit-appearance:none}
+.macro-bar{height:8px;border-radius:4px;overflow:hidden;display:flex;gap:2px;margin:10px 0 6px}
+.macro-bar-p{background:#2c7a4b;height:100%;transition:width 0.3s}
+.macro-bar-c{background:#7a5010;height:100%;transition:width 0.3s}
+.macro-bar-f{background:#8c3020;height:100%;transition:width 0.3s}
+.macro-legend{display:flex;gap:12px;font-size:11px}
+.macro-legend span{display:flex;align-items:center;gap:4px}
+
+/* TOAST */
+.toast{position:fixed;bottom:calc(var(--bnav-h) + 10px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--iron);color:var(--white);padding:9px 18px;border-radius:6px;font-size:13px;font-weight:500;z-index:200;transition:all 0.25s;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* COLLAPSIBLE */
+.collapsible-header{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0}
+.collapsible-arrow{font-size:12px;color:var(--muted);transition:transform 0.2s}
+.collapsible-arrow.open{transform:rotate(180deg)}
+.collapsible-body{display:none;margin-top:12px}
+.collapsible-body.open{display:block}
+
+/* APPLE HEALTH */
+.ah-banner{display:flex;align-items:center;gap:12px;background:var(--chalk);border:1px dashed var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+.ah-icon{font-size:24px;flex-shrink:0}
+.ah-text{}
+.ah-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.ah-sub{font-size:12px;color:var(--muted);line-height:1.4}
+
+@media(min-width:600px){
+  body{display:grid;grid-template-rows:var(--nav-h) 1fr var(--bnav-h)}
+  .scroll-area{padding-bottom:16px}
+  .panel{max-width:800px;margin:0 auto;padding:24px 24px 0}
+  .bnav{max-width:100%;position:fixed;bottom:0;left:0;right:0}
+  .bnav-item{font-size:12px;gap:5px}
+  .bnav-icon{font-size:22px}
+  .msg-input-area{max-width:800px;left:50%;transform:translateX(-50%);border-radius:0}
+}
+
 </style>
 <script src="supabase-config.js"></script>
 </head>
