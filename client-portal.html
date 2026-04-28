@@ -154,7 +154,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 .rule-text li{margin-left:16px;margin-bottom:4px}
 
 /* MESSAGES */
-.msg-thread{display:flex;flex-direction:column;gap:10px;padding-bottom:80px}
+.msg-thread{display:flex;flex-direction:column;gap:10px;padding:12px 16px 100px;overflow-y:auto;height:calc(100vh - 180px)}
 .msg-bubble{max-width:82%;border-radius:12px;padding:10px 13px;font-size:14px;line-height:1.6}
 .msg-from-wade{align-self:flex-start;background:var(--white);border:1px solid var(--border);border-radius:4px 12px 12px 12px}
 .msg-from-client{align-self:flex-end;background:var(--iron);color:var(--white);border-radius:12px 4px 12px 12px}
@@ -256,200 +256,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo">WADE<span>.</span>STRONG</div>
-  <div class="nav-right">
-    <div>
-      <div class="nav-name" id="navName">Loading...</div>
-      <div class="nav-week" id="navWeek">PRE-COMP · WEEK 5/8</div>
-    </div>
-    <div class="nav-avatar" id="navAvatar">CT</div>
-  </div>
-</nav>
-
-<!-- SCROLL AREA -->
-<div class="scroll-area" id="scrollArea">
-
-  <!-- ══ PROGRAM PANEL ══ -->
-  <div class="panel active" id="panel-program">
-    <div class="panel-title">My Program</div>
-
-    <!-- Week tabs -->
-    <div class="week-tabs" id="weekTabs"></div>
-
-    <!-- Sessions -->
-    <div id="sessionList"></div>
-  </div>
-
-  <!-- ══ PROGRESS PANEL ══ -->
-  <div class="panel" id="panel-progress">
-    <div class="panel-title">Progress</div>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">Tracking the main lifts Wade has selected. Updates automatically when you log sessions.</p>
-    <div id="progressCharts"></div>
-  </div>
-
-  <!-- ══ PROFILE PANEL ══ -->
-  <div class="panel" id="panel-profile">
-    <div class="panel-title">My Profile</div>
-
-    <!-- Basic info -->
-    <div class="card">
-      <div class="card-title">Personal Info</div>
-      <div class="profile-grid">
-        <div class="profile-item"><div class="profile-label">Name</div><div class="profile-val" id="profName">—</div></div>
-        <div class="profile-item"><div class="profile-label">Age</div><div class="profile-val" id="profAge">—</div></div>
-        <div class="profile-item"><div class="profile-label">Height</div><div class="profile-val" id="profHeight">—</div></div>
-        <div class="profile-item"><div class="profile-label">Weight</div><div class="profile-val" id="profWeight">—</div></div>
-        <div class="profile-item"><div class="profile-label">Location</div><div class="profile-val" id="profLocation">—</div></div>
-        <div class="profile-item"><div class="profile-label">Program</div><div class="profile-val" id="profProgram">—</div></div>
-        <div class="profile-item"><div class="profile-label">Gym type</div><div class="profile-val" id="profGym">—</div></div>
-        <div class="profile-item"><div class="profile-label">Training days</div><div class="profile-val" id="profDays">—</div></div>
-        <div class="profile-item"><div class="profile-label">Session length</div><div class="profile-val" id="profSession">—</div></div>
-        <div class="profile-item"><div class="profile-label">Training age</div><div class="profile-val" id="profTrainingAge">—</div></div>
-      </div>
-    </div>
-
-    <!-- Comp details (pre-comp only) -->
-    <div class="card" id="profCompCard" style="display:none">
-      <div class="card-title">Competition</div>
-      <div class="profile-grid">
-        <div class="profile-item"><div class="profile-label">Competition</div><div class="profile-val" id="profCompName">—</div></div>
-        <div class="profile-item"><div class="profile-label">Date</div><div class="profile-val" id="profCompDate">—</div></div>
-        <div class="profile-item"><div class="profile-label">Weight class</div><div class="profile-val" id="profWeightClass">—</div></div>
-        <div class="profile-item"><div class="profile-label">Level</div><div class="profile-val" id="profCompLevel">—</div></div>
-      </div>
-    </div>
-
-    <!-- RPE Results -->
-    <div class="card">
-      <div class="card-title">RPE Testing Results</div>
-      <div class="rpe-results">
-        <div id="rpeResultsGrid" style="display:contents"></div>
-      </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">Tested: 8 March 2025</div>
-    </div>
-
-    <!-- Health & Wellbeing -->
-    <div class="card">
-      <div class="collapsible-header" onclick="toggleCollapse('injuryCollapse',this)">
-        <div>
-          <div class="card-title" style="margin-bottom:2px">Health & Wellbeing</div>
-          <div style="font-size:12px;color:var(--muted)">Physical injuries & mental health — Wade factors all of this in</div>
-        </div>
-        <div class="collapsible-arrow">▼</div>
-      </div>
-      <div class="collapsible-body" id="injuryCollapse">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:4px">
-          <div style="font-size:12px;font-weight:600;color:var(--muted)">Physical injuries</div>
-          <button class="btn-sm btn-sm-iron" onclick="showForm('injuryForm')">+ Add</button>
-        </div>
-        <div id="injuryList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No injuries logged yet.</div></div>
-        <div id="injuryForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
-          <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="injArea" placeholder="e.g. Lower back, Left knee"></div>
-          <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="injDesc" placeholder="What happened, severity..."></textarea></div>
-          <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="injStatus"><option value="active">Active</option><option value="monitoring" selected>Monitoring</option><option value="resolved">Resolved</option></select></div>
-          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveInjury()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('injuryForm')">Cancel</button></div>
-        </div>
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 10px">
-          <div style="font-size:12px;font-weight:600;color:var(--muted)">Mental health & stress</div>
-          <button class="btn-sm btn-sm-iron" onclick="showForm('mentalForm')">+ Add</button>
-        </div>
-        <div id="mentalList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No entries yet.</div></div>
-        <div id="mentalForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
-          <div class="form-group"><label class="form-label">Mood</label>
-            <div class="mood-row">
-              <button class="mood-btn" onclick="setMood('😔','low')" id="mood-low">😔</button>
-              <button class="mood-btn" onclick="setMood('😐','meh')" id="mood-meh">😐</button>
-              <button class="mood-btn" onclick="setMood('🙂','ok')" id="mood-ok">🙂</button>
-              <button class="mood-btn" onclick="setMood('😊','good')" id="mood-good">😊</button>
-              <button class="mood-btn" onclick="setMood('🔥','great')" id="mood-great">🔥</button>
-            </div>
-          </div>
-          <div class="form-group"><label class="form-label">Stress level</label>
-            <div class="stress-row">
-              <button class="stress-btn" onclick="setStress('Low')" id="stress-Low">Low</button>
-              <button class="stress-btn" onclick="setStress('Moderate')" id="stress-Moderate">Moderate</button>
-              <button class="stress-btn" onclick="setStress('High')" id="stress-High">High</button>
-              <button class="stress-btn" onclick="setStress('Very high')" id="stress-VH">Very high</button>
-            </div>
-          </div>
-          <div class="form-group"><label class="form-label">Training motivation</label>
-            <div class="motiv-row">
-              <button class="motiv-btn" onclick="setMotiv('None')" id="motiv-None">None</button>
-              <button class="motiv-btn" onclick="setMotiv('Low')" id="motiv-Low">Low</button>
-              <button class="motiv-btn" onclick="setMotiv('Good')" id="motiv-Good">Good</button>
-              <button class="motiv-btn" onclick="setMotiv('High')" id="motiv-High">High</button>
-            </div>
-          </div>
-          <div class="form-group"><label class="form-label">Note for Wade <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><textarea class="form-textarea" id="mentalNote" placeholder="Anything you want Wade to know..."></textarea></div>
-          <div class="warning-msg">💛 If you're struggling beyond training, please reach out — Beyond Blue 1300 22 4636 or Lifeline 13 11 14</div>
-          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveMental()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('mentalForm')">Cancel</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Supplements -->
-    <div class="card">
-      <div class="collapsible-header" onclick="toggleCollapse('suppCollapse',this)">
-        <div>
-          <div class="card-title" style="margin-bottom:2px">Supplements</div>
-          <div style="font-size:12px;color:var(--muted)">Required — Wade needs to know what you're taking</div>
-        </div>
-        <div class="collapsible-arrow">▼</div>
-      </div>
-      <div class="collapsible-body" id="suppCollapse">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:4px">
-          <div style="font-size:12px;font-weight:600;color:var(--muted)">Current supplements</div>
-          <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add</button>
-        </div>
-        <div id="suppList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No supplements added yet — tap + Add to get started.</div></div>
-        <div id="suppForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
-          <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Pre-workout"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div class="form-group"><label class="form-label">Dose</label><input class="form-input" id="suppDose" placeholder="e.g. 5g"></div>
-            <div class="form-group"><label class="form-label">Timing</label><select class="form-select" id="suppTiming"><option>Morning</option><option>Pre-workout</option><option selected>Post-workout</option><option>Before bed</option><option>With meals</option><option>Daily</option></select></div>
-          </div>
-          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveSupp()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('suppForm')">Cancel</button></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Practitioner Notes -->
-    <div class="card">
-      <div class="collapsible-header" onclick="toggleCollapse('practCollapse',this)">
-        <div>
-          <div class="card-title" style="margin-bottom:2px">Practitioner Notes</div>
-          <div style="font-size:12px;color:var(--muted)">Notes from your physio, doctor or health provider</div>
-        </div>
-        <div class="collapsible-arrow">▼</div>
-      </div>
-      <div class="collapsible-body" id="practCollapse">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;margin-top:4px">
-          <div style="font-size:12px;font-weight:600;color:var(--muted)">Shared with Wade</div>
-          <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add</button>
-        </div>
-        <div id="practList"><div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">No notes added yet.</div></div>
-        <div id="practForm" style="display:none;margin-top:12px;background:var(--chalk);border-radius:6px;padding:12px">
-          <div class="form-group"><label class="form-label">Practitioner name & type</label><input class="form-input" id="practName" placeholder="e.g. Sarah Jones — Physiotherapist"></div>
-          <div class="form-group"><label class="form-label">Note / instructions</label><textarea class="form-textarea" id="practNote" placeholder="What they said, restrictions, clearances..."></textarea></div>
-          <div class="form-group"><label class="form-label">Upload document <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label><input type="file" accept=".pdf,.jpg,.png" style="font-size:13px;color:var(--muted)"></div>
-          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Send to Wade</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ══ RECOVERY PANEL ══ -->
-  <div class="panel" id="panel-recovery">
-    <div class="panel-title">Recovery</div>
-
-    <!-- Apple Health -->
-    <div class="ah-banner">
-      <div class="ah-icon">🍎</div>
-      <div class="ah-text">
-        <div class="ah-title">Apple Health sync — coming soon</div>
-        <div class="ah-sub">Auto-import sleep, HRV and activity data. Available in the Wade Strong app.</div>
-      </div>
+  
     </div>
 
     <!-- Daily check-in -->
@@ -1224,11 +1031,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 function switchTab(id, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  el.classList.add('active');
-  document.getElementById('scrollArea').scrollTop = 0;
+  document.getElementById('panel-'+id)?.classList.add('active');
+  el?.classList.add('active');
+  if (id !== 'messages') document.getElementById('scrollArea').scrollTop = 0;
   const msgInput = document.getElementById('msgInputArea');
-  msgInput.classList.toggle('visible', id === 'messages');
+  if (msgInput) msgInput.classList.toggle('visible', id === 'messages');
+  if (id === 'messages') {
+    renderMessages();
+    scrollMsgsToBottom();
+  }
 }
 
 // ── WEEK TABS ─────────────────────────────────────────────────
@@ -1322,21 +1133,7 @@ function renderBlock(b, sid) {
 }
 
 function renderRPELogger(s) {
-  const allEx = s.blocks.flatMap(b => b.exercises);
-  return `
-  <div class="log-section">
-    <div class="log-title">Log your RPE</div>
-    ${allEx.map(e => `
-      <div class="rpe-log-row">
-        <div class="rpe-log-name">${e.name}</div>
-        <div class="rpe-pills">
-          ${[6,6.5,7,7.5,8,8.5,9,9.5,10].map(r => `
-            <button class="rpe-pill-sm" id="rpe_${s.id}_${e.name.replace(/\s/g,'_')}_${r}" onclick="selectRPE('${s.id}','${e.name}',${r},this)">${r}</button>
-          `).join('')}
-        </div>
-      </div>`).join('')}
-    <button class="log-btn" onclick="logSession('${s.id}')">Log session ✓</button>
-  </div>`;
+  return ''; // RPE feedback not required for training sessions
 }
 
 function toggleSession(id) {
@@ -1680,8 +1477,33 @@ function saveMental(){hideForm('mentalForm');showToast('Entry saved ✓');}
 
 // ── INJURY / SUPPS / PRACT ────────────────────────────────────
 function saveInjury(){hideForm('injuryForm');showToast('Injury logged ✓');}
-function saveSupp(){hideForm('suppForm');showToast('Supplement saved ✓');}
-function savePract(){hideForm('practForm');showToast('Note sent to Wade ✓');}
+async function saveSupp() {
+  const name   = document.getElementById('suppName')?.value?.trim() || '';
+  const dose   = document.getElementById('suppDose')?.value?.trim() || '';
+  const timing = document.getElementById('suppTiming')?.value?.trim() || '';
+  const notes  = document.getElementById('suppNotes')?.value?.trim() || '';
+  try {
+    if (clientId) await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'supplement', data: { name, dose, timing, notes } });
+  } catch(e) { console.error('saveSupp:', e); }
+  hideForm('suppForm');
+  showToast('Supplement saved ✓');
+}
+async function savePract() {
+  const noteType = document.getElementById('practType')?.value?.trim() || 'Practitioner note';
+  const notes    = document.getElementById('practNotes')?.value?.trim() || '';
+  const from     = document.getElementById('practFrom')?.value?.trim() || '';
+  if (!notes) { hideForm('practForm'); return; }
+  try {
+    if (clientId) {
+      // Save as message so Wade sees it in admin CRM
+      await db.insert('messages', { client_id: clientId, sender: 'client', message_text: '📋 ' + noteType + (from?' (from '+from+')':'') + ': ' + notes });
+      // Also log to client_health
+      await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'practitioner_note', data: { type: noteType, from, notes } });
+    }
+  } catch(e) { console.error('savePract:', e); }
+  hideForm('practForm');
+  showToast('Note sent to Wade ✓');
+}
 
 // ── CLIP UPLOAD ───────────────────────────────────────────────
 function handleClip(input, exName, uid) {
@@ -1731,6 +1553,80 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 
 // ── SORENESS ROW (template literal issue fix) ─────────────────
 document.getElementById('sorenessRow').innerHTML = Array.from({length:10},(_,i)=>`<button onclick="setSoreness(${i+1})" id="sor-${i+1}" style="flex:1;height:30px;border-radius:4px;border:1px solid var(--border);background:var(--chalk);font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:all 0.15s">${i+1}</button>`).join('');
+
+// ── PROFILE PHOTO ──────────────────────────────────────────────
+function triggerPhotoUpload() {
+  document.getElementById('profilePhotoInput')?.click();
+}
+
+async function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    const avatar = document.getElementById('navAvatar');
+    if (avatar) {
+      avatar.style.backgroundImage = 'url(' + dataUrl + ')';
+      avatar.style.backgroundSize = 'cover';
+      avatar.style.backgroundPosition = 'center';
+      avatar.textContent = '';
+    }
+  };
+  reader.readAsDataURL(file);
+  showToast('Profile photo updated ✓');
+}
+
+// ── PROGRESS PHOTOS ────────────────────────────────────────────
+const photoFiles = {};
+
+function previewPhoto(side, input) {
+  const file = input.files[0];
+  if (!file) return;
+  photoFiles[side] = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const el = document.getElementById('photo' + side.charAt(0).toUpperCase() + side.slice(1) + 'Preview');
+    if (el) {
+      el.style.backgroundImage = 'url(' + e.target.result + ')';
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.innerHTML = '';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function savePhotos() {
+  if (!Object.keys(photoFiles).length) { showToast('Select at least one photo'); return; }
+  const toBase64 = f => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(f); });
+  const data = {};
+  for (const [side, file] of Object.entries(photoFiles)) {
+    data[side] = await toBase64(file);
+  }
+  try {
+    if (clientId) {
+      await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'progress_photos', data });
+      showToast('Photos sent to Wade ✓');
+    }
+  } catch(e) { console.error('savePhotos:', e); showToast('Photos saved locally'); }
+}
+
+// ── BODY MEASUREMENTS ──────────────────────────────────────────
+async function saveMeasurements() {
+  const weight  = document.getElementById('measWeight')?.value;
+  const bodyFat = document.getElementById('measBodyFat')?.value;
+  const waist   = document.getElementById('measWaist')?.value;
+  const chest   = document.getElementById('measChest')?.value;
+  if (!weight && !waist) { showToast('Enter at least one measurement'); return; }
+  try {
+    if (clientId) {
+      await db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'body_measurements', data: { weight, body_fat_pct: bodyFat, waist_cm: waist, chest_cm: chest } });
+      showToast('Measurements saved ✓');
+    }
+  } catch(e) { console.error('saveMeasurements:', e); }
+}
+
 </script>
 </body>
 </html>
