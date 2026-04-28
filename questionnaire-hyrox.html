@@ -307,6 +307,34 @@ textarea.input{min-height:80px;resize:vertical}
       <input class="input" type="text" id="targetTime" placeholder="e.g. sub 1:15:00">
     </div>
 
+
+    <div class="field">
+      <label>Do you have a race booked?</label>
+      <div class="choices">
+        <label class="choice"><input type="radio" name="hasRace" value="yes" onclick="document.getElementById('raceDateField').style.display='block'"><span>Yes — I have a race date</span></label>
+        <label class="choice"><input type="radio" name="hasRace" value="no" onclick="document.getElementById('raceDateField').style.display='none'"><span>No — training for a future race</span></label>
+      </div>
+    </div>
+
+    <div id="raceDateField" style="display:none">
+      <div class="field">
+        <label>Race date</label>
+        <input class="input" type="date" id="raceDate">
+        <div class="hint" id="weeksToRaceHint" style="margin-top:6px;font-weight:600;color:var(--rust)"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>How many weeks do you want your program to run?</label>
+      <div class="hint" style="margin-bottom:10px">Default is 8 weeks. If your race is sooner, we can condense it. Maximum is 8 weeks.</div>
+      <div class="choice-grid" id="programLengthGrid">
+        <label class="choice-card"><input type="radio" name="programLength" value="4"><span>4 weeks<small>Condensed — race is very soon</small></span></label>
+        <label class="choice-card"><input type="radio" name="programLength" value="5"><span>5 weeks<small>Accelerated build</small></span></label>
+        <label class="choice-card"><input type="radio" name="programLength" value="6"><span>6 weeks<small>Standard program</small></span></label>
+        <label class="choice-card"><input type="radio" name="programLength" value="8" checked><span>8 weeks<small>Full program — recommended</small></span></label>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="prevStep(2)">← Back</button>
       <button class="btn btn-rust" onclick="nextStep(2)" style="flex:1">Next →</button>
@@ -618,6 +646,29 @@ textarea.input{min-height:80px;resize:vertical}
 
 <script>
 let currentStep = 1;
+
+// Calculate weeks to race and auto-suggest program length
+document.addEventListener('change', function(e) {
+  if (e.target.id === 'raceDate') {
+    const raceDate = new Date(e.target.value);
+    const today = new Date();
+    const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+    const weeksToRace = Math.round((raceDate - today) / msPerWeek);
+    const hint = document.getElementById('weeksToRaceHint');
+    if (hint && weeksToRace > 0) {
+      hint.textContent = weeksToRace + ' weeks until race day';
+      // Auto-select recommended program length
+      const recommended = weeksToRace <= 4 ? '4' : weeksToRace <= 5 ? '5' : weeksToRace <= 6 ? '6' : '8';
+      const radioBtn = document.querySelector('input[name="programLength"][value="' + recommended + '"]');
+      if (radioBtn) radioBtn.checked = true;
+      hint.textContent += ' — ' + recommended + '-week program recommended';
+    } else if (hint && weeksToRace <= 0) {
+      hint.textContent = 'Race date appears to be in the past — check your date';
+      hint.style.color = '#c03020';
+    }
+  }
+});
+
 const totalSteps = 7;
 const ratings = {};
 
@@ -721,6 +772,7 @@ async function submitForm() {
     hyroxExperience: r('hyroxExperience'), bestTime: g('bestTime'),
     division: r('division'), targetRace: g('targetRace'),
     hyroxGoal: r('hyroxGoal'), targetTime: g('targetTime'),
+    targetRace: g('targetRace'), raceDate: g('raceDate'), programWeeks: r('programWeeks') || '8',
     runBackground: r('runBackground'), kmPace: g('kmPace'),
     gymBackground: r('gymBackground'),
     trainingDays: r('trainingDays'), sessionLength: r('sessionLength'),
@@ -738,6 +790,9 @@ async function submitForm() {
     sleep: r('sleep'), stress: r('stress'),
     physicalJob: r('physicalJob'), anythingElse: g('anythingElse'),
     referral: r('referral'),
+    raceDate: raceDate,
+    programLength: programLength,
+    hasRace: r('hasRace'),
   };
 
   // Identify weak stations (rating 1-2)
@@ -750,6 +805,7 @@ async function submitForm() {
       await db.upsert('clients', {
         email, first_name: firstName, last_name: lastName,
         program_type: 'hyrox', status: 'new',
+        total_weeks: programLength,
         age: formData.age ? parseInt(formData.age) : null,
         height: formData.height || null,
         weight: formData.weight || null,
