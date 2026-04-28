@@ -337,72 +337,64 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
       <input type="file" id="photoFront" accept="image/*" style="display:none" onchange="previewPhoto('front',this)">
       <input type="file" id="photoSide" accept="image/*" style="display:none" onchange="previewPhoto('side',this)">
       <input type="file" id="photoBack" accept="image/*" style="display:none" onchange="previewPhoto('back',this)">
-      <button onclick="savePhotos()" style="width:100%;padding:11px;background:var(--iron);color:#fff;border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer">Send photos to Wade</button>
+      <button onclick="savePhotos()" style="width:100%;padding:11px;background:var(--iron);color:#fff;border:none;border-radius:6px;font-family:var(--font-b);font-size:14px;font-weight:600;cursor:pointer">Save photos</button>
     </div>
 
     <!-- Health & Wellbeing -->
-    <div class="card" id="healthCard">
+        <div class="card" id="healthCard">
       <div class="card-title">Health & Wellbeing</div>
+
       <!-- Goals -->
-      <div class="collapsible">
-        <div class="collapsible-header" onclick="toggleCollapse('goalsBody',this)">
-          <span>Training Goals</span><span class="collapsible-arrow">›</span>
-        </div>
-        <div class="collapsible-body" id="goalsBody">
-          <div id="goalsList" style="font-size:14px;color:var(--muted)">—</div>
-        </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Training Goals</div>
+        <div id="goalsList" style="font-size:14px;color:var(--iron);line-height:1.6">—</div>
       </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:16px"></div>
+
       <!-- Injuries -->
-      <div class="collapsible">
-        <div class="collapsible-header" onclick="toggleCollapse('injuryBody',this)">
-          <span>Injuries & Limitations</span><span class="collapsible-arrow">›</span>
-        </div>
-        <div class="collapsible-body" id="injuryBody">
-          <div id="injuriesList" style="font-size:14px;color:var(--muted)">—</div>
-          <div style="margin-top:10px">
-            <button class="btn-sm btn-sm-iron" onclick="showForm('injuryForm')">+ Log new injury</button>
-          </div>
-          <div id="injuryForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
-            <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="injArea" placeholder="e.g. Left knee"></div>
-            <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="injDesc" placeholder="What happened?"></textarea></div>
-            <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveInjury()">Log</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('injuryForm')">Cancel</button></div>
-          </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Injuries & Limitations</div>
+        <div id="injuriesList" style="font-size:14px;color:var(--iron);line-height:1.6;margin-bottom:10px">—</div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('injuryForm')">+ Log new injury</button>
+        <div id="injuryForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+          <div class="form-group"><label class="form-label">Body area</label><input class="form-input" id="injArea" placeholder="e.g. Left knee"></div>
+          <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="injDesc" placeholder="What happened?"></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveInjury()">Log</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('injuryForm')">Cancel</button></div>
         </div>
       </div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:16px"></div>
+
       <!-- Supplements -->
-      <div class="collapsible">
-        <div class="collapsible-header" onclick="toggleCollapse('suppBody',this)">
-          <span>Supplements</span><span class="collapsible-arrow">›</span>
-        </div>
-        <div class="collapsible-body" id="suppBody">
-          <div id="suppList" style="margin-bottom:8px"></div>
-          <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add supplement</button>
-          <div id="suppForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
-            <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Magnesium"></div>
-            <div class="form-group"><label class="form-label">Dose</label><input class="form-input" id="suppDose" placeholder="e.g. 5g"></div>
-            <div class="form-group"><label class="form-label">Timing</label><input class="form-input" id="suppTiming" placeholder="e.g. Post-workout, Before bed"></div>
-            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="suppNotes" placeholder="Any notes..."></textarea></div>
-            <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveSupp()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('suppForm')">Cancel</button></div>
-          </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Supplements</div>
+        <div id="suppList" style="margin-bottom:10px"></div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('suppForm')">+ Add supplement</button>
+        <div id="suppForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+          <div class="form-group"><label class="form-label">Supplement</label><input class="form-input" id="suppName" placeholder="e.g. Creatine, Protein, Magnesium"></div>
+          <div class="form-group"><label class="form-label">Dose</label><input class="form-input" id="suppDose" placeholder="e.g. 5g"></div>
+          <div class="form-group"><label class="form-label">Timing</label><input class="form-input" id="suppTiming" placeholder="e.g. Post-workout, Before bed"></div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="suppNotes" placeholder="Any notes..."></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="saveSupp()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('suppForm')">Cancel</button></div>
         </div>
       </div>
-      <!-- Practitioner notes -->
-      <div class="collapsible">
-        <div class="collapsible-header" onclick="toggleCollapse('practBody',this)">
-          <span>Practitioner Notes</span><span class="collapsible-arrow">›</span>
-        </div>
-        <div class="collapsible-body" id="practBody">
-          <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share notes from your physio, chiro, or GP with Wade.</div>
-          <div id="practList" style="margin-bottom:8px"></div>
-          <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add note</button>
-          <div id="practForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
-            <div class="form-group"><label class="form-label">Type</label>
-              <select class="form-select" id="practType"><option>Physio note</option><option>Chiro note</option><option>GP clearance</option><option>Imaging result</option><option>Other</option></select>
-            </div>
-            <div class="form-group"><label class="form-label">Practitioner name (optional)</label><input class="form-input" id="practFrom" placeholder="e.g. Dr Smith"></div>
-            <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="practNotes" placeholder="Key points from the appointment..."></textarea></div>
-            <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Send to Wade</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
+
+      <div style="border-top:1px solid var(--border);margin-bottom:16px"></div>
+
+      <!-- Practitioner Notes -->
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Practitioner Notes</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Share notes from your physio, chiro, or GP with Wade.</div>
+        <div id="practList" style="margin-bottom:10px"></div>
+        <button class="btn-sm btn-sm-iron" onclick="showForm('practForm')">+ Add note</button>
+        <div id="practForm" style="display:none;margin-top:10px;background:var(--chalk);border-radius:6px;padding:12px">
+          <div class="form-group"><label class="form-label">Type</label>
+            <select class="form-select" id="practType"><option>Physio note</option><option>Chiro note</option><option>GP clearance</option><option>Imaging result</option><option>Other</option></select>
           </div>
+          <div class="form-group"><label class="form-label">Practitioner name (optional)</label><input class="form-input" id="practFrom" placeholder="e.g. Dr Smith"></div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="practNotes" placeholder="Key points from the appointment..."></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Send to Wade</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
         </div>
       </div>
     </div>
