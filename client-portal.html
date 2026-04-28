@@ -394,7 +394,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);display
           </div>
           <div class="form-group"><label class="form-label">Practitioner name (optional)</label><input class="form-input" id="practFrom" placeholder="e.g. Dr Smith"></div>
           <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="practNotes" placeholder="Key points from the appointment..."></textarea></div>
-          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Send to Wade</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
+          <div style="display:flex;gap:8px"><button class="btn-rust" style="padding:9px" onclick="savePract()">Save</button><button class="btn-ghost" style="padding:9px" onclick="hideForm('practForm')">Cancel</button></div>
         </div>
       </div>
     </div>
@@ -1656,7 +1656,28 @@ function setMotiv(l){selectedMotiv=l;document.querySelectorAll('.motiv-btn').for
 function saveMental(){hideForm('mentalForm');showToast('Entry saved ✓');}
 
 // ── INJURY / SUPPS / PRACT ────────────────────────────────────
-function saveInjury(){hideForm('injuryForm');showToast('Injury logged ✓');}
+function saveInjury() {
+  const area  = document.getElementById('injArea')?.value?.trim() || '';
+  const desc  = document.getElementById('injDesc')?.value?.trim() || '';
+  if (!area) { showToast('Enter a body area'); return; }
+
+  const list = document.getElementById('injuriesList');
+  if (list) {
+    if (list.textContent.trim() === '—') list.innerHTML = '';
+    const item = document.createElement('div');
+    item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+    item.innerHTML = '<strong>' + area + '</strong>' + (desc ? '<br><span style="color:var(--muted)">' + desc + '</span>' : '');
+    list.appendChild(item);
+  }
+
+  if (clientId) {
+    db.insert('client_health', { client_id: clientId, date: new Date().toISOString().split('T')[0], record_type: 'injury', data: { area, desc } }).catch(e => console.error('saveInjury:', e));
+  }
+
+  ['injArea','injDesc'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
+  hideForm('injuryForm');
+  showToast('Injury logged ✓');
+}
 async function saveSupp() {
   const name   = document.getElementById('suppName')?.value?.trim() || '';
   const dose   = document.getElementById('suppDose')?.value?.trim() || '';
@@ -1808,6 +1829,70 @@ async function saveMeasurements() {
 }
 
 
+
+// ── LOAD HEALTH HISTORY ──────────────────────────────────────
+async function loadHealthHistory() {
+  if (!clientId) return;
+  try {
+    const records = await db.select('client_health', { client_id: clientId });
+    if (!records || !records.length) return;
+
+    records.sort((a,b) => new Date(a.created_at||a.date) - new Date(b.created_at||b.date));
+
+    records.forEach(r => {
+      const d = r.data || {};
+      const dateStr = r.date ? new Date(r.date).toLocaleDateString('en-AU', {day:'numeric',month:'short'}) : '';
+
+      if (r.record_type === 'injury') {
+        const list = document.getElementById('injuriesList');
+        if (list) {
+          if (list.textContent.trim() === '—') list.innerHTML = '';
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+          item.innerHTML = '<strong>' + (d.area||'Injury') + '</strong>' + (dateStr?' <span style="color:var(--muted);font-weight:400">· '+dateStr+'</span>':'') + (d.desc?'<br><span style="color:var(--muted)">'+d.desc+'</span>':'');
+          list.appendChild(item);
+        }
+      }
+
+      if (r.record_type === 'supplement') {
+        const list = document.getElementById('suppList');
+        if (list) {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+          item.innerHTML = '<strong>' + (d.name||'Supplement') + '</strong>' + (d.dose?' · '+d.dose:'') + (d.timing?' · '+d.timing:'') + (dateStr?' <span style="color:var(--muted);font-weight:400">· '+dateStr+'</span>':'') + (d.notes?'<br><span style="color:var(--muted)">'+d.notes+'</span>':'');
+          list.appendChild(item);
+        }
+      }
+
+      if (r.record_type === 'practitioner_note') {
+        const list = document.getElementById('practList');
+        if (list) {
+          const item = document.createElement('div');
+          item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--iron)';
+          item.innerHTML = '<strong>' + (d.type||'Note') + '</strong>' + (d.from?' · '+d.from:'') + (dateStr?' <span style="color:var(--muted);font-weight:400">· '+dateStr+'</span>':'') + (d.notes?'<br><span style="color:var(--muted)">'+d.notes+'</span>':'');
+          list.appendChild(item);
+        }
+      }
+
+      if (r.record_type === 'daily_checkin') {
+        const history = document.getElementById('checkInHistory');
+        if (history) {
+          const parts = [];
+          if (d.soreness) parts.push('Soreness ' + d.soreness + '/10');
+          if (d.sleep_hours) parts.push('Sleep ' + d.sleep_hours + 'hrs' + (d.sleep_quality?' ('+d.sleep_quality+')':''));
+          if (d.hrv) parts.push('HRV ' + d.hrv + 'ms');
+          if (d.mood) parts.push('Mood: ' + d.mood);
+          if (parts.length) {
+            const item = document.createElement('div');
+            item.style.cssText = 'padding:10px 12px;background:var(--chalk);border-radius:6px;margin-bottom:6px;font-size:13px;border-left:3px solid var(--rust)';
+            item.innerHTML = (dateStr?'<strong style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted)">'+dateStr+'</strong><br>':'') + parts.join(' · ');
+            history.insertBefore(item, history.firstChild);
+          }
+        }
+      }
+    });
+  } catch(e) { console.error('loadHealthHistory:', e); }
+}
 </script>
 </body>
 </html>
