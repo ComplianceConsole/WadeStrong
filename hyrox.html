@@ -25,15 +25,11 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflow-x:hidden}
-
-/* NAV */
 .nav{position:sticky;top:0;z-index:100;background:rgba(245,240,235,0.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:68px}
 .nav-logo{font-family:var(--font-d);font-size:22px;letter-spacing:2px;color:var(--iron);text-decoration:none}
 .nav-logo span{color:var(--rust)}
 .nav-cta{background:var(--iron);color:#fff;padding:10px 22px;border-radius:4px;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:0.3px;transition:background 0.2s}
 .nav-cta:hover{background:#333}
-
-/* HERO */
 .hero{background:var(--chalk);padding:80px 32px 0;max-width:1100px;margin:0 auto;min-height:85vh;display:flex;flex-direction:column;justify-content:center}
 .hero-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:24px}
 .hero-line{width:40px;height:2px;background:var(--rust)}
@@ -44,16 +40,11 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .hero-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:64px}
 .btn-primary{background:var(--rust);color:#fff;padding:16px 36px;border-radius:4px;font-family:var(--font-b);font-size:16px;font-weight:600;text-decoration:none;letter-spacing:0.2px;transition:background 0.2s;display:inline-block}
 .btn-primary:hover{background:var(--rust-d)}
-.btn-secondary{color:var(--iron);font-size:15px;font-weight:600;text-decoration:none;border-bottom:2px solid var(--iron);padding-bottom:2px;transition:border-color 0.2s}
-.btn-secondary:hover{border-color:var(--rust);color:var(--rust)}
 .hero-stats{display:flex;gap:48px;padding-top:32px;border-top:1px solid var(--border)}
 .hero-stat-num{font-family:var(--font-d);font-size:42px;color:var(--rust);line-height:1}
 .hero-stat-label{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:0.5px}
-
-/* RACE ORDER STRIP */
 .race-strip{background:var(--iron);color:#fff;padding:24px 32px;overflow-x:auto}
 .race-strip-inner{display:flex;align-items:center;gap:0;max-width:1100px;margin:0 auto;min-width:700px}
-.race-item{display:flex;align-items:center;gap:0;flex:1}
 .race-station{text-align:center;flex:1;padding:8px 4px}
 .race-num{font-size:10px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-bottom:4px}
 .race-name{font-size:12px;font-weight:600;color:#fff;line-height:1.3}
@@ -62,16 +53,12 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .race-run{display:flex;flex-direction:column;align-items:center;padding:0 8px;flex-shrink:0}
 .race-run-text{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.4)}
 .race-run-km{font-size:13px;font-weight:700;color:rgba(255,255,255,0.6)}
-
-/* PROGRAM SECTION */
 .section{padding:80px 32px;max-width:1100px;margin:0 auto}
 .section-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .section-line{width:32px;height:2px;background:var(--rust)}
 .section-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--rust)}
 .section-title{font-family:var(--font-d);font-size:clamp(40px,5vw,68px);line-height:1;margin-bottom:20px}
 .section-sub{font-size:17px;color:var(--muted);line-height:1.7;max-width:540px;margin-bottom:48px}
-
-/* WEEK GRID */
 .week-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;margin-bottom:48px}
 .week-card{background:var(--white);border:1px solid var(--border);padding:20px 16px;position:relative;overflow:hidden;transition:transform 0.15s}
 .week-card:hover{transform:translateY(-2px)}
@@ -84,8 +71,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .week-card.peak .week-phase{color:var(--iron)}
 .week-sessions{font-size:12px;color:var(--muted);line-height:1.8}
 .week-sessions strong{color:var(--iron);font-weight:600}
-
-/* WHAT YOU GET */
 .dark-section{background:var(--iron);color:#fff;padding:80px 32px}
 .dark-inner{max-width:1100px;margin:0 auto}
 .dark-section .section-label{color:rgba(184,90,48,0.9)}
@@ -95,8 +80,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .feature-icon{font-size:28px;margin-bottom:16px}
 .feature-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:10px;line-height:1.3}
 .feature-body{font-size:14px;color:rgba(255,255,255,0.55);line-height:1.7}
-
-/* WEIGHTS TABLE */
 .weights-section{background:var(--cream);padding:80px 32px}
 .weights-inner{max-width:1100px;margin:0 auto}
 .weights-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:48px}
@@ -109,8 +92,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .weight-station{font-size:14px;font-weight:500;color:var(--iron)}
 .weight-detail{font-size:13px;color:var(--muted)}
 .weight-val{font-family:var(--font-d);font-size:22px;color:var(--rust)}
-
-/* SIM SESSION */
 .sim-section{padding:80px 32px;max-width:1100px;margin:0 auto}
 .sim-card{background:var(--white);border:1px solid var(--border);border-radius:2px;padding:40px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
 .sim-label{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rust);margin-bottom:16px}
@@ -124,8 +105,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .sim-station-run{width:28px;height:28px;border-radius:50%;border:2px solid rgba(0,0,0,0.12);color:var(--muted);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:0}
 .sim-station-name{font-size:14px;font-weight:600}
 .sim-station-detail{font-size:12px;color:var(--muted);margin-top:1px}
-
-/* PRICING */
 .pricing-section{background:var(--chalk);padding:80px 32px}
 .pricing-inner{max-width:680px;margin:0 auto;text-align:center}
 .pricing-card{background:var(--white);border:1px solid var(--border);border-radius:2px;padding:48px;margin-top:48px;position:relative;overflow:hidden}
@@ -141,8 +120,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .pricing-cta{width:100%;padding:18px;background:var(--rust);color:#fff;border:none;border-radius:4px;font-family:var(--font-b);font-size:17px;font-weight:600;cursor:pointer;transition:background 0.2s;text-decoration:none;display:block;text-align:center}
 .pricing-cta:hover{background:var(--rust-d)}
 .pricing-note{font-size:13px;color:var(--muted);margin-top:16px}
-
-/* ABOUT WADE */
 .about-section{background:var(--iron);padding:80px 32px;color:#fff}
 .about-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
 .about-creds{display:flex;flex-direction:column;gap:14px;margin-top:32px}
@@ -153,8 +130,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .about-quote{font-family:var(--font-d);font-size:clamp(32px,4vw,52px);line-height:1.05;color:#fff}
 .about-quote .rust{color:var(--rust)}
 .about-meta{margin-top:24px;font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase}
-
-/* FAQ */
 .faq-section{padding:80px 32px;max-width:720px;margin:0 auto}
 .faq-item{border-bottom:1px solid var(--border);padding:24px 0;cursor:pointer}
 .faq-q{font-size:16px;font-weight:600;display:flex;justify-content:space-between;align-items:center;gap:16px}
@@ -163,31 +138,23 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 .faq-item.open .faq-arrow{transform:rotate(45deg)}
 .faq-a{font-size:15px;color:var(--muted);line-height:1.7;max-height:0;overflow:hidden;transition:max-height 0.3s ease,padding 0.3s ease}
 .faq-item.open .faq-a{max-height:300px;padding-top:14px}
-
-/* CTA FOOTER */
 .cta-footer{background:var(--rust);padding:80px 32px;text-align:center}
 .cta-footer-title{font-family:var(--font-d);font-size:clamp(48px,7vw,96px);color:#fff;line-height:0.95;margin-bottom:24px}
 .cta-footer-sub{font-size:18px;color:rgba(255,255,255,0.75);margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto}
 .btn-white{background:#fff;color:var(--rust-d);padding:18px 48px;border-radius:4px;font-family:var(--font-b);font-size:17px;font-weight:700;text-decoration:none;display:inline-block;transition:transform 0.15s}
 .btn-white:hover{transform:translateY(-2px)}
-
-/* FOOTER */
 .site-footer{background:var(--iron);padding:32px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
 .site-footer-logo{font-family:var(--font-d);font-size:18px;letter-spacing:2px;color:rgba(255,255,255,0.4)}
 .site-footer-logo span{color:var(--rust)}
 .site-footer-links{display:flex;gap:24px}
 .site-footer-links a{font-size:13px;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.2s}
 .site-footer-links a:hover{color:rgba(255,255,255,0.8)}
-
-/* BOTTOM BAR */
 .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--iron);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;z-index:99;transform:translateY(100%);transition:transform 0.3s ease}
 .bottom-bar.visible{transform:translateY(0)}
 .bottom-bar-text{font-size:14px;color:rgba(255,255,255,0.7)}
 .bottom-bar-text strong{color:#fff}
 .bottom-bar-cta{background:var(--rust);color:#fff;padding:10px 24px;border-radius:4px;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background 0.2s}
 .bottom-bar-cta:hover{background:var(--rust-d)}
-
-/* RESPONSIVE */
 @media(max-width:768px){
   .nav{padding:0 20px}
   .hero{padding:48px 20px 0;min-height:auto}
@@ -205,8 +172,6 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
   .site-footer{padding:24px 20px}
   .bottom-bar{padding:12px 20px}
 }
-
-/* ANIMATIONS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 .anim{opacity:0;animation:fadeUp 0.6s ease forwards}
 .anim-1{animation-delay:0.1s}
@@ -218,32 +183,31 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 </head>
 <body>
 
+<!-- NYC URGENCY BANNER -->
+<div style="background:var(--rust);padding:10px 32px;text-align:center;font-size:13px;color:#fff">
+  🏅 <strong>Hyrox New York</strong> is coming up — <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" style="color:#fff;font-weight:700;text-decoration:underline">secure your program now →</a>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <a href="index.html" class="nav-logo">WADE<span>.</span>STRONG</a>
-  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" class="nav-cta">Start Hyrox program</a>
+  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" class="nav-cta">Start Hyrox program</a>
 </nav>
 
 <!-- HERO -->
-<!-- NYC URGENCY BANNER -->
-<div style="background:var(--rust);color:#fff;text-align:center;padding:10px 24px;font-size:13px;font-weight:600;letter-spacing:0.3px">
-  🏅 <strong>New York Hyrox is 5 weeks away</strong> — condensed 5-week program available. <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" style="color:#fff;text-decoration:underline;margin-left:8px">Start now →</a>
-</div>
-
 <section class="hero">
   <div class="hero-eyebrow anim anim-1">
     <div class="hero-line"></div>
-    <div class="hero-eyebrow-text">Hyrox Coaching · 4–8 weeks · Commercial gym friendly</div>
+    <div class="hero-eyebrow-text">Hyrox Coaching · Commercial gym friendly</div>
   </div>
   <h1 class="hero-title anim anim-2">TRAIN<br>LIKE YOU<br><span class="accent">RACE.</span></h1>
-  <p class="hero-body anim anim-3">A Hyrox program built around your race date — 4 to 8 weeks depending on your timeline. One race simulation per week. Targeted station work based on your weak points. All doable in a commercial gym.</p>
+  <p class="hero-body anim anim-3">A 6-week Hyrox program built by a professional strongman. One race simulation per week. Targeted station work based on your weak points. All doable in a commercial gym.</p>
   <div class="hero-actions anim anim-4">
-    <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" class="btn-primary">Start for $499 →</a>
-    <a href="#program" class="btn-secondary">See the program</a>
+    <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" class="btn-primary">Start for US$499 →</a>
   </div>
   <div class="hero-stats anim anim-5">
     <div>
-      <div class="hero-stat-num">4–8</div>
+      <div class="hero-stat-num">6</div>
       <div class="hero-stat-label">Week program</div>
     </div>
     <div>
@@ -252,7 +216,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
     </div>
     <div>
       <div class="hero-stat-num">1×</div>
-      <div class="hero-stat-label">Sim per week</div>
+      <div class="hero-stat-label">RoxSim per week</div>
     </div>
     <div>
       <div class="hero-stat-num">Open<br>or Pro</div>
@@ -266,59 +230,31 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
   <div class="race-strip-inner">
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">01</div>
-      <div class="race-name">Ski Erg</div>
-      <div class="race-detail">1000m</div>
-    </div>
+    <div class="race-station"><div class="race-num">01</div><div class="race-name">Ski Erg</div><div class="race-detail">1000m</div></div>
     <div class="race-arrow">›</div>
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">02</div>
-      <div class="race-name">Sled Push</div>
-      <div class="race-detail">50m</div>
-    </div>
+    <div class="race-station"><div class="race-num">02</div><div class="race-name">Sled Push</div><div class="race-detail">50m</div></div>
     <div class="race-arrow">›</div>
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">03</div>
-      <div class="race-name">Burpee Broad Jump</div>
-      <div class="race-detail">80m</div>
-    </div>
+    <div class="race-station"><div class="race-num">03</div><div class="race-name">Burpee Broad Jump</div><div class="race-detail">80m</div></div>
     <div class="race-arrow">›</div>
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">04</div>
-      <div class="race-name">Rowing</div>
-      <div class="race-detail">1000m</div>
-    </div>
+    <div class="race-station"><div class="race-num">04</div><div class="race-name">Rowing</div><div class="race-detail">1000m</div></div>
     <div class="race-arrow">›</div>
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">05</div>
-      <div class="race-name">Farmers Carry</div>
-      <div class="race-detail">200m</div>
-    </div>
+    <div class="race-station"><div class="race-num">05</div><div class="race-name">Farmers Carry</div><div class="race-detail">200m</div></div>
     <div class="race-arrow">›</div>
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">06</div>
-      <div class="race-name">Sandbag Lunges</div>
-      <div class="race-detail">100m</div>
-    </div>
+    <div class="race-station"><div class="race-num">06</div><div class="race-name">Sandbag Lunges</div><div class="race-detail">100m</div></div>
     <div class="race-arrow">›</div>
     <div class="race-run"><div class="race-run-km">1km</div><div class="race-run-text">run</div></div>
     <div class="race-arrow">›</div>
-    <div class="race-station">
-      <div class="race-num">07</div>
-      <div class="race-name">Wall Balls</div>
-      <div class="race-detail">100 reps</div>
-    </div>
+    <div class="race-station"><div class="race-num">07</div><div class="race-name">Wall Balls</div><div class="race-detail">100 reps</div></div>
   </div>
 </div>
 
@@ -328,73 +264,17 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
     <div class="section-line"></div>
     <div class="section-label">The 6-week program</div>
   </div>
-  <h2 class="section-title">BUILT AROUND<br>YOUR RACE.</h2>
-  <p class="section-sub">Progressive load from 60% to 100% of race weight. Every week includes a race simulation session — shortened distances early, full race by week 5.</p>
-
+  <h2 class="section-title">BUILT WEEK<br>BY WEEK.</h2>
+  <p class="section-sub">Progressive load from 60% to 100% of race weight. Every week includes a race simulation session — shortened distances early, building to full race distance.</p>
   <div class="week-grid">
-    <div class="week-card build">
-      <div class="week-num">01</div>
-      <div class="week-phase">Build</div>
-      <div class="week-sessions">
-        <strong>RoxSim</strong><br>
-        Half distances, 60% load<br>
-        Run intervals<br>
-        Strength foundation
-      </div>
-    </div>
-    <div class="week-card build">
-      <div class="week-num">02</div>
-      <div class="week-phase">Build</div>
-      <div class="week-sessions">
-        <strong>RoxSim</strong><br>
-        Half distances, 70% load<br>
-        Station accessory work<br>
-        Aerobic base
-      </div>
-    </div>
-    <div class="week-card develop">
-      <div class="week-num">03</div>
-      <div class="week-phase">Develop</div>
-      <div class="week-sessions">
-        <strong>Hyrox Sim</strong><br>
-        75% distances, 80% load<br>
-        Weak station focus<br>
-        Speed intervals
-      </div>
-    </div>
-    <div class="week-card develop">
-      <div class="week-num">04</div>
-      <div class="week-phase">Develop</div>
-      <div class="week-sessions">
-        <strong>Hyrox Sim</strong><br>
-        Full distances, 85% load<br>
-        Pacing practice<br>
-        Strength builders
-      </div>
-    </div>
-    <div class="week-card peak">
-      <div class="week-num">05</div>
-      <div class="week-phase">Peak</div>
-      <div class="week-sessions">
-        <strong>RoxSim</strong><br>
-        Race weight, race pace<br>
-        Transition practice<br>
-        Race-day rehearsal
-      </div>
-    </div>
-    <div class="week-card peak">
-      <div class="week-num">06</div>
-      <div class="week-phase">Peak</div>
-      <div class="week-sessions">
-        <strong>RoxSim</strong><br>
-        100% race weight<br>
-        Taper + sharpen<br>
-        Race ready
-      </div>
-    </div>
+    <div class="week-card build"><div class="week-num">01</div><div class="week-phase">Build</div><div class="week-sessions"><strong>RoxSim — Intro</strong><br>Half distances, 60% load<br>Run intervals<br>Strength foundation</div></div>
+    <div class="week-card build"><div class="week-num">02</div><div class="week-phase">Build</div><div class="week-sessions"><strong>RoxSim — Building</strong><br>Half distances, 70% load<br>Station accessory work<br>Aerobic base</div></div>
+    <div class="week-card develop"><div class="week-num">03</div><div class="week-phase">Develop</div><div class="week-sessions"><strong>RoxSim</strong><br>75% distances, 80% load<br>Weak station focus<br>Speed intervals</div></div>
+    <div class="week-card develop"><div class="week-num">04</div><div class="week-phase">Develop</div><div class="week-sessions"><strong>RoxSim</strong><br>Full distances, 85% load<br>Pacing practice<br>Strength builders</div></div>
+    <div class="week-card peak"><div class="week-num">05</div><div class="week-phase">Peak</div><div class="week-sessions"><strong>Full RoxSim</strong><br>Race weight, race pace<br>Transition practice<br>Race-day rehearsal</div></div>
+    <div class="week-card peak"><div class="week-num">06</div><div class="week-phase">Peak</div><div class="week-sessions"><strong>Full RoxSim</strong><br>100% race weight<br>Taper + sharpen<br>Race ready</div></div>
   </div>
-
-  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" class="btn-primary">Get started — $499 →</a>
+  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" class="btn-primary">Get started — US$499 →</a>
 </section>
 
 <!-- WHAT YOU GET -->
@@ -406,36 +286,12 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
     </div>
     <h2 class="section-title" style="color:#fff">EVERYTHING<br>YOU NEED.</h2>
     <div class="features-grid">
-      <div class="feature">
-        <div class="feature-icon">🏅</div>
-        <div class="feature-title">Weekly race simulation</div>
-        <div class="feature-body">Every week includes a "RoxSim" — all 7 stations in official race order with running between them. Doable in a standard commercial gym with substitutions where needed.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">📍</div>
-        <div class="feature-title">Targeted station work</div>
-        <div class="feature-body">Your questionnaire identifies your weakest stations. Wade programs extra accessory work to attack those specific gaps — ski erg technique, grip for farmers carry, wall ball pacing.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">⚡</div>
-        <div class="feature-title">Run programming included</div>
-        <div class="feature-body">Hyrox is 8km of running. Interval sessions, steady state aerobic work, and pacing strategy built into every week alongside your strength and station training.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">🏋️</div>
-        <div class="feature-title">Correct race weights</div>
-        <div class="feature-body">Programs use official Open or Pro division weights for your gender. You train with the right load from day one — no guessing, no surprises on race day.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">📱</div>
-        <div class="feature-title">Client portal access</div>
-        <div class="feature-body">Your program lives in your personal portal. Log sessions, track station times, send Wade voice notes, and access your full training history — all in one place.</div>
-      </div>
-      <div class="feature">
-        <div class="feature-icon">💬</div>
-        <div class="feature-title">Direct coaching access</div>
-        <div class="feature-body">Wade reviews your session logs and adjusts your program week by week. Not a cookie-cutter template — a program that adapts to how you're actually performing.</div>
-      </div>
+      <div class="feature"><div class="feature-icon">🏅</div><div class="feature-title">Weekly RoxSim</div><div class="feature-body">Every week includes a race simulation — all 7 stations in official race order with running between them. Doable in a standard commercial gym with substitutions where needed.</div></div>
+      <div class="feature"><div class="feature-icon">📍</div><div class="feature-title">Targeted station work</div><div class="feature-body">Your questionnaire identifies your weakest stations. Wade programs extra accessory work to attack those specific gaps — ski erg technique, grip for farmers carry, wall ball pacing.</div></div>
+      <div class="feature"><div class="feature-icon">⚡</div><div class="feature-title">Run programming included</div><div class="feature-body">Hyrox is 8km of running. Interval sessions, steady state aerobic work, and pacing strategy built into every week alongside your strength and station training.</div></div>
+      <div class="feature"><div class="feature-icon">🏋️</div><div class="feature-title">Correct race weights</div><div class="feature-body">Programs use official Open or Pro division weights for your gender. You train with the right load from day one — no guessing, no surprises on race day.</div></div>
+      <div class="feature"><div class="feature-icon">📱</div><div class="feature-title">Client portal access</div><div class="feature-body">Your program lives in your personal portal. Log sessions, track station times, message Wade, and access your full training history — all in one place.</div></div>
+      <div class="feature"><div class="feature-icon">💬</div><div class="feature-title">Direct coaching access</div><div class="feature-body">Wade reviews your session logs and adjusts your program week by week. Not a cookie-cutter template — a program that adapts to how you're actually performing.</div></div>
     </div>
   </div>
 </div>
@@ -449,78 +305,26 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
     </div>
     <h2 class="section-title">KNOW WHAT<br>YOU'RE UP AGAINST.</h2>
     <p class="section-sub">Every station has a standard weight set by Hyrox globally. Wade programs to these exact loads — building from 60% in week 1 to 100% by the final sim.</p>
-
     <div class="weights-grid">
-      <!-- Open Men -->
       <div class="weight-card">
-        <div class="weight-card-header">
-          <div class="weight-card-title">Open Men</div>
-          <div class="weight-division">Standard division</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Ski Erg</div><div class="weight-detail">1000m</div></div>
-          <div class="weight-val">—</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Sled Push</div><div class="weight-detail">50m</div></div>
-          <div class="weight-val">152kg</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Burpee Broad Jump</div><div class="weight-detail">80m</div></div>
-          <div class="weight-val">BW</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Rowing</div><div class="weight-detail">1000m</div></div>
-          <div class="weight-val">—</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Farmers Carry</div><div class="weight-detail">200m</div></div>
-          <div class="weight-val">2×24kg</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Sandbag Lunges</div><div class="weight-detail">100m</div></div>
-          <div class="weight-val">20kg</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Wall Balls</div><div class="weight-detail">100 reps</div></div>
-          <div class="weight-val">6kg</div>
-        </div>
+        <div class="weight-card-header"><div class="weight-card-title">Open Men</div><div class="weight-division">Standard division</div></div>
+        <div class="weight-row"><div><div class="weight-station">Ski Erg</div><div class="weight-detail">1000m</div></div><div class="weight-val">—</div></div>
+        <div class="weight-row"><div><div class="weight-station">Sled Push</div><div class="weight-detail">50m</div></div><div class="weight-val">152kg</div></div>
+        <div class="weight-row"><div><div class="weight-station">Burpee Broad Jump</div><div class="weight-detail">80m</div></div><div class="weight-val">BW</div></div>
+        <div class="weight-row"><div><div class="weight-station">Rowing</div><div class="weight-detail">1000m</div></div><div class="weight-val">—</div></div>
+        <div class="weight-row"><div><div class="weight-station">Farmers Carry</div><div class="weight-detail">200m</div></div><div class="weight-val">2×24kg</div></div>
+        <div class="weight-row"><div><div class="weight-station">Sandbag Lunges</div><div class="weight-detail">100m</div></div><div class="weight-val">20kg</div></div>
+        <div class="weight-row"><div><div class="weight-station">Wall Balls</div><div class="weight-detail">100 reps</div></div><div class="weight-val">6kg</div></div>
       </div>
-
-      <!-- Open Women -->
       <div class="weight-card">
-        <div class="weight-card-header">
-          <div class="weight-card-title">Open Women</div>
-          <div class="weight-division">Standard division</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Ski Erg</div><div class="weight-detail">1000m</div></div>
-          <div class="weight-val">—</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Sled Push</div><div class="weight-detail">50m</div></div>
-          <div class="weight-val">102kg</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Burpee Broad Jump</div><div class="weight-detail">80m</div></div>
-          <div class="weight-val">BW</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Rowing</div><div class="weight-detail">1000m</div></div>
-          <div class="weight-val">—</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Farmers Carry</div><div class="weight-detail">200m</div></div>
-          <div class="weight-val">2×16kg</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Sandbag Lunges</div><div class="weight-detail">100m</div></div>
-          <div class="weight-val">10kg</div>
-        </div>
-        <div class="weight-row">
-          <div><div class="weight-station">Wall Balls</div><div class="weight-detail">100 reps</div></div>
-          <div class="weight-val">4kg</div>
-        </div>
+        <div class="weight-card-header"><div class="weight-card-title">Open Women</div><div class="weight-division">Standard division</div></div>
+        <div class="weight-row"><div><div class="weight-station">Ski Erg</div><div class="weight-detail">1000m</div></div><div class="weight-val">—</div></div>
+        <div class="weight-row"><div><div class="weight-station">Sled Push</div><div class="weight-detail">50m</div></div><div class="weight-val">102kg</div></div>
+        <div class="weight-row"><div><div class="weight-station">Burpee Broad Jump</div><div class="weight-detail">80m</div></div><div class="weight-val">BW</div></div>
+        <div class="weight-row"><div><div class="weight-station">Rowing</div><div class="weight-detail">1000m</div></div><div class="weight-val">—</div></div>
+        <div class="weight-row"><div><div class="weight-station">Farmers Carry</div><div class="weight-detail">200m</div></div><div class="weight-val">2×16kg</div></div>
+        <div class="weight-row"><div><div class="weight-station">Sandbag Lunges</div><div class="weight-detail">100m</div></div><div class="weight-val">10kg</div></div>
+        <div class="weight-row"><div><div class="weight-station">Wall Balls</div><div class="weight-detail">100 reps</div></div><div class="weight-val">4kg</div></div>
       </div>
     </div>
     <p style="font-size:13px;color:var(--muted);margin-top:16px">Pro Men use 202kg sled, 2×32kg farmers, 30kg sandbag, 9kg wall ball. Pro Women = Open Men weights. Ask Wade if unsure which division to target.</p>
@@ -545,38 +349,14 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
       <p class="sim-body" style="margin-top:20px">No sled? Wade programs a treadmill incline substitution. No ski erg? Cable pull variation. The race simulation happens regardless of your gym setup.</p>
     </div>
     <div class="sim-stations">
-      <div class="sim-station-row">
-        <div class="sim-station-run">1K</div>
-        <div><div class="sim-station-name">Run</div><div class="sim-station-detail">400m in weeks 1–2, building to 1km</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">1</div>
-        <div><div class="sim-station-name">Ski Erg</div><div class="sim-station-detail">500m early weeks → 1000m</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">2</div>
-        <div><div class="sim-station-name">Sled Push</div><div class="sim-station-detail">60% load week 1 → 100% race weight</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">3</div>
-        <div><div class="sim-station-name">Burpee Broad Jump</div><div class="sim-station-detail">40m → 80m full distance</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">4</div>
-        <div><div class="sim-station-name">Rowing</div><div class="sim-station-detail">500m → 1000m</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">5</div>
-        <div><div class="sim-station-name">Farmers Carry</div><div class="sim-station-detail">100m → 200m at race weight</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">6</div>
-        <div><div class="sim-station-name">Sandbag Lunges</div><div class="sim-station-detail">50m → 100m</div></div>
-      </div>
-      <div class="sim-station-row">
-        <div class="sim-station-num">7</div>
-        <div><div class="sim-station-name">Wall Balls</div><div class="sim-station-detail">50 reps → 100 reps</div></div>
-      </div>
+      <div class="sim-station-row"><div class="sim-station-run">1K</div><div><div class="sim-station-name">Run</div><div class="sim-station-detail">400m in weeks 1–2, building to 1km</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">1</div><div><div class="sim-station-name">Ski Erg</div><div class="sim-station-detail">500m early weeks → 1000m</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">2</div><div><div class="sim-station-name">Sled Push</div><div class="sim-station-detail">60% load week 1 → 100% race weight</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">3</div><div><div class="sim-station-name">Burpee Broad Jump</div><div class="sim-station-detail">40m → 80m full distance</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">4</div><div><div class="sim-station-name">Rowing</div><div class="sim-station-detail">500m → 1000m</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">5</div><div><div class="sim-station-name">Farmers Carry</div><div class="sim-station-detail">100m → 200m at race weight</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">6</div><div><div class="sim-station-name">Sandbag Lunges</div><div class="sim-station-detail">50m → 100m</div></div></div>
+      <div class="sim-station-row"><div class="sim-station-num">7</div><div><div class="sim-station-name">Wall Balls</div><div class="sim-station-detail">50 reps → 100 reps</div></div></div>
     </div>
   </div>
 </section>
@@ -591,20 +371,20 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
     </div>
     <h2 class="section-title">ONE PRICE.<br>ONE PROGRAM.</h2>
     <div class="pricing-card">
-      <div class="pricing-label">Hyrox Program — 4 to 8 Weeks</div>
-      <div class="pricing-price">$499</div>
+      <div class="pricing-label">Hyrox 6-Week Build</div>
+      <div class="pricing-price">US$499</div>
       <div class="pricing-period">One-time payment · Instant access</div>
       <div class="pricing-includes">
         <div class="pricing-includes-title">Everything included</div>
-        <div class="pricing-item"><div class="pricing-tick">✓</div><div>4–8 week program built around your race date (Open or Pro division)</div></div>
-        <div class="pricing-item"><div class="pricing-tick">✓</div><div>Weekly race simulation session — all 7 stations in order</div></div>
+        <div class="pricing-item"><div class="pricing-tick">✓</div><div>6-week personalised Hyrox program (Open or Pro division)</div></div>
+        <div class="pricing-item"><div class="pricing-tick">✓</div><div>Weekly RoxSim — all 7 stations in race order</div></div>
         <div class="pricing-item"><div class="pricing-tick">✓</div><div>Targeted accessory work for your weakest stations</div></div>
         <div class="pricing-item"><div class="pricing-tick">✓</div><div>Run programming — intervals, steady state, pacing</div></div>
         <div class="pricing-item"><div class="pricing-tick">✓</div><div>Client portal with session logging and progress tracking</div></div>
         <div class="pricing-item"><div class="pricing-tick">✓</div><div>Direct access to Wade for adjustments and questions</div></div>
-        <div class="pricing-item"><div class="pricing-tick">✓</div><div>Commercial gym substitutions built in — no specialist gym needed</div></div>
+        <div class="pricing-item"><div class="pricing-tick">✓</div><div>Commercial gym substitutions built in</div></div>
       </div>
-      <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" class="pricing-cta">Start your program →</a>
+      <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" class="pricing-cta">Start your program →</a>
       <div class="pricing-note">Fill in the questionnaire and Wade builds your program within 24 hours.</div>
     </div>
   </div>
@@ -628,7 +408,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
         <div class="cred"><div class="cred-dot"></div><div class="cred-text">7th at Strongman Corporation Arnold's Pro/Am, Ohio</div></div>
         <div class="cred"><div class="cred-dot"></div><div class="cred-text">Coached athletes across all experience levels — beginners to competitors</div></div>
         <div class="cred"><div class="cred-dot"></div><div class="cred-text">Specialises in functional strength that translates to performance</div></div>
-        <div class="cred"><div class="cred-dot"></div><div class="cred-text">Programs built around real data — questionnaires, RPE, session logs</div></div>
+        <div class="cred"><div class="cred-dot"></div><div class="cred-text">Programs built around real data — questionnaires, station assessments, session logs</div></div>
       </div>
     </div>
   </div>
@@ -641,30 +421,29 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
     <div class="section-label">Common questions</div>
   </div>
   <h2 class="section-title" style="font-size:clamp(36px,4vw,56px);margin-bottom:32px">FAQ</h2>
-
   <div class="faq-item" onclick="toggleFaq(this)">
     <div class="faq-q"><div class="faq-q-text">Do I need a Hyrox-specific gym?</div><div class="faq-arrow">+</div></div>
-    <div class="faq-a">No. The program is designed for commercial gyms. Where Hyrox equipment isn't available (sled, ski erg), Wade programs practical substitutions — heavy treadmill incline for sled push, cable pull variations for ski erg. You still do the simulation session every week.</div>
+    <div class="faq-a">No. The program is designed for commercial gyms. Where Hyrox equipment isn't available, Wade programs practical substitutions. You still do the simulation session every week.</div>
   </div>
   <div class="faq-item" onclick="toggleFaq(this)">
     <div class="faq-q"><div class="faq-q-text">I've never done a Hyrox before. Is this suitable?</div><div class="faq-arrow">+</div></div>
-    <div class="faq-a">Yes. The program is built for first-timers through to experienced competitors chasing a time improvement. Your questionnaire captures your current fitness level and Wade programs accordingly. Week 1 starts at 60% race weight — it's challenging but manageable from day one.</div>
+    <div class="faq-a">Yes. The program is built for first-timers through to experienced competitors chasing a time improvement. Your questionnaire captures your current fitness level and Wade programs accordingly.</div>
   </div>
   <div class="faq-item" onclick="toggleFaq(this)">
     <div class="faq-q"><div class="faq-q-text">How many days per week do I need to train?</div><div class="faq-arrow">+</div></div>
-    <div class="faq-a">The standard program is 4 days per week — one simulation session, one run/station session, one strength session, and one aerobic session. Wade can scale to 3 days if that's what your schedule allows, and up to 5-6 for more advanced athletes.</div>
+    <div class="faq-a">Typically 4 days per week. Wade can scale to 3 days if that's what your schedule allows, and up to 5–6 for more advanced athletes.</div>
   </div>
   <div class="faq-item" onclick="toggleFaq(this)">
     <div class="faq-q"><div class="faq-q-text">Open or Pro — which division should I enter?</div><div class="faq-arrow">+</div></div>
-    <div class="faq-a">Open is the standard entry point and where the majority of athletes race. Pro is significantly heavier — Open Men use 152kg on the sled, Pro Men use 202kg. Wade will advise based on your questionnaire if you're unsure. Most first-timers should race Open.</div>
+    <div class="faq-a">Open is the standard entry point. Pro is significantly heavier. Wade will advise based on your questionnaire if you're unsure. Most first-timers should race Open.</div>
   </div>
   <div class="faq-item" onclick="toggleFaq(this)">
     <div class="faq-q"><div class="faq-q-text">I already have a race booked. Will 6 weeks be enough?</div><div class="faq-arrow">+</div></div>
-    <div class="faq-a">The program adapts to your timeline — 4 weeks if your race is imminent, up to 8 weeks for a full build. Tell us your race date in the questionnaire and Wade builds the right length program. Even 4 weeks of structured RoxSim training will make a meaningful difference to your race performance.</div>
+    <div class="faq-a">6 weeks is enough to make a meaningful improvement to your race performance. If your race is sooner, note that in the questionnaire and Wade will adjust the program to peak you at the right time.</div>
   </div>
   <div class="faq-item" onclick="toggleFaq(this)">
     <div class="faq-q"><div class="faq-q-text">What happens after I pay?</div><div class="faq-arrow">+</div></div>
-    <div class="faq-a">After payment you'll be sent a link to the Hyrox questionnaire — 6 short steps covering your background, goals, station confidence, equipment access and health. Wade reviews your answers and builds your program within 24 hours. You'll receive a link to your client portal where the full 6-week program lives.</div>
+    <div class="faq-a">After payment you'll be sent a link to the Hyrox questionnaire. Wade reviews your answers and builds your program within 24 hours. You'll receive a link to your client portal where the full 6-week program lives.</div>
   </div>
 </section>
 
@@ -672,7 +451,7 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
 <div class="cta-footer">
   <h2 class="cta-footer-title">READY TO<br>RACE?</h2>
   <p class="cta-footer-sub">Fill in the questionnaire. Wade builds your program in 24 hours. Start training this week.</p>
-  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" class="btn-white">Start your program — $499 →</a>
+  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" class="btn-white">Start your program — US$499 →</a>
 </div>
 
 <!-- SITE FOOTER -->
@@ -680,25 +459,22 @@ body{font-family:var(--font-b);background:var(--chalk);color:var(--iron);overflo
   <div class="site-footer-logo">WADE<span>.</span>STRONG</div>
   <div class="site-footer-links">
     <a href="index.html">Home</a>
-    <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html">Hyrox program</a>
+    <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803">Hyrox program</a>
     <a href="index.html#programs">All programs</a>
   </div>
 </footer>
 
 <!-- SCROLL CTA BAR -->
 <div class="bottom-bar" id="bottomBar">
-  <div class="bottom-bar-text">Hyrox 6-week program — <strong>$499 one-time</strong></div>
-  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803?success_url=https://wadestrong.com.au/questionnaire-hyrox.html" class="bottom-bar-cta">Start training →</a>
+  <div class="bottom-bar-text">Hyrox coaching program — <strong>US$499 one-time</strong></div>
+  <a href="https://buy.stripe.com/cNi7sE2Zf76T5OfbKH28803" class="bottom-bar-cta">Start training →</a>
 </div>
 
 <script>
-// Scroll bar
 const bar = document.getElementById('bottomBar');
 window.addEventListener('scroll', () => {
   bar.classList.toggle('visible', window.scrollY > 400);
 }, { passive: true });
-
-// FAQ
 function toggleFaq(el) {
   el.classList.toggle('open');
 }
