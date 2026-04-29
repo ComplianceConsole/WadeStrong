@@ -622,7 +622,7 @@ function renderDashboard() {
   if (recent.length) {
     feed.innerHTML = recent.map(c => {
       const name = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email;
-      const prog = c.program_type === 'pre_comp' ? 'Pre-Comp' : 'Get Strong';
+      const prog = c.program_type === 'pre_comp' ? 'Pre-Comp' : program_type === 'hyrox' ? 'Hyrox' : 'Get Strong';
       const date = new Date(c.created_at).toLocaleDateString('en-AU', { day:'numeric', month:'short' });
       return `<div class="activity-item">
         <div class="activity-dot dot-${c.status === 'active' ? 'green' : c.program_type === 'pre_comp' ? 'rust' : 'amber'}"></div>
@@ -746,7 +746,7 @@ function renderNeedsProgramList() {
     const rpe = allRpeResults.find(r => r.client_id === c.id);
     return `<div class="detail-card" style="cursor:pointer" onclick="openClientDetail('${c.id}')">
       <div style="display:flex;align-items:center;justify-content:space-between">
-        <div><div style="font-size:15px;font-weight:700">${name}</div><div style="font-size:13px;color:var(--muted)">${c.email} · ${c.program_type === 'pre_comp' ? 'Pre-Comp' : 'Get Strong'}</div></div>
+        <div><div style="font-size:15px;font-weight:700">${name}</div><div style="font-size:13px;color:var(--muted)">${c.email} · ${c.program_type === 'pre_comp' ? 'Pre-Comp' : program_type === 'hyrox' ? 'Hyrox' : 'Get Strong'}</div></div>
         <button class="act-btn act-btn-rust" style="width:auto;padding:8px 16px" onclick="event.stopPropagation();openBuilderForClient('${c.id}')">Build program →</button>
       </div>
       ${rpe ? `<div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
@@ -1110,9 +1110,11 @@ function toggleRawData() {
 async function sendWelcomeEmail() {
   if (!currentClient) return;
   const firstName = currentClient.first_name || 'there';
-  const prog = currentClient.program_type === 'pre_comp' ? 'Pre-Comp Build Up' : 'Get Strong';
+  const prog = currentClient.program_type === 'pre_comp' ? 'Pre-Comp Build Up' : currentClient.program_type === 'hyrox' ? 'Hyrox' : 'Get Strong';
   const questionnaireUrl = currentClient.program_type === 'pre_comp'
     ? 'https://wadestrong.com.au/questionnaire-precomp.html'
+    : currentClient.program_type === 'hyrox'
+    ? 'https://wadestrong.com.au/questionnaire-hyrox.html'
     : 'https://wadestrong.com.au/questionnaire-get-strong.html';
 
   try {
@@ -1126,7 +1128,7 @@ async function sendWelcomeEmail() {
           firstName,
           program: prog,
           questionnaireUrl,
-          amount: currentClient.program_type === 'pre_comp' ? '1,200' : '600'
+          amount: currentClient.program_type === 'pre_comp' ? '1,200' : currentClient.program_type === 'hyrox' ? '499' : '600'
         }
       })
     });
